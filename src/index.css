@@ -1,0 +1,144 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Dark theme (default) ──────────────────────── */
+:root,
+.dark {
+  --mkt-950: 7 9 15;
+  --mkt-900: 14 21 32;
+  --mkt-850: 20 31 50;
+  --mkt-800: 26 45 69;
+  --mkt-700: 42 64 96;
+  --mkt-600: 58 82 120;
+  --mkt-500: 80 104 136;
+  --mkt-400: 106 133 168;
+  --mkt-300: 147 174 200;
+  --mkt-200: 189 208 228;
+  --mkt-100: 221 228 240;
+
+  /* SVG / chart tokens */
+  --chart-bg:   7 9 15;
+  --chart-grid: 30 46 70;
+  --chart-axis: 51 65 85;
+  --chart-tick: 100 116 139;
+}
+
+/* ── Light theme ───────────────────────────────── */
+html:not(.dark) {
+  --mkt-950: 248 246 240;
+  --mkt-900: 240 237 228;
+  --mkt-850: 230 226 216;
+  --mkt-800: 214 208 196;
+  --mkt-700: 172 164 150;
+  --mkt-600: 140 132 118;
+  --mkt-500: 112 106 92;
+  --mkt-400: 80 76 66;
+  --mkt-300: 56 52 44;
+  --mkt-200: 38 34 28;
+  --mkt-100: 20 18 14;
+
+  /* SVG / chart tokens */
+  --chart-bg:   240 237 228;
+  --chart-grid: 214 208 196;
+  --chart-axis: 172 164 150;
+  --chart-tick: 112 106 92;
+}
+
+@layer base {
+  body {
+    @apply bg-mkt-950 text-mkt-100 min-h-screen font-mono;
+  }
+
+  ::selection {
+    background: rgba(240, 168, 64, 0.25);
+  }
+
+  ::-webkit-scrollbar {
+    width: 5px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-mkt-900;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-mkt-700 rounded-full;
+  }
+}
+
+@layer utilities {
+  .graph-bg {
+    background-image:
+      linear-gradient(to right, rgb(var(--mkt-700) / 0.25) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(var(--mkt-700) / 0.25) 1px, transparent 1px);
+    background-size: 44px 44px;
+  }
+
+  .panel {
+    @apply bg-mkt-900 border border-mkt-800 rounded-2xl;
+  }
+
+  .label {
+    @apply text-[10px] uppercase tracking-[0.15em] text-mkt-400 font-mono;
+  }
+
+  .input-base {
+    @apply bg-mkt-850 border border-mkt-800 rounded-xl px-4 py-3 font-mono text-mkt-100
+           focus:outline-none focus:border-gold-500/50 focus:ring-1 focus:ring-gold-500/10
+           transition-colors placeholder:text-mkt-700;
+  }
+
+  .btn-primary {
+    @apply bg-gold-500 text-mkt-950 font-bold rounded-xl px-5 py-3
+           hover:bg-gold-400 disabled:opacity-40 transition-all
+           hover:shadow-[0_0_24px_rgba(240,168,64,0.22)];
+  }
+
+  .btn-secondary {
+    @apply bg-mkt-850 text-mkt-100 font-bold rounded-xl px-5 py-3
+           border border-mkt-700 hover:border-mkt-600 hover:bg-mkt-800
+           disabled:opacity-40 transition-all;
+  }
+}
+
+/* ── Keyframes ────────────────────────────────── */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.96); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes ping-dot {
+  75%, 100% { transform: scale(2.2); opacity: 0; }
+}
+
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(240, 168, 64, 0); }
+  50%       { box-shadow: 0 0 0 6px rgba(240, 168, 64, 0.12); }
+}
+
+/* ── Animation utility classes ────────────────── */
+.animate-fade-up   { animation: fade-up   0.45s ease both; }
+.animate-fade-in   { animation: fade-in   0.35s ease both; }
+.animate-scale-in  { animation: scale-in  0.3s  ease both; }
+.animate-glow-pulse { animation: glow-pulse 2s ease-in-out infinite; }
+
+/* ── Status dot ───────────────────────────────── */
+.dot-ping {
+  animation: ping-dot 1.4s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+/* ── Active turn highlight ────────────────────── */
+.my-turn-ring {
+  box-shadow:
+    0 0 0 1px rgba(240, 168, 64, 0.6),
+    0 0 32px rgba(240, 168, 64, 0.12);
+}
