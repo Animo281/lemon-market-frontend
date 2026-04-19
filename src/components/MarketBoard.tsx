@@ -1,4 +1,4 @@
-import { Player, InfoMode, SellerDecision } from '../../../shared/types'
+import { Player, InfoMode, SellerDecision } from '../shared/types'
 
 interface Props {
   sellers: Player[]

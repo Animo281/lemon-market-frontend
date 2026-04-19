@@ -1,4 +1,4 @@
-import { Grade, Role, PublicSession } from '../../../shared/types'
+import { Grade, Role, PublicSession } from '../shared/types'
 
 const BASE = '/api'
 

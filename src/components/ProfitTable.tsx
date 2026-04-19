@@ -1,5 +1,5 @@
-import { RoundResult, Player } from '../../../shared/types'
-import { sellerCost } from '../../../shared/constants'
+import { RoundResult, Player } from '../shared/types'
+import { sellerCost } from '../shared/constants'
 
 interface Props {
   results: RoundResult[]

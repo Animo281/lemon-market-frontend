@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
-import { Grade, PublicSession, RoundResult } from '../../../shared/types'
-import { BUYER_VALUES } from '../../../shared/constants'
+import { Grade, PublicSession, RoundResult } from '../shared/types'
+import { BUYER_VALUES } from '../shared/constants'
 
 interface Props {
   session: PublicSession

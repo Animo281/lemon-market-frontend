@@ -1,4 +1,4 @@
-import { RoundResult } from '../../../shared/types'
+import { RoundResult } from '../shared/types'
 
 interface Props {
   results: RoundResult[]

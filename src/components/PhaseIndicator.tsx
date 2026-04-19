@@ -1,4 +1,4 @@
-import { InfoMode } from '../../../shared/types'
+import { InfoMode } from '../shared/types'
 
 interface Props {
   round: number

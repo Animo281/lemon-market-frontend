@@ -1,4 +1,4 @@
-import { PublicSession, Role } from '../../../shared/types'
+import { PublicSession, Role } from '../shared/types'
 
 interface Props {
   session: PublicSession
