@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { PublicSession } from '../../../shared/types'
-import { sellerCost } from '../../../shared/constants'
+import { PublicSession, Player, SellerDecision, BuyerDecision, RoundResult } from '../shared/types'
+import { sellerCost } from '../shared/constants'
 import { api } from '../api/client'
 import { storage } from '../lib/storage'
 import SessionCodeDisplay from '../components/SessionCodeDisplay'
@@ -163,7 +163,7 @@ export default function AdminView() {
             <div className="md:col-span-3 panel p-6">
               <div className="label mb-4">Verkäufer-Entscheidungen</div>
               <div className="space-y-2">
-                {sellers.sort((a, b) => a.slotIndex - b.slotIndex).map(s => {
+                {sellers.sort((a: Player, b: Player) => a.slotIndex - b.slotIndex).map((s: Player) => {
                   const done = s.id in session.currentSellerDecisions
                   return (
                     <div key={s.id} className={`flex items-center gap-3 py-2.5 px-3 rounded-xl transition-colors ${
@@ -212,7 +212,7 @@ export default function AdminView() {
               <div className="panel p-5">
                 <div className="label mb-3">Käufer-Status</div>
                 <div className="grid grid-cols-2 gap-2">
-                  {buyers.map(b => {
+                  {buyers.map((b: Player) => {
                     const done = b.id in session.currentBuyerDecisions
                     return (
                       <div key={b.id} className={`flex items-center gap-2 px-3 py-2 rounded-xl border transition-colors ${
@@ -261,8 +261,8 @@ export default function AdminView() {
                   </tr>
                 </thead>
                 <tbody>
-                  {lastResult.sellerDecisions.map(sd => {
-                    const s = sellers.find(p => p.id === sd.playerId)
+                  {lastResult.sellerDecisions.map((sd: SellerDecision) => {
+                    const s = sellers.find((p: Player) => p.id === sd.playerId)
                     const profit = Array.from({ length: sd.unitsSold }, (_, i) =>
                       sd.price - sellerCost(sd.grade, i)
                     ).reduce((a, b) => a + b, 0)
@@ -278,9 +278,9 @@ export default function AdminView() {
                       </tr>
                     )
                   })}
-                  {lastResult.buyerDecisions.map(bd => {
-                    const b      = buyers.find(p => p.id === bd.playerId)
-                    const sellerP = sellers.find(p => p.id === bd.sellerId)
+                  {lastResult.buyerDecisions.map((bd: BuyerDecision) => {
+                    const b      = buyers.find((p: Player) => p.id === bd.playerId)
+                    const sellerP = sellers.find((p: Player) => p.id === bd.sellerId)
                     return (
                       <tr key={bd.playerId} className="border-b border-mkt-800/40">
                         <td className="py-2.5 pr-4 text-ice-400 font-bold">{b?.name}</td>
@@ -369,7 +369,7 @@ export default function AdminView() {
             <div>
               <div className="label mb-3">Marktverlauf je Runde</div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {session.results.map(r => (
+                {session.results.map((r: RoundResult) => (
                   <div key={r.round}>
                     <div className="label mb-2">
                       Runde {r.round} ·

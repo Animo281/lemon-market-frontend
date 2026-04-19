@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { PublicSession, Role } from '../../../shared/types'
+import { PublicSession, Role } from '../shared/types'
 import { api } from '../api/client'
 import { storage } from '../lib/storage'
 import JoinSlotPicker from '../components/JoinSlotPicker'

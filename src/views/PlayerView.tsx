@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { PublicSession, Player, Grade } from '../../../shared/types'
-import { sellerCost, BUYER_VALUES } from '../../../shared/constants'
+import { PublicSession, Player, Grade, SellerDecision, BuyerDecision } from '../shared/types'
+import { sellerCost, BUYER_VALUES } from '../shared/constants'
 import { api } from '../api/client'
 import { storage } from '../lib/storage'
 import PhaseIndicator from '../components/PhaseIndicator'
@@ -34,7 +34,7 @@ export default function PlayerView() {
       try {
         const s = await api.getSession(code)
         setSession(s)
-        const found = s.players.find(p => p.id === playerId)
+        const found = s.players.find((p: Player) => p.id === playerId)
         if (found) setMe(found)
       } catch {
         setError('Session nicht gefunden')
@@ -61,21 +61,21 @@ export default function PlayerView() {
     </div>
   )
 
-  const sellers = session.players.filter(p => p.role === 'seller')
-  const buyers  = session.players.filter(p => p.role === 'buyer')
+  const sellers = session.players.filter((p: Player) => p.role === 'seller')
+  const buyers  = session.players.filter((p: Player) => p.role === 'buyer')
   const isSeller = me.role === 'seller'
   const isBuyer  = me.role === 'buyer'
 
   const myDecision           = session.currentSellerDecisions[me.id]
   const lastResult           = session.results[session.results.length - 1]
-  const myLastSellerResult   = lastResult?.sellerDecisions.find(s => s.playerId === me.id)
-  const myLastBuyerResult    = lastResult?.buyerDecisions.find(b => b.playerId === me.id)
+  const myLastSellerResult   = lastResult?.sellerDecisions.find((s: SellerDecision) => s.playerId === me.id)
+  const myLastBuyerResult    = lastResult?.buyerDecisions.find((b: BuyerDecision) => b.playerId === me.id)
   const isMyTurn             = isBuyer && !(me.id in session.currentBuyerDecisions)
   const hasDecided           = isBuyer && me.id in session.currentBuyerDecisions
   const isLastRound          = session.currentRound >= session.totalRounds
   const maxUnits             = session.maxSellerUnits
 
-  const availableSellers = sellers.filter(s => {
+  const availableSellers = sellers.filter((s: Player) => {
     const d = session.currentSellerDecisions[s.id]
     return d?.price !== undefined && (d.unitsSold ?? 0) < (d.unitsOffered ?? maxUnits)
   })
@@ -336,7 +336,7 @@ export default function PlayerView() {
 
                 {availableSellers.length > 0 ? (
                   <div className="space-y-2">
-                    {availableSellers.map(seller => {
+                    {availableSellers.map((seller: Player) => {
                       const d = session.currentSellerDecisions[seller.id]
                       return (
                         <button
@@ -450,7 +450,7 @@ export default function PlayerView() {
                     <div className="bg-mkt-850 rounded-xl p-4">
                       <div className="label mb-1">Gekauft bei</div>
                       <div className="font-mono font-bold text-gold-400 text-sm">
-                        {sellers.find(s => s.id === myLastBuyerResult.sellerId)?.name}
+                        {sellers.find((s: Player) => s.id === myLastBuyerResult.sellerId)?.name}
                       </div>
                     </div>
                     <div className="bg-mkt-850 rounded-xl p-4">
