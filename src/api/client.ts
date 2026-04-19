@@ -1,6 +1,6 @@
 import { Grade, Role, PublicSession } from '../shared/types'
 
-const BASE = (import.meta.env.VITE_API_URL ?? 'https://lemon-market-backend.onrender.com') + '/api'
+const BASE = 'https://lemon-market-backend.onrender.com/api'
 
 async function request<T>(url: string, options?: RequestInit): Promise<T> {
   const res = await fetch(`${BASE}${url}`, options)
