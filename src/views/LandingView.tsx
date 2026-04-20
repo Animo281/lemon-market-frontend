@@ -1,11 +1,14 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../api/client'
-import { storage } from '../lib/storage'
+import { storage, sessionIndex } from '../lib/storage'
 import { DEFAULT_MAX_SELLER_UNITS, DEFAULT_TOTAL_ROUNDS } from '../shared/constants'
 
 export default function LandingView() {
   const navigate = useNavigate()
+  const recentSessions = Object.entries(sessionIndex.getAll())
+    .sort((a, b) => b[1].lastJoined.localeCompare(a[1].lastJoined))
+    .slice(0, 5)
   const [numSellers, setNumSellers] = useState(3)
   const [numBuyers, setNumBuyers] = useState(4)
   const [joinCode, setJoinCode] = useState('')
@@ -178,6 +181,37 @@ export default function LandingView() {
           </button>
         </form>
       </div>
+
+      {/* ── Reconnect card ──────────────────────── */}
+      {recentSessions.length > 0 && (
+        <div
+          className="w-full max-w-2xl mt-5 panel p-5 animate-fade-up relative z-10"
+          style={{ animationDelay: '0.28s', opacity: 0 }}
+        >
+          <div className="label mb-3">Frühere Sessions</div>
+          <div className="space-y-2">
+            {recentSessions.map(([code, entry]) => (
+              <div key={code} className="flex items-center justify-between gap-3 py-2 border-b border-mkt-800 last:border-0">
+                <div className="flex items-center gap-3 min-w-0">
+                  <span className="font-mono font-bold text-gold-500 tracking-widest shrink-0">{code}</span>
+                  <span className="text-mkt-300 text-sm truncate">{entry.name}</span>
+                  <span className="label shrink-0">{entry.role === 'seller' ? 'Verkäufer' : 'Käufer'}</span>
+                </div>
+                <button
+                  className="btn-secondary text-xs px-3 py-1.5 shrink-0"
+                  onClick={() => {
+                    storage.setPlayerToken(code, entry.playerToken)
+                    storage.setPlayerId(code, entry.playerId)
+                    navigate(`/play/${code}`)
+                  }}
+                >
+                  Wiederbetreten →
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* ── Footer citation ─────────────────────── */}
       <p

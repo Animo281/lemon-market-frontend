@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { PublicSession, Role } from '../shared/types'
 import { api } from '../api/client'
-import { storage } from '../lib/storage'
+import { storage, sessionIndex } from '../lib/storage'
 import JoinSlotPicker from '../components/JoinSlotPicker'
 
 export default function JoinView() {
@@ -42,6 +42,14 @@ export default function JoinView() {
       const { playerToken, playerId } = await api.joinSession(code, name.trim(), selectedRole, selectedSlot)
       storage.setPlayerToken(code, playerToken)
       storage.setPlayerId(code, playerId)
+      sessionIndex.save(code, {
+        playerId,
+        playerToken,
+        name: name.trim(),
+        role: selectedRole,
+        slotIndex: selectedSlot,
+        lastJoined: new Date().toISOString(),
+      })
       navigate(`/play/${code}`)
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Fehler')
