@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { PublicSession, Player, Grade, SellerDecision, BuyerDecision } from '../shared/types'
 import { sellerCost, BUYER_VALUES } from '../shared/constants'
-import { api } from '../api/client'
-import { storage } from '../lib/storage'
+import { api, ApiError } from '../api/client'
+import { storage, sessionIndex } from '../lib/storage'
 import PhaseIndicator from '../components/PhaseIndicator'
 import MarketBoard from '../components/MarketBoard'
 import ProfitTable from '../components/ProfitTable'
@@ -18,6 +18,7 @@ export default function PlayerView() {
   const [sellerPrice, setSellerPrice] = useState('')
   const [sellerUnits, setSellerUnits] = useState(2)
   const [error, setError] = useState('')
+  const [kicked, setKicked] = useState(false)
 
   useEffect(() => {
     setSellerGrade(null)
@@ -36,8 +37,12 @@ export default function PlayerView() {
         setSession(s)
         const found = s.players.find((p: Player) => p.id === playerId)
         if (found) setMe(found)
-      } catch {
-        setError('Session nicht gefunden')
+      } catch (err: unknown) {
+        if (err instanceof ApiError && err.status === 403) {
+          setKicked(true)
+        } else {
+          setError('Session nicht gefunden')
+        }
       }
     }
     load()
@@ -46,6 +51,27 @@ export default function PlayerView() {
   }, [code, playerToken, playerId])
 
   if (!code || !playerToken) return null
+
+  if (kicked) return (
+    <div className="min-h-screen graph-bg flex flex-col items-center justify-center gap-6 px-6">
+      <div className="panel p-8 max-w-sm w-full text-center space-y-4">
+        <div className="text-3xl">⚠️</div>
+        <h2 className="font-display text-xl font-bold text-coral-400">Du wurdest entfernt</h2>
+        <p className="text-mkt-400 text-sm font-mono">Der Admin hat dich aus der Session entfernt.</p>
+        <button
+          className="btn-secondary w-full"
+          onClick={() => {
+            storage.clear(code)
+            sessionIndex.remove(code)
+            navigate('/')
+          }}
+        >
+          Zur Startseite
+        </button>
+      </div>
+    </div>
+  )
+
   if (error) return (
     <div className="min-h-screen flex items-center justify-center text-coral-400 font-mono">{error}</div>
   )

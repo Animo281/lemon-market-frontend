@@ -2,9 +2,10 @@ import { PublicSession } from '../shared/types'
 
 interface Props {
   session: PublicSession
+  onKick?: (playerId: string, name: string) => void
 }
 
-export default function PlayerList({ session }: Props) {
+export default function PlayerList({ session, onKick }: Props) {
   const sellers = session.players.filter(p => p.role === 'seller').sort((a, b) => a.slotIndex - b.slotIndex)
   const buyers  = session.players.filter(p => p.role === 'buyer').sort((a, b) => a.slotIndex - b.slotIndex)
   const joined = session.players.length
@@ -44,6 +45,14 @@ export default function PlayerList({ session }: Props) {
                 >
                   <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${p ? 'bg-gold-500' : 'bg-mkt-700'}`} />
                   {p ? p.name : `Slot ${i + 1} — frei`}
+                  {p && onKick && (
+                    <button
+                      className="ml-auto text-[9px] px-1.5 py-0.5 rounded border border-coral-500/30 text-coral-400 hover:bg-coral-500/10 transition-colors"
+                      onClick={() => onKick(p.id, p.name)}
+                    >
+                      ✕
+                    </button>
+                  )}
                 </div>
               )
             })}
@@ -65,6 +74,14 @@ export default function PlayerList({ session }: Props) {
                 >
                   <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${p ? 'bg-ice-500' : 'bg-mkt-700'}`} />
                   {p ? p.name : `Slot ${i + 1} — frei`}
+                  {p && onKick && (
+                    <button
+                      className="ml-auto text-[9px] px-1.5 py-0.5 rounded border border-coral-500/30 text-coral-400 hover:bg-coral-500/10 transition-colors"
+                      onClick={() => onKick(p.id, p.name)}
+                    >
+                      ✕
+                    </button>
+                  )}
                 </div>
               )
             })}

@@ -2,11 +2,18 @@ import { Grade, Role, PublicSession } from '../shared/types'
 
 const BASE = 'https://lemon-market-backend.onrender.com/api'
 
+export class ApiError extends Error {
+  constructor(public status: number, message: string) {
+    super(message)
+    this.name = 'ApiError'
+  }
+}
+
 async function request<T>(url: string, options?: RequestInit): Promise<T> {
   const res = await fetch(`${BASE}${url}`, options)
   if (!res.ok) {
     const body = await res.json().catch(() => ({}))
-    throw new Error(body.error ?? `HTTP ${res.status}`)
+    throw new ApiError(res.status, body.error ?? `HTTP ${res.status}`)
   }
   return res.json()
 }
@@ -60,4 +67,16 @@ export const api = {
 
   toggleInfoMode: (code: string, adminToken: string) =>
     post<PublicSession>(`/session/${code}/toggle-info-mode`, undefined, adminToken),
+
+  kickPlayer: (code: string, playerId: string, adminToken: string) =>
+    request<PublicSession>(`/session/${code}/players/${playerId}`, {
+      method: 'DELETE',
+      headers: { 'x-token': adminToken },
+    }),
+
+  skipBuyer: (code: string, adminToken: string) =>
+    post<PublicSession>(`/session/${code}/skip-buyer`, undefined, adminToken),
+
+  forceAdvance: (code: string, adminToken: string) =>
+    post<PublicSession>(`/session/${code}/force-advance`, undefined, adminToken),
 }

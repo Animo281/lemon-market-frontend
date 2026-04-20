@@ -86,6 +86,36 @@ export default function AdminView() {
     }
   }
 
+  const handleKick = async (playerId: string, name: string) => {
+    if (!window.confirm(`${name} aus der Session entfernen?`)) return
+    try {
+      const s = await api.kickPlayer(code, playerId, adminToken)
+      setSession(s)
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Fehler')
+    }
+  }
+
+  const handleSkipBuyer = async () => {
+    if (!window.confirm('Aktuellen Käufer überspringen?')) return
+    try {
+      const s = await api.skipBuyer(code, adminToken)
+      setSession(s)
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Fehler')
+    }
+  }
+
+  const handleForceAdvance = async () => {
+    if (!window.confirm('Fehlende Verkäufer-Entscheidungen überschreiben und Marktphase starten?')) return
+    try {
+      const s = await api.forceAdvance(code, adminToken)
+      setSession(s)
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Fehler')
+    }
+  }
+
   return (
     <div className="min-h-screen bg-mkt-950 p-3 md:p-6">
       <div className="max-w-6xl mx-auto space-y-6">
@@ -152,7 +182,7 @@ export default function AdminView() {
               )}
             </div>
             <div className="md:col-span-3">
-              <PlayerList session={session} />
+              <PlayerList session={session} onKick={handleKick} />
             </div>
           </div>
         )}
@@ -192,8 +222,16 @@ export default function AdminView() {
                 })}
               </div>
             </div>
-            <div className="md:col-span-2">
-              <PlayerList session={session} />
+            <div className="md:col-span-2 space-y-3">
+              <PlayerList session={session} onKick={handleKick} />
+              {sellers.some((s: Player) => !(s.id in session.currentSellerDecisions)) && (
+                <button
+                  onClick={handleForceAdvance}
+                  className="w-full px-4 py-2.5 rounded-xl border font-mono text-sm font-bold transition-all bg-mkt-850 border-amber-500/30 text-amber-400 hover:bg-amber-500/10"
+                >
+                  Runde erzwingen →
+                </button>
+              )}
             </div>
           </div>
         )}
@@ -214,23 +252,41 @@ export default function AdminView() {
                 <div className="grid grid-cols-2 gap-2">
                   {buyers.map((b: Player) => {
                     const done = b.id in session.currentBuyerDecisions
+                    const isCurrent = session.currentPlayerId === b.id
                     return (
                       <div key={b.id} className={`flex items-center gap-2 px-3 py-2 rounded-xl border transition-colors ${
-                        done ? 'bg-lime-500/8 border-lime-500/20' : 'bg-mkt-850 border-mkt-800'
+                        done ? 'bg-lime-500/8 border-lime-500/20' : isCurrent ? 'bg-gold-500/8 border-gold-500/20' : 'bg-mkt-850 border-mkt-800'
                       }`}>
-                        <span className={`w-2 h-2 rounded-full shrink-0 ${done ? 'bg-lime-400' : 'bg-mkt-700'}`} />
-                        <span className={`font-mono text-sm truncate ${done ? 'text-lime-300' : 'text-mkt-400'}`}>
+                        <span className={`w-2 h-2 rounded-full shrink-0 ${done ? 'bg-lime-400' : isCurrent ? 'bg-gold-500' : 'bg-mkt-700'}`} />
+                        <span className={`font-mono text-sm truncate ${done ? 'text-lime-300' : isCurrent ? 'text-gold-300' : 'text-mkt-400'}`}>
                           {b.name}
                         </span>
                         {done && <span className="ml-auto text-[9px] text-lime-500 uppercase tracking-widest">✓</span>}
+                        {!done && isCurrent && (
+                          <button
+                            className="ml-auto text-[9px] px-1.5 py-0.5 rounded border border-amber-500/30 text-amber-400 hover:bg-amber-500/10 transition-colors font-mono"
+                            onClick={handleSkipBuyer}
+                          >
+                            überspr.
+                          </button>
+                        )}
+                        {!done && (
+                          <button
+                            className="text-[9px] px-1.5 py-0.5 rounded border border-coral-500/30 text-coral-400 hover:bg-coral-500/10 transition-colors"
+                            onClick={() => handleKick(b.id, b.name)}
+                          >
+                            ✕
+                          </button>
+                        )}
                       </div>
                     )
                   })}
                 </div>
               </div>
             </div>
-            <div className="md:col-span-2">
+            <div className="md:col-span-2 space-y-3">
               <SupplyDemandGraph session={session} />
+              <PlayerList session={session} onKick={handleKick} />
             </div>
           </div>
         )}
