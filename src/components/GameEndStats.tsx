@@ -11,8 +11,6 @@ interface Props {
 export default function GameEndStats({ results, sellers, buyers, maxSellerUnits }: Props) {
   const totalSurplus = results.reduce((s, r) => s + r.totalSurplus, 0)
 
-  // Theoretical max: each round, optimal = all buyers buy from sellers at Q2 price
-  // Simplified: sum of (BUYER_VALUES[2] - sellerCost(2, i)) for each possible trade
   const possibleTradesPerRound = Math.min(buyers.length, sellers.length * maxSellerUnits)
   const optimalPerRound = (() => {
     let max = 0
@@ -24,10 +22,8 @@ export default function GameEndStats({ results, sellers, buyers, maxSellerUnits 
     return max
   })()
   const theoreticalMax = optimalPerRound * results.length
-
   const efficiency = theoreticalMax > 0 ? (totalSurplus / theoreticalMax) * 100 : 0
 
-  // Average transaction price
   const prices: number[] = []
   for (const r of results) {
     for (const bd of r.buyerDecisions) {
@@ -36,7 +32,6 @@ export default function GameEndStats({ results, sellers, buyers, maxSellerUnits 
   }
   const avgPrice = prices.length > 0 ? prices.reduce((a, b) => a + b, 0) / prices.length : 0
 
-  // Total transactions
   const totalTransactions = results.reduce((s, r) =>
     s + r.buyerDecisions.filter(bd => bd.sellerId !== null).length, 0
   )
@@ -46,34 +41,41 @@ export default function GameEndStats({ results, sellers, buyers, maxSellerUnits 
       label: 'Gesamtüberschuss',
       value: `€${totalSurplus.toFixed(2)}`,
       sub: `${results.length} Runden`,
-      color: 'text-gold-500',
+      color: 'text-lemon-400',
+      bg: 'bg-lemon-500/8 border-lemon-500/20',
     },
     {
       label: 'Effizienz',
       value: `${efficiency.toFixed(0)}%`,
       sub: 'vs. Optimum',
-      color: efficiency >= 75 ? 'text-lime-400' : efficiency >= 50 ? 'text-gold-500' : 'text-coral-400',
+      color: efficiency >= 75 ? 'text-lime-400' : efficiency >= 50 ? 'text-lemon-400' : 'text-coral-400',
+      bg: efficiency >= 75 ? 'bg-lime-500/8 border-lime-500/20' : efficiency >= 50 ? 'bg-lemon-500/8 border-lemon-500/20' : 'bg-coral-500/8 border-coral-500/20',
     },
     {
       label: 'Ø Preis',
       value: `€${avgPrice.toFixed(2)}`,
       sub: `${prices.length} Preise`,
       color: 'text-ice-400',
+      bg: 'bg-ice-500/8 border-ice-500/20',
     },
     {
       label: 'Transaktionen',
       value: String(totalTransactions),
       sub: `von ${results.length * buyers.length} möglich`,
-      color: 'text-violet-400',
+      color: 'text-copper-400',
+      bg: 'bg-copper-500/8 border-copper-500/20',
     },
   ]
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
       {stats.map(s => (
-        <div key={s.label} className="panel p-5 flex flex-col gap-1">
+        <div key={s.label} className={`panel-warm border ${s.bg} p-5 flex flex-col gap-1`}>
           <div className="label">{s.label}</div>
-          <div className={`font-display text-3xl font-bold leading-none mt-1 ${s.color}`}>{s.value}</div>
+          <div className={`font-display font-bold leading-none mt-1 ${s.color}`}
+               style={{ fontSize: 'clamp(1.5rem, 4vw, 2rem)' }}>
+            {s.value}
+          </div>
           <div className="text-mkt-600 text-xs font-mono mt-1">{s.sub}</div>
         </div>
       ))}

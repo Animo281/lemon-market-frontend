@@ -24,7 +24,6 @@ function calcStats(rounds: RoundResult[]): RoundStats | null {
 export default function InfoModeCompare({ results }: Props) {
   const fullRounds = results.filter(r => r.infoMode === 'full')
   const asymmRounds = results.filter(r => r.infoMode === 'asymmetric')
-
   const fullStats = calcStats(fullRounds)
   const asymmStats = calcStats(asymmRounds)
 
@@ -38,71 +37,77 @@ export default function InfoModeCompare({ results }: Props) {
     ? ((asymmStats.totalTransactions - fullStats.totalTransactions) / fullStats.totalTransactions) * 100
     : null
 
-  const StatCard = ({ title, stats, accent }: { title: string; stats: RoundStats | null; accent: string }) => (
-    <div className={`panel p-5 flex-1 border-l-2 ${accent}`}>
-      <div className="label mb-4">{title}</div>
+  const StatBlock = ({
+    title, stats, mode,
+  }: { title: string; stats: RoundStats | null; mode: 'full' | 'asymm' }) => (
+    <div className="panel-warm flex-1 p-5">
+      <div className="flex items-center gap-2 mb-4">
+        <span className={`w-2 h-2 rounded-full shrink-0 ${mode === 'full' ? 'bg-lime-500' : 'bg-coral-500'}`} />
+        <div className={`label ${mode === 'full' ? 'text-lime-400/70' : 'text-coral-400/70'}`}>
+          {title}
+        </div>
+      </div>
       {stats ? (
         <div className="space-y-3">
           <div>
-            <div className="text-mkt-500 text-xs font-mono mb-0.5">Ø Überschuss</div>
-            <div className="font-display font-bold text-2xl text-mkt-100">€{stats.avgSurplus.toFixed(2)}</div>
+            <div className="text-mkt-500 text-xs mb-0.5">Ø Überschuss</div>
+            <div className={`font-display font-bold leading-none ${
+              mode === 'full' ? 'text-lime-400' : 'text-coral-400'
+            }`} style={{ fontSize: '1.75rem' }}>
+              €{stats.avgSurplus.toFixed(2)}
+            </div>
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-3 pt-2 border-t border-mkt-800">
             <div>
-              <div className="text-mkt-600 text-[10px] font-mono mb-0.5">Transaktionen</div>
+              <div className="text-mkt-600 text-[10px] mb-0.5">Transaktionen</div>
               <div className="font-mono font-bold text-mkt-200">{stats.totalTransactions}</div>
             </div>
             <div>
-              <div className="text-mkt-600 text-[10px] font-mono mb-0.5">Ø Preis</div>
+              <div className="text-mkt-600 text-[10px] mb-0.5">Ø Preis</div>
               <div className="font-mono font-bold text-mkt-200">€{stats.avgPrice.toFixed(2)}</div>
             </div>
           </div>
-          <div className="text-mkt-600 text-[10px] font-mono">{stats.rounds} Runde{stats.rounds !== 1 ? 'n' : ''}</div>
+          <div className="text-mkt-700 text-[10px]">{stats.rounds} Runde{stats.rounds !== 1 ? 'n' : ''}</div>
         </div>
       ) : (
-        <div className="text-mkt-600 text-sm font-mono">Keine Daten</div>
+        <div className="text-mkt-600 text-sm">Keine Daten</div>
       )}
     </div>
   )
 
   return (
-    <div className="panel p-6">
+    <div className="panel-warm p-6">
       <div className="label mb-1">Informationsasymmetrie — Vergleich</div>
-      <p className="text-mkt-500 text-xs font-mono mb-5">
+      <p className="text-mkt-500 text-xs mb-5">
         Akerlof (1970): Asymmetrische Information reduziert den Marktüberschuss
       </p>
 
       <div className="flex flex-col md:flex-row gap-4 items-stretch">
-        <StatCard
-          title="Volle Information"
-          stats={fullStats}
-          accent="border-lime-500"
-        />
+        <StatBlock title="Volle Information" stats={fullStats} mode="full" />
 
-        {/* Delta */}
         {surplusDelta !== null && (
-          <div className="flex flex-col items-center justify-center px-2 gap-2 min-w-[80px]">
+          <div className="flex flex-col items-center justify-center px-2 gap-2 min-w-[72px]">
             <div className="text-mkt-700 text-xl">→</div>
-            <div className={`text-center font-mono font-bold text-sm ${surplusDelta < 0 ? 'text-coral-400' : 'text-lime-400'}`}>
+            <div className={`text-center font-mono font-bold text-base ${
+              surplusDelta < 0 ? 'text-coral-400' : 'text-lime-400'
+            }`}>
               {surplusDelta > 0 ? '+' : ''}{surplusDelta.toFixed(0)}%
             </div>
-            <div className="text-mkt-600 text-[9px] text-center uppercase tracking-widest">Ø Überschuss</div>
+            <div className="label">Ø Überschuss</div>
             {transactionDelta !== null && (
               <>
-                <div className={`text-center font-mono font-bold text-sm mt-1 ${transactionDelta < 0 ? 'text-coral-400' : 'text-lime-400'}`}>
+                <div className={`text-center font-mono font-bold text-base mt-1 ${
+                  transactionDelta < 0 ? 'text-coral-400' : 'text-lime-400'
+                }`}>
                   {transactionDelta > 0 ? '+' : ''}{transactionDelta.toFixed(0)}%
                 </div>
-                <div className="text-mkt-600 text-[9px] text-center uppercase tracking-widest">Transaktionen</div>
+                <div className="label">Transaktionen</div>
               </>
             )}
           </div>
         )}
 
-        <StatCard
-          title="Asymm. Information"
-          stats={asymmStats}
-          accent="border-coral-500"
-        />
+        <StatBlock title="Asymm. Information" stats={asymmStats} mode="asymm" />
       </div>
     </div>
   )

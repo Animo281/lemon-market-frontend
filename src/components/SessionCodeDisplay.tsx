@@ -15,11 +15,15 @@ export default function SessionCodeDisplay({ code }: Props) {
   }
 
   return (
-    <div className="panel p-6">
+    <div className="panel-warm p-6">
       <div className="label mb-3">Session-Code</div>
-      <div className="font-display text-[4.5rem] font-bold text-gold-500 tracking-[0.18em] mb-5 leading-none">
+
+      {/* Code in big display font */}
+      <div className="font-mono font-bold text-lemon-500 tracking-[0.22em] leading-none mb-5"
+           style={{ fontSize: 'clamp(2.5rem, 8vw, 4rem)' }}>
         {code}
       </div>
+
       <div className="flex items-center gap-2">
         <input
           readOnly value={joinUrl}
@@ -33,7 +37,14 @@ export default function SessionCodeDisplay({ code }: Props) {
               : 'bg-mkt-850 border-mkt-700 text-mkt-200 hover:border-mkt-600 hover:text-mkt-100'
           }`}
         >
-          {copied ? '✓ Kopiert' : 'Kopieren'}
+          {copied ? (
+            <span className="flex items-center gap-1.5">
+              <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true">
+                <polyline points="1.5,5.5 4,9 9.5,1.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              Kopiert
+            </span>
+          ) : 'Kopieren'}
         </button>
       </div>
     </div>
