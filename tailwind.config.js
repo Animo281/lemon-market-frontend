@@ -18,37 +18,48 @@ export default {
           200: 'rgb(var(--mkt-200) / <alpha-value>)',
           100: 'rgb(var(--mkt-100) / <alpha-value>)',
         },
-        gold: {
-          300: '#fad080',
-          400: '#f5c060',
-          500: '#f0a840',
-          600: '#d08820',
+        // Primary: Zitronen-Gelb — Verkäufer, Preise, CTAs, Session-Codes
+        lemon: {
+          200: 'rgb(253 240 160 / <alpha-value>)',
+          300: 'rgb(250 234 106 / <alpha-value>)',
+          400: 'rgb(245 216 40 / <alpha-value>)',
+          500: 'rgb(240 196 25 / <alpha-value>)',
+          600: 'rgb(200 156 8 / <alpha-value>)',
         },
-        ice: {
-          300: '#90deff',
-          400: '#6dd4ff',
-          500: '#48c4ff',
-          600: '#28a0e0',
-        },
+        // Positive: Limette — Gewinne, Volle-Info, Bestätigungen
         lime: {
-          400: '#50d888',
-          500: '#30c879',
-          600: '#20a858',
+          400: 'rgb(120 216 72 / <alpha-value>)',
+          500: 'rgb(92 192 48 / <alpha-value>)',
+          600: 'rgb(66 160 32 / <alpha-value>)',
         },
+        // Negative: Coral — Asymm.-Info, Verluste, Q1-Qualität, Fehler
         coral: {
-          400: '#f07070',
-          500: '#f05050',
-          600: '#d03030',
+          400: 'rgb(240 112 96 / <alpha-value>)',
+          500: 'rgb(232 74 42 / <alpha-value>)',
+          600: 'rgb(192 48 24 / <alpha-value>)',
         },
-        violet: {
-          400: '#b098f8',
-          500: '#9d7ef5',
-          600: '#7a58d8',
+        // Käufer: Eis-Blau
+        ice: {
+          300: 'rgb(136 216 245 / <alpha-value>)',
+          400: 'rgb(90 196 236 / <alpha-value>)',
+          500: 'rgb(56 168 216 / <alpha-value>)',
+          600: 'rgb(26 136 190 / <alpha-value>)',
+        },
+        // Kupfer — Sekundärakzent, Konfiguration
+        copper: {
+          400: 'rgb(208 152 72 / <alpha-value>)',
+          500: 'rgb(184 120 40 / <alpha-value>)',
+          600: 'rgb(148 96 16 / <alpha-value>)',
         },
       },
       fontFamily: {
-        display: ['"Playfair Display"', 'Georgia', 'serif'],
-        mono: ['"JetBrains Mono"', 'Menlo', 'monospace'],
+        display: ['"Bricolage Grotesque"', 'system-ui', 'sans-serif'],
+        sans:    ['"Bricolage Grotesque"', 'system-ui', 'sans-serif'],
+        mono:    ['"JetBrains Mono"', 'Menlo', 'monospace'],
+      },
+      borderRadius: {
+        '2xl': '1rem',
+        '3xl': '1.25rem',
       },
     },
   },

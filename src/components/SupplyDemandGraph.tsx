@@ -52,11 +52,11 @@ function findEquilibrium(supply: number[], demand: number[]): { qty: number; pri
   return { qty: lastMatch + 1, price: (s[lastMatch] + d[lastMatch]) / 2 }
 }
 
-// Design-system colors (semantic, not blue/amber/green)
+// Design-system colors — Nacht-Markt palette
 const GRADE_COLOR: Record<number, string> = {
-  1: '#f07070',  // coral-400
-  2: '#f0a840',  // gold-500
-  3: '#50d888',  // lime-400
+  1: '#F07060',  // coral-400
+  2: '#F5D828',  // lemon-400
+  3: '#78D848',  // lime-400
 }
 
 export default function SupplyDemandGraph({ session, historyResult }: Props) {
@@ -68,21 +68,23 @@ export default function SupplyDemandGraph({ session, historyResult }: Props) {
   const maxUnits = session.maxSellerUnits
   const maxQty = Math.max(sellers.length * maxUnits, buyers.length, 1)
 
-  // --- Supply prices ---
-  const supplyPrices: number[] = []
+  // --- Supply prices (with grade for color coding) ---
+  const supplyItems: { price: number; grade: Grade }[] = []
   if (historyResult) {
     for (const sd of historyResult.sellerDecisions) {
-      for (let i = 0; i < sd.unitsOffered; i++) supplyPrices.push(sd.price)
+      for (let i = 0; i < sd.unitsOffered; i++) supplyItems.push({ price: sd.price, grade: sd.grade })
     }
   } else {
     for (const seller of sellers) {
       const d = session.currentSellerDecisions[seller.id]
-      if (d?.price !== undefined) {
+      if (d?.price !== undefined && d?.grade !== undefined) {
         const offered = d.unitsOffered ?? maxUnits
-        for (let i = 0; i < offered; i++) supplyPrices.push(d.price)
+        for (let i = 0; i < offered; i++) supplyItems.push({ price: d.price, grade: d.grade as Grade })
       }
     }
   }
+  const sortedSupplyItems = [...supplyItems].sort((a, b) => a.price - b.price)
+  const supplyPrices = sortedSupplyItems.map(s => s.price)
 
   // --- Demand prices (buyer WTP) ---
   // Full info: WTP = BUYER_VALUES[best grade] — buyers know what they're buying
@@ -175,7 +177,7 @@ export default function SupplyDemandGraph({ session, historyResult }: Props) {
         {eq ? (
           <span className="text-xs font-mono bg-mkt-850 border border-mkt-800 rounded-lg px-2.5 py-1 text-mkt-300">
             P* ≈{' '}
-            <span className="text-gold-500 font-bold">€{eq.price.toFixed(2)}</span>
+            <span className="text-lemon-400 font-bold">€{eq.price.toFixed(2)}</span>
             {'  '}Q* ={' '}
             <span className="text-ice-400 font-bold">{eq.qty}</span>
           </span>
@@ -283,23 +285,21 @@ export default function SupplyDemandGraph({ session, historyResult }: Props) {
             />
           )}
 
-          {/* Supply curve */}
-          {supplyPath && (
-            <path
-              key={`supply-${animKey}`}
-              d={supplyPath}
-              stroke="#e8e8ff"
-              strokeWidth={2.5}
-              fill="none"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              style={{
-                strokeDasharray: DASH,
-                strokeDashoffset: DASH,
-                animation: 'sdg-draw 0.65s cubic-bezier(0.4,0,0.2,1) forwards',
-              }}
-            />
-          )}
+          {/* Supply curve — colored per grade */}
+          {sortedSupplyItems.length > 0 && sortedSupplyItems.map((item, i) => {
+            const x1 = qX(i, maxQty)
+            const x2 = qX(i + 1, maxQty)
+            const y  = pY(item.price, MAX_P)
+            const nextY = sortedSupplyItems[i + 1] ? pY(sortedSupplyItems[i + 1].price, MAX_P) : undefined
+            return (
+              <g key={`supply-seg-${i}-${animKey}`} style={{ animation: `sdg-fade 0.4s ease ${0.05 * i}s both`, opacity: 0 }}>
+                <line x1={x1} x2={x2} y1={y} y2={y} stroke={GRADE_COLOR[item.grade]} strokeWidth={2.5} strokeLinecap="round" />
+                {nextY !== undefined && (
+                  <line x1={x2} x2={x2} y1={y} y2={nextY} stroke="#e8e8ff" strokeWidth={2} strokeOpacity={0.4} />
+                )}
+              </g>
+            )
+          })}
 
           {/* Demand curve */}
           {demandPath && (
@@ -352,16 +352,16 @@ export default function SupplyDemandGraph({ session, historyResult }: Props) {
             <line
               x1={qX(eq.qty, maxQty)} y1={pY(eq.price, MAX_P)}
               x2={qX(eq.qty, maxQty)} y2={H - M.bottom}
-              stroke="#9d7ef5" strokeWidth={1} strokeDasharray="4 3" opacity={0.6}
+              stroke="#B87828" strokeWidth={1} strokeDasharray="4 3" opacity={0.6}
             />
             <line
               x1={M.left} y1={pY(eq.price, MAX_P)}
               x2={qX(eq.qty, maxQty)} y2={pY(eq.price, MAX_P)}
-              stroke="#9d7ef5" strokeWidth={1} strokeDasharray="4 3" opacity={0.6}
+              stroke="#B87828" strokeWidth={1} strokeDasharray="4 3" opacity={0.6}
             />
             <circle
               cx={qX(eq.qty, maxQty)} cy={pY(eq.price, MAX_P)}
-              r={5} fill="#9d7ef5" stroke="rgb(var(--chart-bg))" strokeWidth={2}
+              r={5} fill="#B87828" stroke="rgb(var(--chart-bg))" strokeWidth={2}
             />
           </g>
         )}
@@ -389,29 +389,30 @@ export default function SupplyDemandGraph({ session, historyResult }: Props) {
       {/* Legend */}
       <div className="flex flex-wrap gap-x-4 gap-y-1 mt-3 text-[10px] text-mkt-500 font-mono">
         <span className="flex items-center gap-1.5">
-          <span className="w-5 h-0.5 rounded inline-block" style={{ backgroundColor: '#e8e8ff' }} />Angebot
+          <span className="flex gap-0.5">
+            <span className="w-2 h-0.5 rounded inline-block bg-coral-400 self-center" />
+            <span className="w-2 h-0.5 rounded inline-block bg-lemon-400 self-center" />
+            <span className="w-1 h-0.5 rounded inline-block bg-lime-400 self-center" />
+          </span>
+          Angebot
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="w-5 h-0.5 rounded inline-block" style={{ backgroundColor: '#FFD700' }} />Nachfrage
+          <span className="w-5 h-0.5 rounded inline-block bg-lemon-400" />Nachfrage
         </span>
         {eq && (
           <span className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-violet-500 inline-block" />Gleichgewicht
+            <span className="w-2 h-2 rounded-full bg-copper-500 inline-block" />Gleichgewicht
           </span>
         )}
-        {transactions.length > 0 && (
-          <>
-            <span className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-coral-400 inline-block" />Q1
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-gold-500 inline-block" />Q2
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-lime-400 inline-block" />Q3
-            </span>
-          </>
-        )}
+        <span className="flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-coral-400 inline-block" />Q1
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-lemon-400 inline-block" />Q2
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-lime-400 inline-block" />Q3
+        </span>
       </div>
 
       <style>{`

@@ -7,10 +7,10 @@ interface Props {
   maxSellerUnits: number
 }
 
-const GRADE_LABEL: Record<number, { label: string; cls: string }> = {
-  1: { label: 'Q1', cls: 'text-coral-400 border-coral-500/30 bg-coral-500/10' },
-  2: { label: 'Q2', cls: 'text-gold-500 border-gold-500/30 bg-gold-500/10' },
-  3: { label: 'Q3', cls: 'text-lime-400 border-lime-500/30 bg-lime-500/10' },
+const GRADE_STYLE: Record<number, { label: string; cls: string; dot: string }> = {
+  1: { label: 'Q1', cls: 'text-coral-400 border-coral-500/35 bg-coral-500/10', dot: 'bg-coral-400' },
+  2: { label: 'Q2', cls: 'text-lemon-400 border-lemon-500/35 bg-lemon-500/10', dot: 'bg-lemon-400' },
+  3: { label: 'Q3', cls: 'text-lime-400  border-lime-500/35  bg-lime-500/10',  dot: 'bg-lime-400'  },
 }
 
 export default function MarketBoard({ sellers, decisions, infoMode, maxSellerUnits }: Props) {
@@ -24,66 +24,77 @@ export default function MarketBoard({ sellers, decisions, infoMode, maxSellerUni
   return (
     <div className="space-y-3">
       {infoMode === 'asymmetric' && (
-        <div className="flex items-center gap-2.5 bg-coral-500/8 border border-coral-500/25 rounded-xl px-4 py-2.5 text-coral-300 text-xs font-mono">
-          <span className="text-coral-400 text-base leading-none">⚠</span>
-          Asymmetrische Information — Qualität nicht sichtbar
+        <div className="flex items-center gap-2.5 bg-coral-500/8 border border-coral-500/25 rounded-xl px-4 py-2.5 text-coral-300 text-sm">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="shrink-0 text-coral-400">
+            <path d="M8 2L14 13H2L8 2Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+            <path d="M8 6v4M8 11.5v.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+          </svg>
+          <span className="font-semibold">Asymmetrische Information</span>
+          <span className="text-coral-400/70 text-xs">— Qualität nicht sichtbar</span>
         </div>
       )}
 
       <div className={`grid gap-3 ${colCls}`}>
-        {sorted.map(seller => {
+        {sorted.map((seller, idx) => {
           const d = decisions[seller.id]
           const offered = d?.unitsOffered ?? maxSellerUnits
           const soldOut = (d?.unitsSold ?? 0) >= offered
           const pending = d?.price === undefined
-          const gradeInfo = d?.grade !== undefined ? GRADE_LABEL[d.grade] : null
+          const gradeStyle = d?.grade !== undefined ? GRADE_STYLE[d.grade] : null
 
           return (
             <div
               key={seller.id}
-              className={`panel p-5 flex flex-col gap-3 transition-all duration-300 ${
-                soldOut ? 'opacity-35 grayscale' : ''
-              } ${!pending ? 'border-mkt-700' : ''}`}
+              className={`stall-card p-5 flex flex-col gap-3 animate-stall-in ${
+                soldOut ? 'opacity-30' : ''
+              }`}
+              style={{ animationDelay: `${idx * 0.05}s` }}
             >
-              {/* Seller name + sold-out badge */}
+              {/* Header: seller name + sold-out */}
               <div className="flex items-center justify-between min-w-0">
-                <span className="text-gold-400 font-bold text-sm truncate">{seller.name}</span>
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="w-1.5 h-1.5 rounded-full bg-lemon-500 shrink-0" />
+                  <span className="font-semibold text-mkt-100 text-sm truncate">{seller.name}</span>
+                </div>
                 {soldOut && (
-                  <span className="shrink-0 ml-2 text-[9px] uppercase tracking-widest text-coral-500 border border-coral-500/40 rounded-md px-1.5 py-0.5">
-                    Sold out
+                  <span className="shrink-0 ml-2 text-[9px] font-bold uppercase tracking-widest text-mkt-500 border border-mkt-700 rounded-md px-1.5 py-0.5">
+                    Ausverkauft
                   </span>
                 )}
               </div>
 
               {pending ? (
-                /* Waiting state */
-                <div className="flex items-center gap-2 text-mkt-500 text-xs py-3">
+                <div className="flex items-center gap-2 text-mkt-600 text-sm py-3">
                   <span className="relative flex h-1.5 w-1.5 shrink-0">
-                    <span className="dot-ping absolute inline-flex h-full w-full rounded-full bg-mkt-500 opacity-75" />
-                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-mkt-500" />
+                    <span className="dot-ping absolute inline-flex h-full w-full rounded-full bg-mkt-600 opacity-75" />
+                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-mkt-600" />
                   </span>
                   entscheidet…
                 </div>
               ) : (
                 <>
-                  {/* Price */}
-                  <div className="font-mono font-bold text-2xl text-mkt-100 leading-none">
+                  {/* Price — large and warm */}
+                  <div className="font-mono font-bold text-lemon-400 leading-none"
+                       style={{ fontSize: 'clamp(1.5rem, 4vw, 2rem)' }}>
                     €{d?.price?.toFixed(2)}
                   </div>
 
-                  {/* Grade + units row */}
+                  {/* Grade + units */}
                   <div className="flex items-center justify-between">
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md border font-mono ${
-                      infoMode === 'full' && gradeInfo
-                        ? gradeInfo.cls
-                        : 'text-mkt-500 border-mkt-700 bg-transparent'
+                    <span className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-lg border ${
+                      infoMode === 'full' && gradeStyle
+                        ? gradeStyle.cls
+                        : 'text-mkt-600 border-mkt-800 bg-transparent'
                     }`}>
-                      {infoMode === 'full' && gradeInfo ? gradeInfo.label : '?'}
+                      {infoMode === 'full' && gradeStyle && (
+                        <span className={`w-1.5 h-1.5 rounded-full ${gradeStyle.dot}`} />
+                      )}
+                      {infoMode === 'full' && gradeStyle ? gradeStyle.label : '?'}
                     </span>
 
-                    {/* Units as number */}
-                    <span className="font-mono text-sm font-bold text-gold-500">
-                      {d?.unitsSold ?? 0}<span className="text-mkt-600">/{offered}</span>
+                    <span className="font-mono text-sm">
+                      <span className="text-mkt-300 font-bold">{d?.unitsSold ?? 0}</span>
+                      <span className="text-mkt-700">/{offered}</span>
                     </span>
                   </div>
                 </>

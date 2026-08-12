@@ -40,14 +40,18 @@ export default function AdminView() {
 
   if (!code || !adminToken) return null
   if (error) return (
-    <div className="min-h-screen flex items-center justify-center text-coral-400 font-mono">{error}</div>
+    <div className="min-h-screen market-bg flex items-center justify-center">
+      <div className="panel-warm p-8 text-center">
+        <p className="text-coral-400 font-mono text-sm">{error}</p>
+      </div>
+    </div>
   )
   if (!session) return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="flex items-center gap-2.5 text-mkt-400 text-sm font-mono">
+    <div className="min-h-screen market-bg flex items-center justify-center">
+      <div className="flex items-center gap-2.5 text-mkt-500 text-sm font-mono">
         <span className="relative flex h-2 w-2">
-          <span className="dot-ping absolute inline-flex h-full w-full rounded-full bg-mkt-400 opacity-75" />
-          <span className="relative inline-flex h-2 w-2 rounded-full bg-mkt-400" />
+          <span className="dot-ping absolute inline-flex h-full w-full rounded-full bg-lemon-500 opacity-75" />
+          <span className="relative inline-flex h-2 w-2 rounded-full bg-lemon-500" />
         </span>
         Lade…
       </div>
@@ -78,6 +82,8 @@ export default function AdminView() {
   }
 
   const handleToggleInfoMode = async () => {
+    const next = session?.infoMode === 'full' ? 'asymmetrisch (Qualität ausblenden)' : 'volle Info (Qualität einblenden)'
+    if (!window.confirm(`Informationsmodus wechseln zu: ${next}?`)) return
     try {
       const s = await api.toggleInfoMode(code, adminToken)
       setSession(s)
@@ -117,14 +123,13 @@ export default function AdminView() {
   }
 
   return (
-    <div className="min-h-screen bg-mkt-950 p-3 md:p-6">
+    <div className="min-h-screen market-bg p-3 md:p-6">
       <div className="max-w-6xl mx-auto space-y-6">
 
         {/* ── Header ────────────────────────────────── */}
         <div className="flex items-center justify-between">
           <div>
-            <div className="label mb-1">Market for Lemons · Admin</div>
-            <h1 className="font-display text-3xl font-bold text-gold-500">Admin-Panel</h1>
+            <h1 className="font-display text-3xl font-bold text-lemon-400">Admin-Panel</h1>
           </div>
           {session.phase !== 'lobby' && session.phase !== 'game-end' && (
             <PhaseIndicator round={session.currentRound} total={session.totalRounds} infoMode={session.infoMode} />
@@ -141,12 +146,12 @@ export default function AdminView() {
               return (
                 <div key={i} className="flex items-center gap-2">
                   <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono transition-all ${
-                    isCurrent ? 'bg-gold-500/15 border border-gold-500/40 text-gold-400' :
+                    isCurrent ? 'bg-lemon-500/15 border border-lemon-500/40 text-lemon-400' :
                     isDone    ? 'bg-mkt-850 border border-mkt-800 text-mkt-400' :
                                 'border border-mkt-800/50 text-mkt-700'
                   }`}>
                     <span className={`w-1.5 h-1.5 rounded-full ${
-                      isCurrent ? 'bg-gold-500' :
+                      isCurrent ? 'bg-lemon-500' :
                       isDone    ? 'bg-mkt-500' :
                                   'bg-mkt-700'
                     }`} />
@@ -161,7 +166,11 @@ export default function AdminView() {
           </div>
         )}
 
-        {error && <div className="text-coral-400 text-xs font-mono">{error}</div>}
+        {error && (
+          <div className="px-4 py-2.5 rounded-xl bg-coral-500/8 border border-coral-500/25 text-coral-400 text-xs font-mono">
+            {error}
+          </div>
+        )}
 
         {/* ── LOBBY ─────────────────────────────────── */}
         {session.phase === 'lobby' && (
@@ -190,7 +199,7 @@ export default function AdminView() {
         {/* ── SELLER INPUT ──────────────────────────── */}
         {session.phase === 'seller-input' && (
           <div className="grid grid-cols-1 md:grid-cols-5 gap-5 animate-fade-up">
-            <div className="md:col-span-3 panel p-6">
+            <div className="md:col-span-3 panel-warm p-6">
               <div className="label mb-4">Verkäufer-Entscheidungen</div>
               <div className="space-y-2">
                 {sellers.sort((a: Player, b: Player) => a.slotIndex - b.slotIndex).map((s: Player) => {
@@ -199,13 +208,13 @@ export default function AdminView() {
                     <div key={s.id} className={`flex items-center gap-3 py-2.5 px-3 rounded-xl transition-colors ${
                       done ? 'bg-lime-500/8 border border-lime-500/20' : 'bg-mkt-850 border border-mkt-800'
                     }`}>
-                      <span className={`w-2 h-2 rounded-full ${done ? 'bg-lime-400' : 'bg-mkt-700'}`} />
-                      {done && (
-                        <span className="text-[9px] uppercase tracking-widest text-lime-500 border border-lime-500/25 rounded px-1.5 py-0.5">
-                          ✓
-                        </span>
-                      )}
-                      {!done && (
+                      {done ? (
+                        <span className="flex items-center text-lime-500 border border-lime-500/25 rounded px-1.5 py-0.5">
+                        <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
+                          <polyline points="1.5,5 3.5,8 8.5,1.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </span>
+                      ) : (
                         <span className="relative flex h-1.5 w-1.5">
                           <span className="dot-ping absolute inline-flex h-full w-full rounded-full bg-mkt-500 opacity-75" />
                           <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-mkt-500" />
@@ -255,13 +264,27 @@ export default function AdminView() {
                     const isCurrent = session.currentPlayerId === b.id
                     return (
                       <div key={b.id} className={`flex items-center gap-2 px-3 py-2 rounded-xl border transition-colors ${
-                        done ? 'bg-lime-500/8 border-lime-500/20' : isCurrent ? 'bg-gold-500/8 border-gold-500/20' : 'bg-mkt-850 border-mkt-800'
+                        done ? 'bg-lime-500/8 border-lime-500/20' :
+                        isCurrent ? 'bg-lemon-500/8 border-lemon-500/20' :
+                        'bg-mkt-850 border-mkt-800'
                       }`}>
-                        <span className={`w-2 h-2 rounded-full shrink-0 ${done ? 'bg-lime-400' : isCurrent ? 'bg-gold-500' : 'bg-mkt-700'}`} />
-                        <span className={`font-mono text-sm truncate ${done ? 'text-lime-300' : isCurrent ? 'text-gold-300' : 'text-mkt-400'}`}>
+                        <span className={`w-2 h-2 rounded-full shrink-0 ${
+                          done ? 'bg-lime-400' :
+                          isCurrent ? 'bg-lemon-500 animate-pulse' :
+                          'bg-mkt-700'
+                        }`} />
+                        <span className={`font-mono text-sm truncate ${
+                          done ? 'text-lime-300' :
+                          isCurrent ? 'text-lemon-300' :
+                          'text-mkt-400'
+                        }`}>
                           {b.name}
                         </span>
-                        {done && <span className="ml-auto text-[9px] text-lime-500 uppercase tracking-widest">✓</span>}
+                        {done && (
+                          <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true" className="ml-auto text-lime-500">
+                            <polyline points="1.5,5 3.5,8 8.5,1.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        )}
                         {!done && isCurrent && (
                           <button
                             className="ml-auto text-[9px] px-1.5 py-0.5 rounded border border-amber-500/30 text-amber-400 hover:bg-amber-500/10 transition-colors font-mono"
@@ -294,7 +317,7 @@ export default function AdminView() {
         {/* ── ROUND END ─────────────────────────────── */}
         {session.phase === 'round-end' && lastResult && (
           <div className="grid grid-cols-1 md:grid-cols-5 gap-5 animate-fade-up">
-            <div className="md:col-span-3 panel p-6 space-y-4">
+            <div className="md:col-span-3 panel-warm p-6 space-y-4">
               <div className="flex items-center justify-between border-b border-mkt-800 pb-4">
                 <h2 className="font-bold text-mkt-100">Runde {lastResult.round} — Ergebnisse</h2>
                 <span className={`text-xs px-2.5 py-1 rounded-lg border font-mono ${
@@ -306,72 +329,86 @@ export default function AdminView() {
                 </span>
               </div>
 
-              <div className="overflow-x-auto"><table className="w-full text-xs font-mono">
-                <thead>
-                  <tr className="border-b border-mkt-800">
-                    <th className="label text-left py-2 pr-4">Spieler</th>
-                    <th className="label text-left py-2 pr-4">Q</th>
-                    <th className="label text-left py-2 pr-4">Preis</th>
-                    <th className="label text-left py-2">Einh.</th>
-                    <th className="label text-left py-2">Profit</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {lastResult.sellerDecisions.map((sd: SellerDecision) => {
-                    const s = sellers.find((p: Player) => p.id === sd.playerId)
-                    const profit = Array.from({ length: sd.unitsSold }, (_, i) =>
-                      sd.price - sellerCost(sd.grade, i)
-                    ).reduce((a, b) => a + b, 0)
-                    return (
-                      <tr key={sd.playerId} className="border-b border-mkt-800/40">
-                        <td className="py-2.5 pr-4 text-gold-400 font-bold">{s?.name}</td>
-                        <td className="py-2.5 pr-4 text-mkt-300">Q{sd.grade}</td>
-                        <td className="py-2.5 pr-4 text-mkt-200">€{sd.price.toFixed(2)}</td>
-                        <td className="py-2.5 text-mkt-300">{sd.unitsSold}</td>
-                        <td className={`py-2.5 font-bold ${profit >= 0 ? 'text-lime-400' : 'text-coral-400'}`}>
-                          €{profit.toFixed(2)}
-                        </td>
-                      </tr>
-                    )
-                  })}
-                  {lastResult.buyerDecisions.map((bd: BuyerDecision) => {
-                    const b      = buyers.find((p: Player) => p.id === bd.playerId)
-                    const sellerP = sellers.find((p: Player) => p.id === bd.sellerId)
-                    return (
-                      <tr key={bd.playerId} className="border-b border-mkt-800/40">
-                        <td className="py-2.5 pr-4 text-ice-400 font-bold">{b?.name}</td>
-                        <td className="py-2.5 pr-4 text-mkt-300">{bd.grade ? `Q${bd.grade}` : '—'}</td>
-                        <td className="py-2.5 pr-4 text-mkt-200">
-                          {bd.price != null ? `€${bd.price.toFixed(2)}` : sellerP ? '—' : 'Kein Kauf'}
-                        </td>
-                        <td className="py-2.5 text-mkt-600">—</td>
-                        <td className={`py-2.5 font-bold ${bd.earnings >= 0 ? 'text-lime-400' : 'text-coral-400'}`}>
-                          €{bd.earnings.toFixed(2)}
-                        </td>
-                      </tr>
-                    )
-                  })}
-                </tbody>
-              </table></div>
-
-              <div className="flex items-center justify-between pt-2 border-t border-mkt-800 font-mono text-sm">
-                <span className="text-mkt-500">Gesamtüberschuss</span>
-                <span className="text-gold-500 font-bold text-lg">€{lastResult.totalSurplus.toFixed(2)}</span>
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs font-mono">
+                  <thead>
+                    <tr className="border-b border-mkt-800">
+                      <th className="label text-left py-2 pr-4">Spieler</th>
+                      <th className="label text-left py-2 pr-4">Q</th>
+                      <th className="label text-left py-2 pr-4">Preis</th>
+                      <th className="label text-left py-2">Einh.</th>
+                      <th className="label text-left py-2">Profit</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {lastResult.sellerDecisions.map((sd: SellerDecision) => {
+                      const s = sellers.find((p: Player) => p.id === sd.playerId)
+                      const profit = Array.from({ length: sd.unitsSold }, (_, i) =>
+                        sd.price - sellerCost(sd.grade, i)
+                      ).reduce((a, b) => a + b, 0)
+                      return (
+                        <tr key={sd.playerId} className="border-b border-mkt-800/40">
+                          <td className="py-2.5 pr-4 text-lemon-400 font-bold">{s?.name}</td>
+                          <td className="py-2.5 pr-4">
+                            <span className={
+                              sd.grade === 1 ? 'text-coral-400' :
+                              sd.grade === 2 ? 'text-lemon-400' :
+                              'text-lime-400'
+                            }>Q{sd.grade}</span>
+                          </td>
+                          <td className="py-2.5 pr-4 text-mkt-200">€{sd.price.toFixed(2)}</td>
+                          <td className="py-2.5 text-mkt-300">{sd.unitsSold}</td>
+                          <td className={`py-2.5 font-bold ${profit >= 0 ? 'text-lime-400' : 'text-coral-400'}`}>
+                            €{profit.toFixed(2)}
+                          </td>
+                        </tr>
+                      )
+                    })}
+                    {lastResult.buyerDecisions.map((bd: BuyerDecision) => {
+                      const b      = buyers.find((p: Player) => p.id === bd.playerId)
+                      const sellerP = sellers.find((p: Player) => p.id === bd.sellerId)
+                      return (
+                        <tr key={bd.playerId} className="border-b border-mkt-800/40">
+                          <td className="py-2.5 pr-4 text-ice-400 font-bold">{b?.name}</td>
+                          <td className="py-2.5 pr-4 text-mkt-300">{bd.grade ? `Q${bd.grade}` : '—'}</td>
+                          <td className="py-2.5 pr-4 text-mkt-200">
+                            {bd.price != null ? `€${bd.price.toFixed(2)}` : sellerP ? '—' : 'Kein Kauf'}
+                          </td>
+                          <td className="py-2.5 text-mkt-600">—</td>
+                          <td className={`py-2.5 font-bold ${bd.earnings >= 0 ? 'text-lime-400' : 'text-coral-400'}`}>
+                            €{bd.earnings.toFixed(2)}
+                          </td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
               </div>
 
-              {session.infoMode === 'full' && (
-                <button
-                  onClick={handleToggleInfoMode}
-                  className="w-full mt-2 px-4 py-2.5 rounded-xl border font-mono text-sm font-bold transition-all bg-mkt-850 border-mkt-700 text-mkt-300 hover:border-coral-500/50 hover:text-coral-300 hover:bg-coral-500/10"
-                >
-                  Qualität ausblenden (Asymm. Info) →
-                </button>
-              )}
-              {session.infoMode === 'asymmetric' && (
-                <div className="w-full mt-2 px-4 py-2.5 rounded-xl border font-mono text-sm font-bold bg-coral-500/10 border-coral-500/40 text-coral-300 text-center">
-                  ✓ Qualität dauerhaft ausgeblendet
-                </div>
-              )}
+              <div className="flex items-center justify-between pt-3 border-t border-mkt-800 font-mono text-sm">
+                <span className="text-mkt-500">Gesamtüberschuss</span>
+                <span className="text-lemon-400 font-bold text-lg">€{lastResult.totalSurplus.toFixed(2)}</span>
+              </div>
+
+              <button
+                onClick={handleToggleInfoMode}
+                className={`w-full mt-2 px-4 py-2.5 rounded-xl border font-mono text-sm font-bold transition-all ${
+                  session.infoMode === 'full'
+                    ? 'bg-mkt-850 border-mkt-700 text-mkt-300 hover:border-coral-500/50 hover:text-coral-300 hover:bg-coral-500/10'
+                    : 'bg-coral-500/10 border-coral-500/40 text-coral-300 hover:border-lime-500/50 hover:text-lime-300 hover:bg-lime-500/10'
+                }`}
+              >
+                {session.infoMode === 'full'
+                  ? 'Qualität ausblenden (→ Asymm. Info)'
+                  : (
+                    <span className="flex items-center justify-center gap-1.5">
+                      <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true">
+                        <polyline points="1.5,5.5 4,9 9.5,1.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                      Asymm. Info · Klicken zum Zurücksetzen
+                    </span>
+                  )}
+              </button>
               <button
                 onClick={handleNextRound}
                 className="btn-primary w-full mt-2"
@@ -392,8 +429,10 @@ export default function AdminView() {
             {/* Header */}
             <div className="flex items-end justify-between">
               <div>
-                <div className="label mb-1.5">Spielende · {session.totalRounds} Runden</div>
-                <h2 className="font-display text-4xl font-bold text-gold-500">Alle Ergebnisse</h2>
+                <h2 className="font-display font-bold text-lemon-400"
+                    style={{ fontSize: 'clamp(2rem, 6vw, 3.5rem)' }}>
+                  Alle Ergebnisse
+                </h2>
               </div>
               <button
                 onClick={() => { storage.clear(code); navigate('/') }}
