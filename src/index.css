@@ -148,11 +148,6 @@ html:not(.dark) {
     letter-spacing: -0.008em;
   }
 
-  /* Qualitäts-Badge */
-  .quality-q1 { @apply text-coral-400 border-coral-500/40 bg-coral-500/10; }
-  .quality-q2 { @apply text-lemon-400 border-lemon-500/40 bg-lemon-500/10; }
-  .quality-q3 { @apply text-lime-400  border-lime-500/40  bg-lime-500/10;  }
-
   /* Info-Mode-Badge */
   .badge-full {
     @apply text-lime-400 border-lime-500/30 bg-lime-500/10;

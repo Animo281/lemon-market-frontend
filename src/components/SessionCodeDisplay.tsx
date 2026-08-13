@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { CheckIcon } from './icons'
 
 interface Props {
   code: string
@@ -39,9 +40,7 @@ export default function SessionCodeDisplay({ code }: Props) {
         >
           {copied ? (
             <span className="flex items-center gap-1.5">
-              <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true">
-                <polyline points="1.5,5.5 4,9 9.5,1.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
+              <CheckIcon size={11} />
               Kopiert
             </span>
           ) : 'Kopieren'}

@@ -7,6 +7,7 @@ import { storage, sessionIndex } from '../lib/storage'
 import PhaseIndicator from '../components/PhaseIndicator'
 import MarketBoard from '../components/MarketBoard'
 import ProfitTable from '../components/ProfitTable'
+import { CheckIcon } from '../components/icons'
 
 export default function PlayerView() {
   const { code } = useParams<{ code: string }>()
@@ -313,9 +314,7 @@ export default function PlayerView() {
         {session.phase === 'seller-input' && isSeller && myDecision && (
           <div className="panel-warm p-10 text-center animate-scale-in">
             <div className="w-12 h-12 rounded-full bg-lime-500/10 border border-lime-500/30 flex items-center justify-center mx-auto mb-4">
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true" className="text-lime-400">
-                <polyline points="4,10.5 8,15 16,5" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
+              <CheckIcon size={20} strokeWidth={1.75} className="text-lime-400" />
             </div>
             <div className="font-bold text-mkt-100 text-lg mb-1">Entscheidung abgegeben</div>
             <div className="flex items-center justify-center gap-2 text-mkt-500 text-sm mt-3">
@@ -452,9 +451,7 @@ export default function PlayerView() {
             {isBuyer && hasDecided && (
               <div className="panel p-6 text-center animate-scale-in">
                 <div className="w-10 h-10 rounded-full bg-lime-500/10 border border-lime-500/30 flex items-center justify-center mx-auto mb-3">
-                  <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true" className="text-lime-400">
-                <polyline points="3,9.5 7,13.5 15,4.5" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
+                  <CheckIcon size={18} strokeWidth={1.75} className="text-lime-400" />
                 </div>
                 <div className="font-bold text-mkt-100 mb-1">Entscheidung abgegeben</div>
                 <div className="flex items-center justify-center gap-2 text-mkt-600 text-xs mt-2">
@@ -484,9 +481,7 @@ export default function PlayerView() {
             </div>
 
             {isSeller && myLastSellerResult && (() => {
-              const profit = Array.from({ length: myLastSellerResult.unitsSold }, (_, i) =>
-                myLastSellerResult.price - sellerCost(myLastSellerResult.grade, i)
-              ).reduce((a, b) => a + b, 0)
+              const profit = myLastSellerResult.earnings
               return (
                 <div className="grid grid-cols-2 gap-3">
                   <div className="bg-mkt-850 rounded-xl p-4">

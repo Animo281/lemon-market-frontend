@@ -1,5 +1,4 @@
 import { RoundResult, Player } from '../shared/types'
-import { sellerCost } from '../shared/constants'
 
 interface Props {
   results: RoundResult[]
@@ -19,10 +18,7 @@ export default function ProfitTable({ results, sellers, buyers }: Props) {
       buyerTotals[bd.playerId] = (buyerTotals[bd.playerId] ?? 0) + bd.earnings
     }
     for (const sd of r.sellerDecisions) {
-      const profit = Array.from({ length: sd.unitsSold }, (_, i) =>
-        sd.price - sellerCost(sd.grade, i)
-      ).reduce((a, b) => a + b, 0)
-      sellerTotals[sd.playerId] = (sellerTotals[sd.playerId] ?? 0) + profit
+      sellerTotals[sd.playerId] = (sellerTotals[sd.playerId] ?? 0) + sd.earnings
     }
   }
 
