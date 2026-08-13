@@ -5,10 +5,10 @@ const PREFIX = 'lemons'
 
 export const storage = {
   setAdminToken: (code: string, token: string) =>
-    sessionStorage.setItem(`${PREFIX}:admin:${code}`, token),
+    localStorage.setItem(`${PREFIX}:admin:${code}`, token),
 
   getAdminToken: (code: string): string | null =>
-    sessionStorage.getItem(`${PREFIX}:admin:${code}`),
+    localStorage.getItem(`${PREFIX}:admin:${code}`),
 
   setPlayerToken: (code: string, token: string) =>
     sessionStorage.setItem(`${PREFIX}:player:${code}`, token),

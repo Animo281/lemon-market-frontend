@@ -1,6 +1,6 @@
 import { Grade, Role, PublicSession } from '../shared/types'
 
-const BASE = 'https://lemon-market-backend.onrender.com/api'
+const BASE = import.meta.env.VITE_API_URL ?? 'https://lemon-market-backend.onrender.com/api'
 
 export class ApiError extends Error {
   constructor(public status: number, message: string) {

@@ -53,13 +53,15 @@ export default {
         },
       },
       fontFamily: {
-        display: ['"Bricolage Grotesque"', 'system-ui', 'sans-serif'],
-        sans:    ['"Bricolage Grotesque"', 'system-ui', 'sans-serif'],
+        display: ['"DM Sans"', 'system-ui', 'sans-serif'],
+        sans:    ['"DM Sans"', 'system-ui', 'sans-serif'],
         mono:    ['"JetBrains Mono"', 'Menlo', 'monospace'],
       },
       borderRadius: {
-        '2xl': '1rem',
-        '3xl': '1.25rem',
+        '2xl': '0.875rem',
+      },
+      letterSpacing: {
+        tight: '-0.022em',
       },
     },
   },
