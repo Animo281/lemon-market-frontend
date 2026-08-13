@@ -69,11 +69,12 @@ export default function LandingView() {
         className="absolute inset-0 w-full h-full pointer-events-none select-none"
         xmlns="http://www.w3.org/2000/svg"
         aria-hidden="true"
+        viewBox="0 0 1000 1000"
         preserveAspectRatio="none"
       >
         {/* Supply — gold, rising */}
         <polyline
-          points="0,90% 15%,75% 30%,62% 45%,55% 60%,48% 75%,43% 90%,38% 100%,35%"
+          points="0,900 150,750 300,620 450,550 600,480 750,430 900,380 1000,350"
           fill="none"
           stroke="#f0a840"
           strokeWidth="1"
@@ -82,7 +83,7 @@ export default function LandingView() {
         />
         {/* Demand — ice, falling */}
         <polyline
-          points="0,18% 15%,28% 30%,38% 45%,48% 60%,58% 75%,68% 90%,76% 100%,83%"
+          points="0,180 150,280 300,380 450,480 600,580 750,680 900,760 1000,830"
           fill="none"
           stroke="#48c4ff"
           strokeWidth="1"

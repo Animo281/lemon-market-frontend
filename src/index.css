@@ -22,6 +22,10 @@
   --chart-grid: 58 42 26;
   --chart-axis: 84 64 42;
   --chart-tick: 138 114 96;
+
+  /* Depth shadows — dark theme casts true black */
+  --shadow-rgb: 18 13 8;
+  --shadow-strength: 1;
 }
 
 /* ── Light theme — Heller Tagesmarkt ─────────── */
@@ -43,6 +47,10 @@ html:not(.dark) {
   --chart-grid: 218 208 190;
   --chart-axis: 180 168 148;
   --chart-tick: 108 98 82;
+
+  /* Depth shadows — light theme casts a soft warm shadow, not black */
+  --shadow-rgb: 90 72 48;
+  --shadow-strength: 0.35;
 }
 
 @layer base {
@@ -89,42 +97,55 @@ html:not(.dark) {
 
   /* Stall-Karte: das zentrale Panel-Element */
   .panel {
-    @apply bg-mkt-900 border border-mkt-800 rounded-2xl;
+    @apply bg-mkt-900 border border-mkt-800/80 rounded-2xl;
+    box-shadow:
+      0 1px 3px rgb(var(--shadow-rgb) / calc(0.55 * var(--shadow-strength))),
+      0 4px 16px rgb(var(--shadow-rgb) / calc(0.3 * var(--shadow-strength)));
   }
 
   .panel-warm {
-    @apply bg-mkt-900 border border-mkt-700/60 rounded-2xl;
-    box-shadow: inset 0 1px 0 rgba(245, 237, 208, 0.04);
+    @apply bg-mkt-900 border border-mkt-700/50 rounded-2xl;
+    box-shadow:
+      inset 0 1px 0 rgba(245, 237, 208, 0.05),
+      0 1px 4px rgb(var(--shadow-rgb) / calc(0.6 * var(--shadow-strength))),
+      0 6px 20px rgb(var(--shadow-rgb) / calc(0.35 * var(--shadow-strength)));
   }
 
   /* Micro-Label */
   .label {
-    @apply text-[10px] uppercase tracking-[0.14em] text-mkt-500 font-sans font-semibold;
+    @apply text-[10px] uppercase tracking-[0.13em] text-mkt-500 font-sans font-semibold;
   }
 
   /* Input */
   .input-base {
-    @apply bg-mkt-850 border border-mkt-800 rounded-xl px-4 py-3 font-mono text-mkt-100
-           focus:outline-none focus:border-lemon-500/60 focus:ring-2 focus:ring-lemon-500/10
+    @apply bg-mkt-850 border border-mkt-800/70 rounded-xl px-4 py-3 font-mono text-mkt-100
+           focus:outline-none focus:border-lemon-500/50 focus:ring-2 focus:ring-lemon-500/10
            transition-colors placeholder:text-mkt-700;
+    box-shadow: inset 0 1px 3px rgb(var(--shadow-rgb) / calc(0.4 * var(--shadow-strength)));
   }
 
   /* Primary CTA — Zitronen-Gelb */
   .btn-primary {
     @apply bg-lemon-500 text-mkt-950 font-bold rounded-xl px-5 py-3
-           hover:bg-lemon-400 disabled:opacity-40 disabled:cursor-not-allowed
-           transition-all active:scale-[0.98];
-    box-shadow: 0 0 0 0 rgba(240, 196, 25, 0);
+           hover:bg-lemon-400 disabled:opacity-35 disabled:cursor-not-allowed
+           transition-all active:scale-[0.975] active:translate-y-px;
+    box-shadow: 0 1px 3px rgb(var(--shadow-rgb) / calc(0.5 * var(--shadow-strength))), 0 0 0 0 rgba(240, 196, 25, 0);
+    letter-spacing: -0.01em;
   }
   .btn-primary:hover:not(:disabled) {
-    box-shadow: 0 4px 20px rgba(240, 196, 25, 0.18);
+    box-shadow: 0 1px 3px rgb(var(--shadow-rgb) / calc(0.5 * var(--shadow-strength))), 0 6px 22px rgba(240, 196, 25, 0.22);
+  }
+  .btn-primary:active:not(:disabled) {
+    box-shadow: 0 1px 2px rgb(var(--shadow-rgb) / calc(0.4 * var(--shadow-strength)));
   }
 
   /* Secondary CTA */
   .btn-secondary {
-    @apply bg-mkt-850 text-mkt-100 font-bold rounded-xl px-5 py-3
-           border border-mkt-700 hover:border-mkt-600 hover:bg-mkt-800
-           disabled:opacity-40 disabled:cursor-not-allowed transition-all active:scale-[0.98];
+    @apply bg-mkt-850 text-mkt-200 font-semibold rounded-xl px-5 py-3
+           border border-mkt-700/70 hover:border-mkt-600/80 hover:bg-mkt-800
+           disabled:opacity-35 disabled:cursor-not-allowed transition-all active:scale-[0.975] active:translate-y-px;
+    box-shadow: 0 1px 3px rgb(var(--shadow-rgb) / calc(0.4 * var(--shadow-strength)));
+    letter-spacing: -0.008em;
   }
 
   /* Qualitäts-Badge */
@@ -186,8 +207,9 @@ html:not(.dark) {
 /* ── Aktiver Käufer — warmer Glow-Ring ────────── */
 .my-turn-ring {
   box-shadow:
-    0 0 0 1px rgba(240, 196, 25, 0.5),
-    0 0 28px rgba(240, 196, 25, 0.1);
+    0 0 0 1px rgba(240, 196, 25, 0.45),
+    0 0 24px rgba(240, 196, 25, 0.12),
+    0 4px 16px rgb(var(--shadow-rgb) / calc(0.5 * var(--shadow-strength)));
 }
 
 /* ── Stall-Karte: hover warm glow ─────────────── */
@@ -195,6 +217,14 @@ html:not(.dark) {
   @apply panel transition-all duration-200;
 }
 .stall-card:hover {
-  border-color: rgba(240, 196, 25, 0.3);
-  box-shadow: 0 0 0 1px rgba(240, 196, 25, 0.08), 0 4px 16px rgba(18, 13, 8, 0.4);
+  border-color: rgba(240, 196, 25, 0.28);
+  box-shadow:
+    0 0 0 1px rgba(240, 196, 25, 0.06),
+    0 2px 6px rgb(var(--shadow-rgb) / calc(0.5 * var(--shadow-strength))),
+    0 8px 24px rgb(var(--shadow-rgb) / calc(0.4 * var(--shadow-strength)));
+}
+
+/* ── Heading tight tracking ───────────────────── */
+h1, h2, h3 {
+  @apply tracking-tight;
 }
