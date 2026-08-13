@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
 import { Grade, PublicSession, RoundResult } from '../shared/types'
-import { BUYER_VALUES } from '../shared/constants'
 
 interface Props {
   session: PublicSession
@@ -38,20 +37,6 @@ function buildPath(prices: number[], max: number, maxP: number, asc: boolean): s
   return d
 }
 
-function findEquilibrium(supply: number[], demand: number[]): { qty: number; price: number } | null {
-  if (!supply.length || !demand.length) return null
-  const s = [...supply].sort((a, b) => a - b)
-  const d = [...demand].sort((a, b) => b - a)
-  const len = Math.min(s.length, d.length)
-  let lastMatch = -1
-  for (let i = 0; i < len; i++) {
-    if (d[i] >= s[i]) lastMatch = i
-    else break
-  }
-  if (lastMatch < 0) return null
-  return { qty: lastMatch + 1, price: (s[lastMatch] + d[lastMatch]) / 2 }
-}
-
 // Design-system colors — Nacht-Markt palette
 const GRADE_COLOR: Record<number, string> = {
   1: '#F07060',  // coral-400
@@ -86,34 +71,10 @@ export default function SupplyDemandGraph({ session, historyResult }: Props) {
   const sortedSupplyItems = [...supplyItems].sort((a, b) => a.price - b.price)
   const supplyPrices = sortedSupplyItems.map(s => s.price)
 
-  // --- Demand prices (buyer WTP) ---
-  // Full info: WTP = BUYER_VALUES[best grade] — buyers know what they're buying
-  // Asymmetric info: E[value] = grade-proportion-weighted avg (Akerlof rational expectation)
-  const demandPrices: number[] = []
-  function calcAsymmetricWTP(grades: (1 | 2 | 3)[]): number {
-    if (!grades.length) return BUYER_VALUES[2]
-    return grades.reduce((s, g) => s + BUYER_VALUES[g], 0) / grades.length
-  }
-  if (historyResult) {
-    const grades = historyResult.sellerDecisions.map(sd => sd.grade)
-    if (historyResult.infoMode === 'full' && grades.length) {
-      const bestGrade = Math.max(...grades) as 1 | 2 | 3
-      for (let i = 0; i < buyers.length; i++) demandPrices.push(BUYER_VALUES[bestGrade])
-    } else {
-      const wtp = calcAsymmetricWTP(grades)
-      for (let i = 0; i < buyers.length; i++) demandPrices.push(wtp)
-    }
-  } else if (session.infoMode === 'full') {
-    const decisions = Object.values(session.currentSellerDecisions)
-    const knownGrades = decisions.filter(d => d.grade !== undefined).map(d => d.grade as 1|2|3)
-    const bestGrade = knownGrades.length ? Math.max(...knownGrades) as 1|2|3 : 2
-    for (let i = 0; i < buyers.length; i++) demandPrices.push(BUYER_VALUES[bestGrade])
-  } else {
-    const decisions = Object.values(session.currentSellerDecisions)
-    const knownGrades = decisions.filter(d => d.grade !== undefined).map(d => d.grade as 1|2|3)
-    const wtp = calcAsymmetricWTP(knownGrades)
-    for (let i = 0; i < buyers.length; i++) demandPrices.push(wtp)
-  }
+  // --- Demand prices + equilibrium: already computed server-side, same formulas
+  // (bestGradeWTP / calcAsymmetricWTP / findEquilibrium in the backend's gameAnalytics) ---
+  const metrics = historyResult ? historyResult.metrics : session.currentRoundMetrics
+  const demandPrices = metrics?.demandCurve ?? []
 
   // --- Transactions ---
   const transactions: { qty: number; price: number; grade: Grade }[] = []
@@ -147,7 +108,7 @@ export default function SupplyDemandGraph({ session, historyResult }: Props) {
 
   const supplyPath = buildPath(supplyPrices, maxQty, MAX_P, true)
   const demandPath = buildPath(demandPrices, maxQty, MAX_P, false)
-  const eq = findEquilibrium(supplyPrices, demandPrices)
+  const eq = metrics?.equilibrium ?? null
 
   // Trigger animation on curve changes
   const pathsKey = `${supplyPath}|${demandPath}`
