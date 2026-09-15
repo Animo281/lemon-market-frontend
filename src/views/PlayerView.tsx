@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { PublicSession, Player, Grade, SellerDecision, BuyerDecision } from '../shared/types'
-import { sellerCost, BUYER_VALUES } from '../shared/constants'
+import { PublicSession, Player, Grade, SellerDecision } from '../shared/types'
+import { sellerCost } from '../shared/constants'
 import { api, ApiError } from '../api/client'
 import { storage, sessionIndex } from '../lib/storage'
 import PhaseIndicator from '../components/PhaseIndicator'
 import MarketBoard from '../components/MarketBoard'
 import ProfitTable from '../components/ProfitTable'
 import { CheckIcon } from '../components/icons'
+import BuyerView from './BuyerView'
 
 export default function PlayerView() {
   const { code } = useParams<{ code: string }>()
@@ -79,13 +80,6 @@ export default function PlayerView() {
     </div>
   )
 
-  if (error) return (
-    <div className="min-h-screen market-bg flex items-center justify-center">
-      <div className="panel-warm p-8 text-center">
-        <p className="text-coral-400 font-mono text-sm">{error}</p>
-      </div>
-    </div>
-  )
   if (!session || !me) return (
     <div className="min-h-screen market-bg flex items-center justify-center">
       <div className="flex items-center gap-2.5 text-mkt-500 text-sm font-mono">
@@ -98,24 +92,29 @@ export default function PlayerView() {
     </div>
   )
 
+  // Buyers get their own "Abendmarkt" world (BuyerView) across every phase —
+  // see HANDOFF.md and the plan. Sellers, admin and landing keep the existing
+  // Nacht-Markt design untouched.
+  if (me.role === 'buyer') {
+    return (
+      <BuyerView
+        session={session}
+        me={me}
+        code={code}
+        playerToken={playerToken}
+        error={error}
+        onSessionUpdate={setSession}
+        onError={setError}
+      />
+    )
+  }
+
   const sellers = session.players.filter((p: Player) => p.role === 'seller')
-  const buyers  = session.players.filter((p: Player) => p.role === 'buyer')
-  const isSeller = me.role === 'seller'
-  const isBuyer  = me.role === 'buyer'
-
-  const myDecision           = session.currentSellerDecisions[me.id]
-  const lastResult           = session.results[session.results.length - 1]
-  const myLastSellerResult   = lastResult?.sellerDecisions.find((s: SellerDecision) => s.playerId === me.id)
-  const myLastBuyerResult    = lastResult?.buyerDecisions.find((b: BuyerDecision) => b.playerId === me.id)
-  const isMyTurn             = isBuyer && !(me.id in session.currentBuyerDecisions)
-  const hasDecided           = isBuyer && me.id in session.currentBuyerDecisions
-  const isLastRound          = session.currentRound >= session.totalRounds
-  const maxUnits             = session.maxSellerUnits
-
-  const availableSellers = sellers.filter((s: Player) => {
-    const d = session.currentSellerDecisions[s.id]
-    return d?.price !== undefined && (d.unitsSold ?? 0) < (d.unitsOffered ?? maxUnits)
-  })
+  const myDecision  = session.currentSellerDecisions[me.id]
+  const lastResult  = session.results[session.results.length - 1]
+  const myLastSellerResult = lastResult?.sellerDecisions.find((s: SellerDecision) => s.playerId === me.id)
+  const isLastRound = session.currentRound >= session.totalRounds
+  const maxUnits    = session.maxSellerUnits
 
   const handleSellerSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -124,16 +123,6 @@ export default function PlayerView() {
     if (isNaN(price) || price <= 0) return
     try {
       const s = await api.sellerDecision(code, playerToken, sellerGrade, price, sellerUnits)
-      setSession(s)
-    } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Fehler')
-    }
-  }
-
-  const handleBuy = async (sellerId: string | null) => {
-    if (!playerToken) return
-    try {
-      const s = await api.buyerDecision(code, playerToken, sellerId)
       setSession(s)
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Fehler')
@@ -168,9 +157,7 @@ export default function PlayerView() {
           <div>
             <h1 className="text-xl font-bold text-mkt-100">
               {me.name}&ensp;
-              <span className={isSeller ? 'text-lemon-400' : 'text-ice-400'}>
-                {isSeller ? 'Verkäufer' : 'Käufer'}
-              </span>
+              <span className="text-lemon-400">Verkäufer</span>
             </h1>
             <div className="font-mono text-xs text-lemon-500/60 tracking-widest mt-0.5">{code}</div>
           </div>
@@ -196,19 +183,15 @@ export default function PlayerView() {
             </div>
             <div className="font-bold text-mkt-100 text-lg mb-2">Warte auf Spielstart</div>
             <div className="text-mkt-500 text-sm mb-6">Der Dozent startet das Spiel gleich.</div>
-            <div className={`inline-flex items-center gap-2 text-sm font-mono px-4 py-2 rounded-xl border ${
-              isSeller
-                ? 'border-lemon-500/30 bg-lemon-500/8 text-lemon-400'
-                : 'border-ice-500/30 bg-ice-500/8 text-ice-400'
-            }`}>
-              <span className={`w-1.5 h-1.5 rounded-full ${isSeller ? 'bg-lemon-500' : 'bg-ice-500'}`} />
-              {isSeller ? `Verkäufer ${me.slotIndex + 1}` : `Käufer ${me.slotIndex + 1}`}
+            <div className="inline-flex items-center gap-2 text-sm font-mono px-4 py-2 rounded-xl border border-lemon-500/30 bg-lemon-500/8 text-lemon-400">
+              <span className="w-1.5 h-1.5 rounded-full bg-lemon-500" />
+              Verkäufer {me.slotIndex + 1}
             </div>
           </div>
         )}
 
         {/* ── SELLER INPUT — form ────────────────────── */}
-        {session.phase === 'seller-input' && isSeller && !myDecision && (
+        {session.phase === 'seller-input' && !myDecision && (
           <form onSubmit={handleSellerSubmit} className="space-y-4 animate-fade-up">
 
             {/* Cost reference table */}
@@ -311,7 +294,7 @@ export default function PlayerView() {
         )}
 
         {/* SELLER INPUT — waiting */}
-        {session.phase === 'seller-input' && isSeller && myDecision && (
+        {session.phase === 'seller-input' && myDecision && (
           <div className="panel-warm p-10 text-center animate-scale-in">
             <div className="w-12 h-12 rounded-full bg-lime-500/10 border border-lime-500/30 flex items-center justify-center mx-auto mb-4">
               <CheckIcon size={20} strokeWidth={1.75} className="text-lime-400" />
@@ -327,142 +310,30 @@ export default function PlayerView() {
           </div>
         )}
 
-        {/* SELLER INPUT — buyer waiting */}
-        {session.phase === 'seller-input' && isBuyer && (
-          <div className="panel p-10 text-center animate-fade-in">
-            <div className="flex items-center justify-center gap-2 text-mkt-500 text-sm mb-4">
-              <span className="relative flex h-1.5 w-1.5">
-                <span className="dot-ping absolute inline-flex h-full w-full rounded-full bg-mkt-500 opacity-75" />
-                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-mkt-500" />
-              </span>
-              Verkäufer entscheiden…
-            </div>
-            <div className="text-mkt-400 text-sm">Bitte warten</div>
-          </div>
-        )}
-
         {/* ── MARKET ────────────────────────────────── */}
         {session.phase === 'market' && (
           <div className="space-y-4 animate-fade-up">
             <MarketBoard sellers={sellers} decisions={session.currentSellerDecisions} infoMode={session.infoMode} maxSellerUnits={maxUnits} />
 
-            {/* Seller status */}
-            {isSeller && (
-              <div className="panel p-5">
-                <div className="label mb-3">Dein Status</div>
-                <div className="flex items-center gap-4">
-                  <div>
-                    <div className="text-xs text-mkt-500 mb-0.5">Einheiten verkauft</div>
-                    <div className="font-mono font-bold text-2xl text-lemon-400">
-                      {myDecision?.unitsSold ?? 0}
-                      <span className="text-mkt-600 text-base">/{myDecision?.unitsOffered ?? maxUnits}</span>
-                    </div>
+            <div className="panel p-5">
+              <div className="label mb-3">Dein Status</div>
+              <div className="flex items-center gap-4">
+                <div>
+                  <div className="text-xs text-mkt-500 mb-0.5">Einheiten verkauft</div>
+                  <div className="font-mono font-bold text-2xl text-lemon-400">
+                    {myDecision?.unitsSold ?? 0}
+                    <span className="text-mkt-600 text-base">/{myDecision?.unitsOffered ?? maxUnits}</span>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 text-mkt-600 text-xs mt-3">
-                  <span className="relative flex h-1.5 w-1.5">
-                    <span className="dot-ping absolute inline-flex h-full w-full rounded-full bg-mkt-600 opacity-75" />
-                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-mkt-600" />
-                  </span>
-                  Käufer entscheiden…
-                </div>
               </div>
-            )}
-
-            {/* Buyer turn */}
-            {isBuyer && isMyTurn && (
-              <div className="panel-warm p-6 border-lemon-500/40 animate-scale-in"
-                   style={{ borderColor: 'rgba(245, 216, 40, 0.4)' }}>
-                <div className="flex items-center justify-between mb-4">
-                  <div className="text-lemon-400 font-bold text-xl">Du bist dran!</div>
-                  {(() => {
-                    const pos = session.buyerQueue.indexOf(me.id)
-                    const total = session.buyerQueue.length
-                    if (pos >= 0) return (
-                      <span className="text-xs font-mono text-mkt-600">
-                        Käufer {pos + 1} / {total}
-                      </span>
-                    )
-                    return null
-                  })()}
-                </div>
-
-                {availableSellers.length > 0 ? (
-                  <div className="space-y-2">
-                    {availableSellers.map((seller: Player) => {
-                      const d = session.currentSellerDecisions[seller.id]
-                      return (
-                        <button
-                          key={seller.id}
-                          onClick={() => handleBuy(seller.id)}
-                          className="w-full flex items-center justify-between bg-mkt-850 border border-mkt-700
-                                     hover:border-lemon-500/50 hover:bg-lemon-500/8 rounded-xl px-5 py-3.5
-                                     transition-all group"
-                        >
-                          <span className="text-lemon-400 font-bold group-hover:text-lemon-300">{seller.name}</span>
-                          <div className="flex items-center gap-3 text-sm font-mono">
-                            <span className="text-mkt-100 font-bold">€{d?.price?.toFixed(2)}</span>
-                            {session.infoMode === 'full' && d?.grade && (
-                              <span className={`text-xs px-2 py-0.5 rounded-md border ${
-                                d.grade === 1 ? 'text-coral-400 border-coral-500/30 bg-coral-500/10' :
-                                d.grade === 2 ? 'text-lemon-400 border-lemon-500/30 bg-lemon-500/10' :
-                                'text-lime-400 border-lime-500/30 bg-lime-500/10'
-                              }`}>
-                                Q{d.grade}
-                              </span>
-                            )}
-                            <span className="text-mkt-500 text-xs">Käuferwert: €{
-                              session.infoMode === 'full' && d?.grade
-                                ? BUYER_VALUES[d.grade].toFixed(2)
-                                : '?'
-                            }</span>
-                          </div>
-                        </button>
-                      )
-                    })}
-                  </div>
-                ) : (
-                  <p className="text-mkt-500 text-sm mb-3">Keine verfügbaren Angebote.</p>
-                )}
-
-                <button
-                  onClick={() => handleBuy(null)}
-                  className="btn-secondary w-full mt-3 text-sm"
-                >
-                  Kein Kauf
-                </button>
+              <div className="flex items-center gap-2 text-mkt-600 text-xs mt-3">
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="dot-ping absolute inline-flex h-full w-full rounded-full bg-mkt-600 opacity-75" />
+                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-mkt-600" />
+                </span>
+                Käufer entscheiden…
               </div>
-            )}
-
-            {/* Buyer waiting for turn */}
-            {isBuyer && !isMyTurn && !hasDecided && (
-              <div className="panel p-6 text-center animate-fade-in">
-                <div className="flex items-center justify-center gap-2 text-mkt-500 text-sm">
-                  <span className="relative flex h-1.5 w-1.5">
-                    <span className="dot-ping absolute inline-flex h-full w-full rounded-full bg-mkt-500 opacity-75" />
-                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-mkt-500" />
-                  </span>
-                  Warte auf deinen Zug…
-                </div>
-              </div>
-            )}
-
-            {/* Buyer already submitted */}
-            {isBuyer && hasDecided && (
-              <div className="panel p-6 text-center animate-scale-in">
-                <div className="w-10 h-10 rounded-full bg-lime-500/10 border border-lime-500/30 flex items-center justify-center mx-auto mb-3">
-                  <CheckIcon size={18} strokeWidth={1.75} className="text-lime-400" />
-                </div>
-                <div className="font-bold text-mkt-100 mb-1">Entscheidung abgegeben</div>
-                <div className="flex items-center justify-center gap-2 text-mkt-600 text-xs mt-2">
-                  <span className="relative flex h-1.5 w-1.5">
-                    <span className="dot-ping absolute inline-flex h-full w-full rounded-full bg-mkt-600 opacity-75" />
-                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-mkt-600" />
-                  </span>
-                  Warte auf andere Käufer…
-                </div>
-              </div>
-            )}
+            </div>
           </div>
         )}
 
@@ -480,7 +351,7 @@ export default function PlayerView() {
               </span>
             </div>
 
-            {isSeller && myLastSellerResult && (() => {
+            {myLastSellerResult && (() => {
               const profit = myLastSellerResult.earnings
               return (
                 <div className="grid grid-cols-2 gap-3">
@@ -509,47 +380,6 @@ export default function PlayerView() {
               )
             })()}
 
-            {isBuyer && myLastBuyerResult && (
-              <div className="space-y-3">
-                {myLastBuyerResult.sellerId ? (
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-mkt-850 rounded-xl p-4">
-                      <div className="label mb-1">Gekauft bei</div>
-                      <div className="font-mono font-bold text-lemon-400 text-sm">
-                        {sellers.find((s: Player) => s.id === myLastBuyerResult.sellerId)?.name}
-                      </div>
-                    </div>
-                    <div className="bg-mkt-850 rounded-xl p-4">
-                      <div className="label mb-1">Qualität</div>
-                      <div className="font-mono font-bold text-xl text-mkt-100">Q{myLastBuyerResult.grade}</div>
-                    </div>
-                    <div className="bg-mkt-850 rounded-xl p-4">
-                      <div className="label mb-1">Preis bezahlt</div>
-                      <div className="font-mono font-bold text-xl text-lemon-400">€{myLastBuyerResult.price?.toFixed(2)}</div>
-                    </div>
-                    <div className="bg-mkt-850 rounded-xl p-4">
-                      <div className="label mb-1">Käuferwert</div>
-                      <div className="font-mono font-bold text-xl text-ice-400">
-                        €{myLastBuyerResult.grade ? BUYER_VALUES[myLastBuyerResult.grade].toFixed(2) : '—'}
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="bg-mkt-850 rounded-xl p-4 text-mkt-500 text-sm font-mono">
-                    Kein Kauf in dieser Runde
-                  </div>
-                )}
-                <div className="flex justify-between items-center bg-mkt-850 rounded-xl px-4 py-3 font-mono">
-                  <span className="text-mkt-400 text-sm">Dein Gewinn</span>
-                  <span className={`font-bold text-xl ${
-                    myLastBuyerResult.earnings >= 0 ? 'text-lime-400' : 'text-coral-400'
-                  }`}>
-                    €{myLastBuyerResult.earnings.toFixed(2)}
-                  </span>
-                </div>
-              </div>
-            )}
-
             <div className="flex justify-between items-center pt-3 border-t border-mkt-800 font-mono text-sm">
               <span className="text-mkt-500">Gesamtüberschuss Runde {lastResult.round}</span>
               <span className="text-lemon-400 font-bold">€{lastResult.totalSurplus.toFixed(2)}</span>
@@ -575,7 +405,7 @@ export default function PlayerView() {
               </h2>
             </div>
             <div className="panel p-6">
-              <ProfitTable results={session.results} sellers={sellers} buyers={buyers} />
+              <ProfitTable results={session.results} sellers={sellers} buyers={session.players.filter((p: Player) => p.role === 'buyer')} />
             </div>
           </div>
         )}
