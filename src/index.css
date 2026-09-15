@@ -223,3 +223,169 @@ html:not(.dark) {
 h1, h2, h3 {
   @apply tracking-tight;
 }
+
+/* ══════════════════════════════════════════════════════════════════════
+   Abendmarkt — Käuferansicht (BuyerView)
+   Illustrierte Szene statt Karten-Grid; siehe HANDOFF.md. Eigene Palette
+   (eve-*, Patrick Hand) und cqw-Einheiten, damit alles mit dem 1024×572-
+   Hintergrundbild skaliert. Bleibt in Light/Dark identisch — die Szene
+   ist ein Bild, nur Panels außerhalb reagieren aufs Theme.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.scene-scroller {
+  overflow-x: auto;
+  border-radius: 16px;
+  border: 3px solid #2B1B12;
+}
+.scene-world {
+  min-width: 880px;
+  container-type: inline-size;
+  background: #4D7AA1;
+}
+@media (max-width: 879px) {
+  .scene-scroller { scroll-snap-type: x mandatory; }
+  .scene-world .scene-lane { scroll-snap-align: start; }
+}
+
+.scene-hud {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 1cqw; padding: 1.2cqw 1.6cqw .3cqw; flex-wrap: wrap;
+}
+.scene-brand {
+  display: flex; align-items: center; gap: .7cqw;
+  font-family: theme('fontFamily.caps'); font-size: 2.9cqw; color: #F1E4CE; line-height: 1;
+}
+.scene-pills { display: flex; gap: .7cqw; align-items: center; flex-wrap: wrap; }
+.scene-pill {
+  background: #F1E4CE; color: #2B1B12; border: .22cqw solid #2B1B12; border-radius: .5cqw;
+  padding: .2cqw 1cqw; font-size: 1.7cqw; white-space: nowrap;
+  display: inline-flex; gap: .45cqw; align-items: center; line-height: 1.3;
+  font-family: theme('fontFamily.hand');
+}
+.scene-pill .v { font-size: 2cqw; font-family: theme('fontFamily.caps'); }
+.scene-pill.phase-full { background: #D9E8B8; }
+.scene-pill.phase-asymm { background: #F6D98C; }
+
+.scene-lane { position: relative; aspect-ratio: 1024 / 572; background-size: 100% 100%; }
+.scene-lane + .scene-lane { border-top: 3px solid #2B1B12; }
+.scene-lane-name {
+  position: absolute; left: 1%; top: 1.6%; background: #F1E4CE; color: #2B1B12;
+  border: .22cqw solid #2B1B12; border-radius: .4cqw; padding: .1cqw 1cqw;
+  font-family: theme('fontFamily.caps'); font-size: 1.6cqw; z-index: 6; transform: rotate(-1.5deg);
+}
+
+.stall-name {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  background: #F1E4CE; border: .2cqw solid #2B1B12; border-radius: .3cqw; color: #2B1B12;
+  transform: rotate(var(--r)); line-height: 1; z-index: 3; font-family: theme('fontFamily.hand');
+}
+.stall-name small { font-size: 1.15cqw; color: #6E5646; }
+.stall-name b { font-weight: 400; font-family: theme('fontFamily.caps'); font-size: 2.4cqw; }
+.stall-name.lemonade { background: #DCCC62; flex-direction: row; gap: .6cqw; }
+.stall-name.lemonade small { color: #4A4214; }
+.stall-name.lemonade b { font-size: 2cqw; }
+
+.stall-offer {
+  transform: translate(-50%, -50%) rotate(var(--r));
+  display: flex; align-items: center; gap: .6cqw; background: #F1E4CE;
+  border: .24cqw solid #2B1B12; border-radius: .5cqw; padding: .35cqw .8cqw .35cqw .5cqw;
+  color: #2B1B12; z-index: 4; white-space: nowrap; font-family: theme('fontFamily.hand');
+}
+.stall-offer.chalk { background: #2E3631; color: #F3EEE2; border-color: #5A3A22; border-width: .45cqw; }
+.stall-offer .price { font-family: theme('fontFamily.caps'); font-size: 2.7cqw; line-height: 1; }
+.stall-crate { position: relative; width: 4cqw; aspect-ratio: 70 / 53; flex: none; }
+.stall-crate img { width: 100%; height: 100%; display: block; }
+.stall-crate svg { position: absolute; inset: -6% -4% 20% -4%; width: 108%; height: 86%; }
+.stall-qtext { display: block; font-family: theme('fontFamily.caps'); font-size: 1.35cqw; line-height: 1.15; }
+.stall-qunknown { color: inherit; }
+
+.stall-cover-lemon { z-index: 3; transform: translate(-50%, -50%); }
+.stall-cover-lemon svg { width: 2.4cqw; height: 2.4cqw; display: block; }
+
+.stall-closed {
+  z-index: 5; pointer-events: none;
+  backdrop-filter: brightness(.32) saturate(.35); -webkit-backdrop-filter: brightness(.32) saturate(.35);
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 9%, #000 91%, transparent),
+                       linear-gradient(to bottom, transparent, #000 7%, #000 93%, transparent);
+  -webkit-mask-composite: source-in;
+  mask-image: linear-gradient(to right, transparent, #000 9%, #000 91%, transparent),
+              linear-gradient(to bottom, transparent, #000 7%, #000 93%, transparent);
+  mask-composite: intersect;
+}
+.stall-board {
+  transform: translate(-50%, -50%) rotate(-4deg); background: #6B4226; color: #F1E4CE;
+  border: .25cqw solid #2B1B12; border-radius: .4cqw; padding: .2cqw 1.4cqw;
+  font-family: theme('fontFamily.caps'); font-size: 2.2cqw; z-index: 6; white-space: nowrap;
+}
+
+.stall-stamp {
+  transform: translate(-50%, -50%) rotate(-11deg); border: .35cqw solid #A8261C; color: #A8261C;
+  background: rgba(241, 228, 206, .92); border-radius: .6cqw; padding: 0 1.2cqw;
+  font-family: theme('fontFamily.caps'); font-size: 2.5cqw; z-index: 7; pointer-events: none; line-height: 1.3;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .stall-stamp.fresh { animation: stall-stamp-press .3s cubic-bezier(.3, 1.6, .5, 1); }
+  @keyframes stall-stamp-press {
+    from { transform: translate(-50%, -50%) rotate(-11deg) scale(1.9); opacity: 0; }
+    to   { transform: translate(-50%, -50%) rotate(-11deg) scale(1); opacity: 1; }
+  }
+}
+
+.stall-buy {
+  transform: translateX(-50%); z-index: 6; font-family: theme('fontFamily.caps'); font-size: 2.1cqw;
+  line-height: 1.2; color: #2B1B12; background: #F4C542; border: .25cqw solid #2B1B12;
+  border-radius: .6cqw; padding: .2cqw 2cqw .3cqw; cursor: pointer; white-space: nowrap;
+  box-shadow: 0 .35cqw 0 #2B1B12;
+}
+.stall-buy:hover { background: #FFD65C; }
+.stall-buy:active { transform: translateX(-50%) translateY(.3cqw); box-shadow: 0 .05cqw 0 #2B1B12; }
+.stall-buy[aria-disabled="true"] { background: #CFC4B2; color: #5A4A3C; cursor: default; box-shadow: none; }
+.stall-buy.done { background: #C9DFA2; color: #23460C; }
+.stall-buy:focus-visible { outline: 3px solid #FFD65C; outline-offset: 3px; }
+
+.sorting-card {
+  background: rgba(241, 228, 206, .97); border: .18cqw solid #2B1B12; border-radius: .25cqw;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; font-family: theme('fontFamily.hand'); line-height: 1.15; z-index: 3;
+}
+.sorting-card b { font-family: theme('fontFamily.caps'); font-size: 1.5cqw; }
+.sorting-card span { font-size: 1.15cqw; }
+
+.scene-pass-btn {
+  font-family: theme('fontFamily.caps'); font-size: 1.05rem; color: #2B1B12; background: #F1E4CE;
+  border: 2px solid #2B1B12; border-radius: 10px; padding: .55rem 1.5rem; cursor: pointer;
+  box-shadow: 0 3px 0 #2B1B12; transition: transform .1s ease;
+}
+.scene-pass-btn:hover { background: #fff8ec; }
+.scene-pass-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #2B1B12; }
+.scene-pass-btn[aria-disabled="true"] { background: #CFC4B2; color: #5A4A3C; cursor: default; box-shadow: none; }
+
+.scene-snap-dots { display: flex; justify-content: center; gap: .5rem; padding-top: .5rem; }
+.scene-snap-dot { width: 7px; height: 7px; border-radius: 50%; background: #6E5646; opacity: .35; }
+.scene-snap-dot.active { opacity: 1; background: #F4C542; }
+@media (min-width: 880px) {
+  .scene-snap-dots { display: none; }
+}
+
+/* Page shell + auxiliary "paper" panels used by BuyerView outside the pixel-
+   perfect scene (wait states, round-end receipt, game-end table) — same
+   Abendmarkt palette, regular rem units since they're not container-scaled. */
+.eve-page {
+  background-color: #E4DACA;
+  background-image:
+    radial-gradient(circle at 20% 20%, rgba(244, 197, 66, 0.08) 0%, transparent 55%),
+    radial-gradient(circle at 80% 70%, rgba(77, 122, 161, 0.06) 0%, transparent 55%);
+  color: #2B1B12;
+}
+/* Theme is an explicit .dark class on <html> (see lib/theme.ts), not a media query. */
+html.dark .eve-page { background-color: #1B2230; }
+
+.eve-note {
+  background: #F1E4CE;
+  color: #2B1B12;
+  border: 2px solid #2B1B12;
+  border-radius: 14px;
+  font-family: theme('fontFamily.hand');
+  box-shadow: 0 3px 0 rgba(43, 27, 18, .25);
+}
+.eve-note b { font-family: theme('fontFamily.caps'); font-weight: 400; }

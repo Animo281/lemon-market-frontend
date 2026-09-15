@@ -51,11 +51,23 @@ export default {
           500: 'rgb(184 120 40 / <alpha-value>)',
           600: 'rgb(148 96 16 / <alpha-value>)',
         },
+        // Abendmarkt (Käuferansicht): illustrierte Szene, eigene Palette
+        eve: {
+          sky: '#4D7AA1',
+          ink: '#2B1B12',
+          paper: '#F1E4CE',
+          lemonade: '#DCCC62',
+          chalk: '#2E3631',
+          chalkink: '#F3EEE2',
+          stamp: '#A8261C',
+        },
       },
       fontFamily: {
         display: ['"DM Sans"', 'system-ui', 'sans-serif'],
         sans:    ['"DM Sans"', 'system-ui', 'sans-serif'],
         mono:    ['"JetBrains Mono"', 'Menlo', 'monospace'],
+        hand:    ['"Patrick Hand"', '"Comic Neue"', 'system-ui', 'sans-serif'],
+        caps:    ['"Patrick Hand SC"', '"Patrick Hand"', 'system-ui', 'sans-serif'],
       },
       borderRadius: {
         '2xl': '0.875rem',
