@@ -1,8 +1,52 @@
-import { PublicSession } from '../shared/types'
+import { PublicSession, Player } from '../shared/types'
 
 interface Props {
   session: PublicSession
   onKick?: (playerId: string, name: string) => void
+}
+
+function RoleColumn({
+  label, players, count, headerDot, filledDot, labelColor, onKick,
+}: {
+  label: string
+  players: Player[]
+  count: number
+  headerDot: string
+  filledDot: string
+  labelColor: string
+  onKick?: (playerId: string, name: string) => void
+}) {
+  return (
+    <div>
+      <div className="flex items-center gap-1.5 mb-2.5">
+        <span className={`w-1.5 h-1.5 rounded-full ${headerDot}`} />
+        <span className={`label ${labelColor}`}>
+          {label} {players.length}/{count}
+        </span>
+      </div>
+      <div className="space-y-1">
+        {Array.from({ length: count }, (_, i) => {
+          const p = players.find(pl => pl.slotIndex === i)
+          return (
+            <div key={i} className={`flex items-center gap-2 py-1.5 px-2 rounded-lg text-xs transition-colors ${
+              p ? 'text-mkt-100' : 'text-mkt-700'
+            }`}>
+              <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${p ? filledDot : 'bg-mkt-800'}`} />
+              <span className="truncate font-sans">{p ? p.name : `Slot ${i + 1}`}</span>
+              {p && onKick && (
+                <button
+                  className="ml-auto shrink-0 text-[9px] px-1.5 py-0.5 rounded border border-coral-500/30 text-coral-400 hover:bg-coral-500/10 transition-colors"
+                  onClick={() => onKick(p.id, p.name)}
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
 }
 
 export default function PlayerList({ session, onKick }: Props) {
@@ -30,67 +74,14 @@ export default function PlayerList({ session, onKick }: Props) {
       </div>
 
       <div className="grid grid-cols-2 gap-4">
-        {/* Sellers */}
-        <div>
-          <div className="flex items-center gap-1.5 mb-2.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-lemon-500" />
-            <span className="label text-lemon-500/80">
-              Verkäufer {sellers.length}/{session.numSellers}
-            </span>
-          </div>
-          <div className="space-y-1">
-            {Array.from({ length: session.numSellers }, (_, i) => {
-              const p = sellers.find(s => s.slotIndex === i)
-              return (
-                <div key={i} className={`flex items-center gap-2 py-1.5 px-2 rounded-lg text-xs transition-colors ${
-                  p ? 'text-mkt-100' : 'text-mkt-700'
-                }`}>
-                  <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${p ? 'bg-lemon-400' : 'bg-mkt-800'}`} />
-                  <span className="truncate font-sans">{p ? p.name : `Slot ${i + 1}`}</span>
-                  {p && onKick && (
-                    <button
-                      className="ml-auto shrink-0 text-[9px] px-1.5 py-0.5 rounded border border-coral-500/30 text-coral-400 hover:bg-coral-500/10 transition-colors"
-                      onClick={() => onKick(p.id, p.name)}
-                    >
-                      ✕
-                    </button>
-                  )}
-                </div>
-              )
-            })}
-          </div>
-        </div>
-
-        {/* Buyers */}
-        <div>
-          <div className="flex items-center gap-1.5 mb-2.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-ice-500" />
-            <span className="label text-ice-500/80">
-              Käufer {buyers.length}/{session.numBuyers}
-            </span>
-          </div>
-          <div className="space-y-1">
-            {Array.from({ length: session.numBuyers }, (_, i) => {
-              const p = buyers.find(b => b.slotIndex === i)
-              return (
-                <div key={i} className={`flex items-center gap-2 py-1.5 px-2 rounded-lg text-xs transition-colors ${
-                  p ? 'text-mkt-100' : 'text-mkt-700'
-                }`}>
-                  <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${p ? 'bg-ice-400' : 'bg-mkt-800'}`} />
-                  <span className="truncate font-sans">{p ? p.name : `Slot ${i + 1}`}</span>
-                  {p && onKick && (
-                    <button
-                      className="ml-auto shrink-0 text-[9px] px-1.5 py-0.5 rounded border border-coral-500/30 text-coral-400 hover:bg-coral-500/10 transition-colors"
-                      onClick={() => onKick(p.id, p.name)}
-                    >
-                      ✕
-                    </button>
-                  )}
-                </div>
-              )
-            })}
-          </div>
-        </div>
+        <RoleColumn
+          label="Verkäufer" players={sellers} count={session.numSellers}
+          headerDot="bg-lemon-500" filledDot="bg-lemon-400" labelColor="text-lemon-500/80" onKick={onKick}
+        />
+        <RoleColumn
+          label="Käufer" players={buyers} count={session.numBuyers}
+          headerDot="bg-ice-500" filledDot="bg-ice-400" labelColor="text-ice-500/80" onKick={onKick}
+        />
       </div>
     </div>
   )

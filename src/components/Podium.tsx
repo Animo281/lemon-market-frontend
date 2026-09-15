@@ -1,5 +1,4 @@
 import { RoundResult, Player } from '../shared/types'
-import { sellerCost } from '../shared/constants'
 
 interface Props {
   sellers: Player[]
@@ -18,10 +17,7 @@ export default function Podium({ sellers, buyers, results }: Props) {
 
   for (const r of results) {
     for (const sd of r.sellerDecisions) {
-      const p = Array.from({ length: sd.unitsSold }, (_, i) =>
-        sd.price - sellerCost(sd.grade, i)
-      ).reduce((a, b) => a + b, 0)
-      profits[sd.playerId] = (profits[sd.playerId] ?? 0) + p
+      profits[sd.playerId] = (profits[sd.playerId] ?? 0) + sd.earnings
     }
     for (const bd of r.buyerDecisions) {
       profits[bd.playerId] = (profits[bd.playerId] ?? 0) + bd.earnings

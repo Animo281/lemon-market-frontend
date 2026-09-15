@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { PublicSession, Player, SellerDecision, BuyerDecision, RoundResult } from '../shared/types'
-import { sellerCost } from '../shared/constants'
 import { api } from '../api/client'
+import { CheckIcon } from '../components/icons'
 import { storage } from '../lib/storage'
 import SessionCodeDisplay from '../components/SessionCodeDisplay'
 import PlayerList from '../components/PlayerList'
@@ -210,10 +210,8 @@ export default function AdminView() {
                     }`}>
                       {done ? (
                         <span className="flex items-center text-lime-500 border border-lime-500/25 rounded px-1.5 py-0.5">
-                        <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
-                          <polyline points="1.5,5 3.5,8 8.5,1.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                      </span>
+                          <CheckIcon size={10} />
+                        </span>
                       ) : (
                         <span className="relative flex h-1.5 w-1.5">
                           <span className="dot-ping absolute inline-flex h-full w-full rounded-full bg-mkt-500 opacity-75" />
@@ -280,11 +278,7 @@ export default function AdminView() {
                         }`}>
                           {b.name}
                         </span>
-                        {done && (
-                          <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true" className="ml-auto text-lime-500">
-                            <polyline points="1.5,5 3.5,8 8.5,1.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                          </svg>
-                        )}
+                        {done && <CheckIcon size={10} className="ml-auto text-lime-500" />}
                         {!done && isCurrent && (
                           <button
                             className="ml-auto text-[9px] px-1.5 py-0.5 rounded border border-amber-500/30 text-amber-400 hover:bg-amber-500/10 transition-colors font-mono"
@@ -343,9 +337,7 @@ export default function AdminView() {
                   <tbody>
                     {lastResult.sellerDecisions.map((sd: SellerDecision) => {
                       const s = sellers.find((p: Player) => p.id === sd.playerId)
-                      const profit = Array.from({ length: sd.unitsSold }, (_, i) =>
-                        sd.price - sellerCost(sd.grade, i)
-                      ).reduce((a, b) => a + b, 0)
+                      const profit = sd.earnings
                       return (
                         <tr key={sd.playerId} className="border-b border-mkt-800/40">
                           <td className="py-2.5 pr-4 text-lemon-400 font-bold">{s?.name}</td>
@@ -402,9 +394,7 @@ export default function AdminView() {
                   ? 'Qualität ausblenden (→ Asymm. Info)'
                   : (
                     <span className="flex items-center justify-center gap-1.5">
-                      <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true">
-                        <polyline points="1.5,5.5 4,9 9.5,1.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
+                      <CheckIcon size={11} />
                       Asymm. Info · Klicken zum Zurücksetzen
                     </span>
                   )}
