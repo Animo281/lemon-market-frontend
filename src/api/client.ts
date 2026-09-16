@@ -10,12 +10,21 @@ export class ApiError extends Error {
 }
 
 async function request<T>(url: string, options?: RequestInit): Promise<T> {
-  const res = await fetch(`${BASE}${url}`, options)
+  let res: Response
+  try {
+    res = await fetch(`${BASE}${url}`, options)
+  } catch {
+    // fetch() rejects with a TypeError on offline/DNS/CORS failures — without
+    // this guard, the browser's raw "Failed to fetch" string reaches the UI.
+    throw new ApiError(0, 'Keine Verbindung zum Server. Prüfe deine Internetverbindung.')
+  }
   if (!res.ok) {
     const body = await res.json().catch(() => ({}))
-    throw new ApiError(res.status, body.error ?? `HTTP ${res.status}`)
+    throw new ApiError(res.status, body.error ?? `Serverfehler (${res.status}).`)
   }
-  return res.json()
+  return res.json().catch(() => {
+    throw new ApiError(res.status, 'Antwort vom Server war ungültig.')
+  })
 }
 
 function post<T>(url: string, body?: unknown, token?: string): Promise<T> {
@@ -27,10 +36,6 @@ function post<T>(url: string, body?: unknown, token?: string): Promise<T> {
     },
     body: body !== undefined ? JSON.stringify(body) : undefined,
   })
-}
-
-function get<T>(url: string): Promise<T> {
-  return request<T>(url)
 }
 
 export interface CreateSessionResponse { code: string; adminToken: string; sessionId: string }
@@ -47,8 +52,12 @@ export const api = {
       body: JSON.stringify(config),
     }),
 
-  getSession: (code: string) =>
-    get<PublicSession>(`/session/${code}`),
+  // token is optional: an admin/player passing their own token gets their own
+  // grade reflected back even in asymmetric mode (see backend README,
+  // "Viewer-aware responses"); an anonymous poll (e.g. the join lobby) still
+  // works exactly as before.
+  getSession: (code: string, token?: string) =>
+    request<PublicSession>(`/session/${code}`, token ? { headers: { 'x-token': token } } : undefined),
 
   joinSession: (code: string, name: string, role: Role, slotIndex: number) =>
     post<JoinSessionResponse>(`/session/${code}/join`, { name, role, slotIndex }),

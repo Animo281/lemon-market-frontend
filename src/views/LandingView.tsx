@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { api } from '../api/client'
 import { storage, sessionIndex } from '../lib/storage'
 import { DEFAULT_MAX_SELLER_UNITS, DEFAULT_TOTAL_ROUNDS } from '../shared/constants'
+import ErrorBanner from '../components/ErrorBanner'
 
 export default function LandingView() {
   const navigate = useNavigate()
@@ -19,17 +20,28 @@ export default function LandingView() {
   const [modalMaxUnits, setModalMaxUnits] = useState(DEFAULT_MAX_SELLER_UNITS)
   const [modalRounds, setModalRounds] = useState(DEFAULT_TOTAL_ROUNDS)
   const [modalLoading, setModalLoading] = useState(false)
+  const [modalError, setModalError] = useState('')
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault()
+    // An emptied number input reads as 0 (Number('') === 0) and the fields
+    // have no JS clamp today, so out-of-range values only get caught by the
+    // browser's own (unstyled, English) validation bubble. Clamp here too —
+    // matches what the settings modal below already does — so a blanked
+    // field snaps back into range instead of silently submitting 0.
+    const sellers = Math.min(6, Math.max(1, numSellers || 1))
+    const buyers = Math.min(10, Math.max(1, numBuyers || 1))
+    if (sellers !== numSellers) setNumSellers(sellers)
+    if (buyers !== numBuyers) setNumBuyers(buyers)
+
     setLoading(true)
     setError('')
     try {
-      const { code, adminToken } = await api.createSession(numSellers, numBuyers)
+      const { code, adminToken } = await api.createSession(sellers, buyers)
       storage.setAdminToken(code, adminToken)
       setPendingConfig({ code, adminToken })
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Fehler')
+      setError(err instanceof Error ? err.message : 'Session konnte nicht erstellt werden.')
     } finally {
       setLoading(false)
     }
@@ -38,15 +50,20 @@ export default function LandingView() {
   const handleConfigSubmit = async () => {
     if (!pendingConfig) return
     setModalLoading(true)
+    setModalError('')
     try {
       await api.updateSessionConfig(pendingConfig.code, pendingConfig.adminToken, {
         maxSellerUnits: modalMaxUnits,
         totalRounds: modalRounds,
       })
-    } catch {
-      // silently ignore — defaults stay on server
-    } finally {
       navigate(`/admin/${pendingConfig.code}`)
+    } catch (err: unknown) {
+      // Used to navigate on failure too (in `finally`), so a lecturer had no
+      // way to tell a rejected config from an accepted one — the session
+      // would silently run with server defaults instead of their settings.
+      setModalError(err instanceof Error ? err.message : 'Einstellungen konnten nicht gespeichert werden.')
+    } finally {
+      setModalLoading(false)
     }
   }
 
@@ -126,7 +143,7 @@ export default function LandingView() {
               </span>
               <input
                 type="number" min={1} max={6} value={numSellers}
-                onChange={e => setNumSellers(Number(e.target.value))}
+                onChange={e => setNumSellers(e.target.value === '' ? 1 : Math.min(6, Math.max(1, Number(e.target.value))))}
                 className="bg-mkt-850 border border-mkt-800 rounded-xl px-3 py-3 font-mono text-gold-500 font-bold text-2xl text-center focus:outline-none focus:border-gold-500/50 transition-colors"
               />
             </label>
@@ -137,13 +154,13 @@ export default function LandingView() {
               </span>
               <input
                 type="number" min={1} max={10} value={numBuyers}
-                onChange={e => setNumBuyers(Number(e.target.value))}
+                onChange={e => setNumBuyers(e.target.value === '' ? 1 : Math.min(10, Math.max(1, Number(e.target.value))))}
                 className="bg-mkt-850 border border-mkt-800 rounded-xl px-3 py-3 font-mono text-ice-500 font-bold text-2xl text-center focus:outline-none focus:border-ice-500/50 transition-colors"
               />
             </label>
           </div>
 
-          {error && <p className="text-coral-400 text-xs font-mono -mt-2">{error}</p>}
+          {error && <ErrorBanner message={error} />}
 
           <button
             type="submit" disabled={loading}
@@ -256,6 +273,8 @@ export default function LandingView() {
                 />
               </label>
             </div>
+
+            {modalError && <ErrorBanner message={modalError} />}
 
             <button
               onClick={handleConfigSubmit}

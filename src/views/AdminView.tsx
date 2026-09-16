@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { PublicSession, Player, SellerDecision, BuyerDecision, RoundResult } from '../shared/types'
-import { api } from '../api/client'
+import { api, ApiError } from '../api/client'
 import { CheckIcon } from '../components/icons'
 import { storage } from '../lib/storage'
 import SessionCodeDisplay from '../components/SessionCodeDisplay'
@@ -13,12 +13,15 @@ import ProfitTable from '../components/ProfitTable'
 import GameEndStats from '../components/GameEndStats'
 import Podium from '../components/Podium'
 import InfoModeCompare from '../components/InfoModeCompare'
+import ErrorBanner from '../components/ErrorBanner'
 
 export default function AdminView() {
   const { code } = useParams<{ code: string }>()
   const navigate  = useNavigate()
   const [session, setSession] = useState<PublicSession | null>(null)
   const [error, setError]     = useState('')
+  const [busy, setBusy]       = useState(false)
+  const hasLoadedOnce = useRef(false)
 
   const adminToken = code ? storage.getAdminToken(code) : null
 
@@ -27,10 +30,20 @@ export default function AdminView() {
     if (!adminToken) { navigate('/'); return }
     const load = async () => {
       try {
-        const s = await api.getSession(code)
+        const s = await api.getSession(code, adminToken)
         setSession(s)
-      } catch {
-        setError('Session nicht gefunden')
+        hasLoadedOnce.current = true
+        setError('')
+      } catch (err: unknown) {
+        // Used to replace the whole console on ANY error and never clear it
+        // (see below) — one dropped request mid-lecture locked the lecturer
+        // out permanently. Now: before the first successful load, an error
+        // is a real "can't reach this session" (full-page). After that, a
+        // failed poll is transient — show the inline banner and keep the
+        // console interactive; it clears itself on the next successful poll.
+        const msg = err instanceof ApiError ? err.message : 'Verbindung verloren — versuche es weiter…'
+        if (!hasLoadedOnce.current) setError(msg)
+        else setError(msg)
       }
     }
     load()
@@ -39,10 +52,11 @@ export default function AdminView() {
   }, [code, adminToken])
 
   if (!code || !adminToken) return null
-  if (error) return (
-    <div className="min-h-screen market-bg flex items-center justify-center">
-      <div className="panel-warm p-8 text-center">
-        <p className="text-coral-400 font-mono text-sm">{error}</p>
+  if (error && !hasLoadedOnce.current) return (
+    <div className="min-h-screen market-bg flex items-center justify-center p-6">
+      <div className="panel-warm p-8 max-w-sm w-full text-center space-y-4">
+        <ErrorBanner message={error} />
+        <button className="btn-secondary w-full" onClick={() => navigate('/')}>Zur Startseite</button>
       </div>
     </div>
   )
@@ -63,63 +77,46 @@ export default function AdminView() {
   const lastResult = session.results[session.results.length - 1]
   const isLastRound = session.currentRound >= session.totalRounds
 
-  const handleStart = async () => {
+  // Every admin action shares the same guard: skip while a previous action
+  // is still in flight (no in-flight lock existed before — a double-click
+  // on "Nächste Runde" could advance two rounds), and always clear the
+  // stale banner before trying again so a fixed problem doesn't linger.
+  const runAction = async (action: () => Promise<PublicSession>) => {
+    if (busy) return
+    setBusy(true)
+    setError('')
     try {
-      const s = await api.startGame(code, adminToken)
+      const s = await action()
       setSession(s)
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Fehler')
+      setError(e instanceof ApiError ? e.message : 'Aktion fehlgeschlagen.')
+    } finally {
+      setBusy(false)
     }
   }
 
-  const handleNextRound = async () => {
-    try {
-      const s = await api.nextRound(code, adminToken)
-      setSession(s)
-    } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Fehler')
-    }
-  }
+  const handleStart = () => runAction(() => api.startGame(code, adminToken))
+  const handleNextRound = () => runAction(() => api.nextRound(code, adminToken))
 
-  const handleToggleInfoMode = async () => {
+  const handleToggleInfoMode = () => {
     const next = session?.infoMode === 'full' ? 'asymmetrisch (Qualität ausblenden)' : 'volle Info (Qualität einblenden)'
     if (!window.confirm(`Informationsmodus wechseln zu: ${next}?`)) return
-    try {
-      const s = await api.toggleInfoMode(code, adminToken)
-      setSession(s)
-    } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Fehler')
-    }
+    runAction(() => api.toggleInfoMode(code, adminToken))
   }
 
-  const handleKick = async (playerId: string, name: string) => {
+  const handleKick = (playerId: string, name: string) => {
     if (!window.confirm(`${name} aus der Session entfernen?`)) return
-    try {
-      const s = await api.kickPlayer(code, playerId, adminToken)
-      setSession(s)
-    } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Fehler')
-    }
+    runAction(() => api.kickPlayer(code, playerId, adminToken))
   }
 
-  const handleSkipBuyer = async () => {
+  const handleSkipBuyer = () => {
     if (!window.confirm('Aktuellen Käufer überspringen?')) return
-    try {
-      const s = await api.skipBuyer(code, adminToken)
-      setSession(s)
-    } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Fehler')
-    }
+    runAction(() => api.skipBuyer(code, adminToken))
   }
 
-  const handleForceAdvance = async () => {
+  const handleForceAdvance = () => {
     if (!window.confirm('Fehlende Verkäufer-Entscheidungen überschreiben und Marktphase starten?')) return
-    try {
-      const s = await api.forceAdvance(code, adminToken)
-      setSession(s)
-    } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Fehler')
-    }
+    runAction(() => api.forceAdvance(code, adminToken))
   }
 
   return (
@@ -166,11 +163,7 @@ export default function AdminView() {
           </div>
         )}
 
-        {error && (
-          <div className="px-4 py-2.5 rounded-xl bg-coral-500/8 border border-coral-500/25 text-coral-400 text-xs font-mono">
-            {error}
-          </div>
-        )}
+        {error && <ErrorBanner message={error} />}
 
         {/* ── LOBBY ─────────────────────────────────── */}
         {session.phase === 'lobby' && (
@@ -179,7 +172,7 @@ export default function AdminView() {
               <SessionCodeDisplay code={code} />
               <button
                 onClick={handleStart}
-                disabled={sellers.length === 0 || buyers.length === 0}
+                disabled={busy || sellers.length === 0 || buyers.length === 0}
                 className="btn-primary w-full text-base"
               >
                 Spiel starten →
@@ -234,7 +227,8 @@ export default function AdminView() {
               {sellers.some((s: Player) => !(s.id in session.currentSellerDecisions)) && (
                 <button
                   onClick={handleForceAdvance}
-                  className="w-full px-4 py-2.5 rounded-xl border font-mono text-sm font-bold transition-all bg-mkt-850 border-amber-500/30 text-amber-400 hover:bg-amber-500/10"
+                  disabled={busy}
+                  className="w-full px-4 py-2.5 rounded-xl border font-mono text-sm font-bold transition-all bg-mkt-850 border-amber-500/30 text-amber-400 hover:bg-amber-500/10 disabled:opacity-50"
                 >
                   Runde erzwingen →
                 </button>
@@ -281,16 +275,18 @@ export default function AdminView() {
                         {done && <CheckIcon size={10} className="ml-auto text-lime-500" />}
                         {!done && isCurrent && (
                           <button
-                            className="ml-auto text-[9px] px-1.5 py-0.5 rounded border border-amber-500/30 text-amber-400 hover:bg-amber-500/10 transition-colors font-mono"
+                            className="ml-auto text-[9px] px-1.5 py-0.5 rounded border border-amber-500/30 text-amber-400 hover:bg-amber-500/10 transition-colors font-mono disabled:opacity-50"
                             onClick={handleSkipBuyer}
+                            disabled={busy}
                           >
                             überspr.
                           </button>
                         )}
                         {!done && (
                           <button
-                            className="text-[9px] px-1.5 py-0.5 rounded border border-coral-500/30 text-coral-400 hover:bg-coral-500/10 transition-colors"
+                            className="text-[9px] px-1.5 py-0.5 rounded border border-coral-500/30 text-coral-400 hover:bg-coral-500/10 transition-colors disabled:opacity-50"
                             onClick={() => handleKick(b.id, b.name)}
+                            disabled={busy}
                           >
                             ✕
                           </button>
@@ -384,7 +380,8 @@ export default function AdminView() {
 
               <button
                 onClick={handleToggleInfoMode}
-                className={`w-full mt-2 px-4 py-2.5 rounded-xl border font-mono text-sm font-bold transition-all ${
+                disabled={busy}
+                className={`w-full mt-2 px-4 py-2.5 rounded-xl border font-mono text-sm font-bold transition-all disabled:opacity-50 ${
                   session.infoMode === 'full'
                     ? 'bg-mkt-850 border-mkt-700 text-mkt-300 hover:border-coral-500/50 hover:text-coral-300 hover:bg-coral-500/10'
                     : 'bg-coral-500/10 border-coral-500/40 text-coral-300 hover:border-lime-500/50 hover:text-lime-300 hover:bg-lime-500/10'
@@ -401,6 +398,7 @@ export default function AdminView() {
               </button>
               <button
                 onClick={handleNextRound}
+                disabled={busy}
                 className="btn-primary w-full mt-2"
               >
                 {isLastRound ? 'Ergebnisse anzeigen →' : 'Nächste Runde →'}

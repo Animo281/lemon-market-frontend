@@ -23,7 +23,9 @@ export const storage = {
     sessionStorage.getItem(`${PREFIX}:pid:${code}`),
 
   clear: (code: string) => {
-    sessionStorage.removeItem(`${PREFIX}:admin:${code}`)
+    // Admin token lives in localStorage (survives tab close, see comment
+    // above), not sessionStorage — this used to leave it behind forever.
+    localStorage.removeItem(`${PREFIX}:admin:${code}`)
     sessionStorage.removeItem(`${PREFIX}:player:${code}`)
     sessionStorage.removeItem(`${PREFIX}:pid:${code}`)
   },
