@@ -84,6 +84,8 @@ export interface PublicSession {
   limits: {
     maxSellerUnits: number
     maxRounds: number
+    maxSellers: number
+    maxBuyers: number
   }
   currentRoundMetrics: RoundMetrics | null
 }

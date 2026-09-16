@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { PublicSession, Player, Grade, SellerDecision } from '../shared/types'
 import { sellerCost } from '../shared/constants'
@@ -7,6 +7,7 @@ import { storage, sessionIndex } from '../lib/storage'
 import PhaseIndicator from '../components/PhaseIndicator'
 import MarketBoard from '../components/MarketBoard'
 import ProfitTable from '../components/ProfitTable'
+import ErrorBanner from '../components/ErrorBanner'
 import { CheckIcon } from '../components/icons'
 import BuyerView from './BuyerView'
 
@@ -19,8 +20,10 @@ export default function PlayerView() {
   const [sellerGrade, setSellerGrade] = useState<Grade | null>(null)
   const [sellerPrice, setSellerPrice] = useState('')
   const [sellerUnits, setSellerUnits] = useState(2)
+  const [sellerBusy, setSellerBusy] = useState(false)
   const [error, setError] = useState('')
   const [kicked, setKicked] = useState(false)
+  const hasLoadedOnce = useRef(false)
 
   useEffect(() => {
     setSellerGrade(null)
@@ -35,16 +38,29 @@ export default function PlayerView() {
     if (!code || !playerToken) { navigate('/'); return }
     const load = async () => {
       try {
-        const s = await api.getSession(code)
+        const s = await api.getSession(code, playerToken)
         setSession(s)
+        setError('')
         const found = s.players.find((p: Player) => p.id === playerId)
-        if (found) setMe(found)
+        if (found) {
+          setMe(found)
+        } else if (hasLoadedOnce.current) {
+          // The session loaded fine, but our own playerId is no longer in
+          // the player list — the reliable "you got kicked" signal. (A 403
+          // from getSession never fires in practice: that call sends no
+          // token today, so it can't be told apart from "you were never a
+          // player here" — this check doesn't depend on that.)
+          setKicked(true)
+        }
+        hasLoadedOnce.current = true
       } catch (err: unknown) {
         if (err instanceof ApiError && err.status === 403) {
           setKicked(true)
-        } else {
-          setError('Session nicht gefunden')
+        } else if (!hasLoadedOnce.current) {
+          setError(err instanceof ApiError ? err.message : 'Session nicht gefunden.')
         }
+        // else: transient poll failure after a successful load — keep
+        // showing the last good state instead of blanking the screen.
       }
     }
     load()
@@ -118,14 +134,23 @@ export default function PlayerView() {
 
   const handleSellerSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!sellerGrade || !sellerPrice || !playerToken) return
+    if (!sellerGrade || !sellerPrice || !playerToken || sellerBusy) return
     const price = parseFloat(sellerPrice)
-    if (isNaN(price) || price <= 0) return
+    if (isNaN(price) || price <= 0) {
+      // Used to just `return` here — button stayed enabled, click did
+      // nothing, no way to tell why. Now says what's wrong.
+      setError('Preis muss größer als 0 sein.')
+      return
+    }
+    setSellerBusy(true)
+    setError('')
     try {
       const s = await api.sellerDecision(code, playerToken, sellerGrade, price, sellerUnits)
       setSession(s)
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Fehler')
+      setError(e instanceof ApiError ? e.message : 'Fehler')
+    } finally {
+      setSellerBusy(false)
     }
   }
 
@@ -166,11 +191,7 @@ export default function PlayerView() {
           )}
         </div>
 
-        {error && (
-          <div className="px-4 py-2.5 rounded-xl bg-coral-500/8 border border-coral-500/25 text-coral-400 text-xs font-mono">
-            {error}
-          </div>
-        )}
+        {error && <ErrorBanner message={error} />}
 
         {/* ── LOBBY ─────────────────────────────────── */}
         {session.phase === 'lobby' && (
@@ -266,7 +287,7 @@ export default function PlayerView() {
               <div className="relative">
                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-mkt-500 font-mono text-xl">€</span>
                 <input
-                  type="number" step="0.10" min="0" value={sellerPrice}
+                  type="number" step="0.01" min="0" value={sellerPrice}
                   onChange={e => setSellerPrice(e.target.value)}
                   placeholder="0.00"
                   className="w-full bg-mkt-850 border border-mkt-800 rounded-xl pl-9 pr-4 py-3.5 font-mono
@@ -285,10 +306,10 @@ export default function PlayerView() {
             </div>
 
             <button
-              type="submit" disabled={!sellerGrade || !sellerPrice}
+              type="submit" disabled={!sellerGrade || !sellerPrice || sellerBusy}
               className="btn-primary w-full text-base"
             >
-              Entscheidung abgeben →
+              {sellerBusy ? 'Sende…' : 'Entscheidung abgeben →'}
             </button>
           </form>
         )}

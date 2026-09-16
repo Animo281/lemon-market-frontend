@@ -15,9 +15,10 @@ interface Props {
   interactive: boolean
   justBought: boolean
   onBuy: (sellerId: string) => void
+  onBlocked: (reason: string) => void
 }
 
-export default function StallSlot({ slot, seller, offer, myDecision, interactive, justBought, onBuy }: Props) {
+export default function StallSlot({ slot, seller, offer, myDecision, interactive, justBought, onBuy, onBlocked }: Props) {
   // A slot with no seller assigned, or one whose seller hasn't set a price yet
   // (lobby, seller-input, or still deciding), reads the same "Licht aus" way —
   // there is nothing to compare yet.
@@ -115,7 +116,18 @@ export default function StallSlot({ slot, seller, offer, myDecision, interactive
         data-seller-id={seller.id}
         aria-label={ariaLabel}
         aria-disabled={disabled || undefined}
-        onClick={() => { if (!disabled) onBuy(seller.id) }}
+        onClick={() => {
+          if (disabled) {
+            onBlocked(
+              boughtHere ? 'Du hast hier schon gekauft.' :
+              soldOut ? 'Dieser Stand ist ausverkauft.' :
+              alreadyDecided ? 'Du hast in dieser Runde schon entschieden.' :
+              'Du bist gerade nicht an der Reihe.'
+            )
+            return
+          }
+          onBuy(seller.id)
+        }}
       >
         {label}
       </button>

@@ -13,10 +13,11 @@ interface Props {
   interactive: boolean
   justBoughtSellerId: string | null
   onBuy: (sellerId: string) => void
+  onBlocked: (reason: string) => void
 }
 
 export default function MarketLane({
-  laneIndex, showLaneName, laneSellers, offersBySellerId, myDecision, interactive, justBoughtSellerId, onBuy,
+  laneIndex, showLaneName, laneSellers, offersBySellerId, myDecision, interactive, justBoughtSellerId, onBuy, onBlocked,
 }: Props) {
   return (
     <section
@@ -39,6 +40,7 @@ export default function MarketLane({
             interactive={interactive}
             justBought={seller ? justBoughtSellerId === seller.id : false}
             onBuy={onBuy}
+            onBlocked={onBlocked}
           />
         )
       })}

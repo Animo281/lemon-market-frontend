@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { CheckIcon } from './icons'
 
 interface Props {
@@ -7,12 +7,24 @@ interface Props {
 
 export default function SessionCodeDisplay({ code }: Props) {
   const [copied, setCopied] = useState(false)
+  const [copyFailed, setCopyFailed] = useState(false)
+  const inputRef = useRef<HTMLInputElement>(null)
   const joinUrl = `${window.location.origin}/join/${code}`
 
-  const copyLink = () => {
-    navigator.clipboard.writeText(joinUrl)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
+  const copyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(joinUrl)
+      setCopyFailed(false)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      // navigator.clipboard throws/rejects on insecure contexts (no HTTPS)
+      // or without permission — used to fail completely silently. Select
+      // the text so the lecturer can still copy it manually with Ctrl+C.
+      inputRef.current?.select()
+      setCopyFailed(true)
+      setTimeout(() => setCopyFailed(false), 3000)
+    }
   }
 
   return (
@@ -27,6 +39,7 @@ export default function SessionCodeDisplay({ code }: Props) {
 
       <div className="flex items-center gap-2">
         <input
+          ref={inputRef}
           readOnly value={joinUrl}
           className="flex-1 bg-mkt-850 border border-mkt-800 rounded-xl px-3 py-2 font-mono text-xs text-mkt-400 focus:outline-none select-all cursor-text"
         />
@@ -46,6 +59,11 @@ export default function SessionCodeDisplay({ code }: Props) {
           ) : 'Kopieren'}
         </button>
       </div>
+      {copyFailed && (
+        <p className="text-coral-400 text-xs font-mono mt-2">
+          Kopieren nicht möglich — Link ist markiert, mit Strg+C manuell kopieren.
+        </p>
+      )}
     </div>
   )
 }

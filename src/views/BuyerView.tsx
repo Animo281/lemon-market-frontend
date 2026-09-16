@@ -48,6 +48,10 @@ export default function BuyerView({ session, me, code, playerToken, error, onSes
 
   const sellers = session.players.filter(p => p.role === 'seller').sort((a, b) => a.slotIndex - b.slotIndex)
   const buyers = session.players.filter(p => p.role === 'buyer').sort((a, b) => a.slotIndex - b.slotIndex)
+  // Indexed by slotIndex, not array position — with sparsely-filled seller
+  // slots (e.g. only slot 2 of 0-3 joined), sellers[0] used to land in the
+  // first stall regardless of which slot they actually picked.
+  const sellerBySlot = new Map(sellers.map(s => [s.slotIndex, s]))
   const lanes = laneCount(session.numSellers)
 
   // The board only reveals once every seller has submitted (phase → 'market');
@@ -71,16 +75,21 @@ export default function BuyerView({ session, me, code, playerToken, error, onSes
     return sum + (bd?.earnings ?? 0)
   }, 0)
 
+  const [buying, setBuying] = useState(false)
+
   const handleBuy = async (sellerId: string | null) => {
-    if (!playerToken) return
+    if (!playerToken || buying) return
+    setBuying(true)
     try {
       const s = await api.buyerDecision(code, playerToken, sellerId)
       onSessionUpdate(s)
       if (sellerId) {
         const seller = sellers.find(x => x.id === sellerId)
         const bd = s.currentBuyerDecisions[me.id]
+        const price = bd?.price != null ? bd.price.toFixed(2) : '—'
+        const earnings = bd ? bd.earnings.toFixed(2) : '0.00'
         setJustBought(sellerId)
-        setLiveMsg(`Zitronen von ${seller?.name} für ${bd?.price?.toFixed(2)} € gekauft. Dein Gewinn: ${bd?.earnings.toFixed(2)} €.`)
+        setLiveMsg(`Zitronen von ${seller?.name ?? 'diesem Stand'} für ${price} € gekauft. Dein Gewinn: ${earnings} €.`)
         requestAnimationFrame(() => {
           document.querySelector<HTMLButtonElement>(`[data-seller-id="${sellerId}"]`)?.focus()
         })
@@ -90,8 +99,16 @@ export default function BuyerView({ session, me, code, playerToken, error, onSes
       }
     } catch (e: unknown) {
       onError(e instanceof Error ? e.message : 'Fehler')
+    } finally {
+      setBuying(false)
     }
   }
+
+  // A click on a "disabled" stall/pass button used to be a silent no-op —
+  // aria-disabled (not disabled) is used deliberately so screen readers can
+  // still find the control, but that means clicks do reach onClick. Give a
+  // reason instead of nothing happening.
+  const handleBlocked = (reason: string) => onError(reason)
 
   const showScene = session.phase === 'lobby' || session.phase === 'seller-input' || session.phase === 'market'
 
@@ -107,7 +124,7 @@ export default function BuyerView({ session, me, code, playerToken, error, onSes
         </div>
 
         {error && (
-          <div className="eve-note px-4 py-2.5 text-sm" style={{ borderColor: '#A8261C', color: '#A8261C' }}>
+          <div role="alert" className="eve-note px-4 py-2.5 text-sm" style={{ borderColor: '#A8261C', color: '#A8261C' }}>
             {error}
           </div>
         )}
@@ -130,12 +147,13 @@ export default function BuyerView({ session, me, code, playerToken, error, onSes
                     key={l}
                     laneIndex={l}
                     showLaneName={lanes > 1}
-                    laneSellers={Array.from({ length: STALL_SLOTS.length }, (_, k) => sellers[l * STALL_SLOTS.length + k])}
+                    laneSellers={Array.from({ length: STALL_SLOTS.length }, (_, k) => sellerBySlot.get(l * STALL_SLOTS.length + k))}
                     offersBySellerId={offersBySellerId}
                     myDecision={myDecision}
                     interactive={isMyTurn}
                     justBoughtSellerId={justBought}
                     onBuy={handleBuy}
+                    onBlocked={handleBlocked}
                   />
                 ))}
               </div>
@@ -152,7 +170,10 @@ export default function BuyerView({ session, me, code, playerToken, error, onSes
                   type="button"
                   className="scene-pass-btn"
                   aria-disabled={!isMyTurn || undefined}
-                  onClick={() => { if (isMyTurn) handleBuy(null) }}
+                  onClick={() => {
+                    if (!isMyTurn) { handleBlocked(myDecision ? 'Du hast in dieser Runde schon entschieden.' : 'Du bist gerade nicht an der Reihe.'); return }
+                    handleBuy(null)
+                  }}
                 >
                   Nicht kaufen
                 </button>

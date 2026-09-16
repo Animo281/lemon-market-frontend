@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { PublicSession, Role } from '../shared/types'
-import { api } from '../api/client'
+import { api, ApiError } from '../api/client'
 import { storage, sessionIndex } from '../lib/storage'
 import JoinSlotPicker from '../components/JoinSlotPicker'
+import ErrorBanner from '../components/ErrorBanner'
 
 export default function JoinView() {
   const { code: codeParam } = useParams<{ code?: string }>()
@@ -16,16 +17,30 @@ export default function JoinView() {
   const [selectedSlot, setSelectedSlot] = useState<number | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [lookupFailed, setLookupFailed] = useState(false)
+  const failCount = useRef(0)
 
   useEffect(() => {
+    failCount.current = 0
+    setLookupFailed(false)
     if (!code || code.length !== 4) return
     const load = async () => {
       try {
         const s = await api.getSession(code)
         setSession(s)
-        setError('')
-      } catch {
+        setLookupFailed(false)
+        failCount.current = 0
+      } catch (err: unknown) {
         setSession(null)
+        // A single failed poll can just be a network blip — only treat the
+        // code as genuinely bad after a few consecutive misses, otherwise
+        // this used to spin on "Lade Session…" forever with no way out on
+        // a real 404 for a mistyped/expired code.
+        failCount.current += 1
+        if (failCount.current >= 3) {
+          setLookupFailed(true)
+          setError(err instanceof ApiError ? err.message : 'Session nicht gefunden — Code prüfen.')
+        }
       }
     }
     load()
@@ -76,8 +91,9 @@ export default function JoinView() {
           </h1>
         </div>
 
-        {/* Code entry */}
-        {!codeParam && (
+        {/* Code entry — also shown for a malformed deep link like /join/AB
+            (length ≠ 4), which used to render nothing but the heading. */}
+        {(!codeParam || codeParam.length !== 4) && (
           <form onSubmit={handleCodeSubmit} className="panel-warm p-6 space-y-4 animate-scale-in">
             <label className="flex flex-col gap-2">
               <span className="label">Session-Code</span>
@@ -139,11 +155,7 @@ export default function JoinView() {
               onSelect={(role, slot) => { setSelectedRole(role); setSelectedSlot(slot) }}
             />
 
-            {error && (
-              <p className="text-coral-400 text-sm font-mono bg-coral-500/8 border border-coral-500/25 rounded-xl px-4 py-3">
-                {error}
-              </p>
-            )}
+            {error && <ErrorBanner message={error} />}
 
             <button
               type="submit"
@@ -153,6 +165,13 @@ export default function JoinView() {
               {loading ? 'Beitreten…' : 'Beitreten →'}
             </button>
           </form>
+        ) : code.length === 4 && lookupFailed ? (
+          <div className="panel p-8 text-center animate-fade-in space-y-4">
+            <ErrorBanner message={error} />
+            <button className="btn-secondary w-full text-base" onClick={() => navigate('/')}>
+              Zur Startseite
+            </button>
+          </div>
         ) : code.length === 4 ? (
           <div className="panel p-8 text-center animate-fade-in">
             <div className="flex items-center justify-center gap-2.5 text-mkt-500 text-sm">
