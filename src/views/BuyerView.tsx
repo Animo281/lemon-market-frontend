@@ -101,7 +101,7 @@ export default function BuyerView({ session, me, code, playerToken, error, onSes
           itself has min-width:880px (HANDOFF.md) and must fit uncropped
           well before that breakpoint, or it'd scroll on ordinary desktops. */}
       <div className="max-w-5xl mx-auto space-y-4">
-        <div className="flex items-center justify-between px-1 font-hand text-sm opacity-70">
+        <div className="flex items-center justify-between px-1 font-hand text-sm eve-meta">
           <span>{me.name} · Käufer {me.slotIndex + 1}</span>
           <span className="font-caps tracking-widest">{code}</span>
         </div>
