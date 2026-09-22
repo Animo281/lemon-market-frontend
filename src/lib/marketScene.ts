@@ -8,7 +8,8 @@ import cratePoor from '../assets/market/crate-poor.png'
 export const MARKET_SCENE_IMAGE = marketEveningUrl
 
 // Background scene is a fixed 1024×572 illustration. Every position below is defined
-// in image pixels and converted to % so it scales with the container, per HANDOFF.md.
+// in image pixels and converted to % so it scales with the container, per
+// docs/lemon-market-ui/HANDOFF.md.
 export const SCENE_W = 1024
 export const SCENE_H = 572
 export const SELLERS_PER_LANE = 4
@@ -43,7 +44,8 @@ export interface StallSlotGeometry {
   cover?: [number, number]
 }
 
-// Positions in image pixels, taken from HANDOFF.md's "Stand-Slots pro Marktgasse" table.
+// Positions in image pixels, taken from docs/lemon-market-ui/HANDOFF.md's
+// "Stand-Slots pro Marktgasse" table.
 export const STALL_SLOTS: StallSlotGeometry[] = [
   {
     cx: 116,
@@ -79,7 +81,8 @@ export const CLOSED_BOARD_Y = 320
 // opposite of the mockup's painted "Qualität 1 = perfekt" sorting station. We keep the
 // backend's numbering (it's what sellers, the admin view, and the profit tables all use)
 // and remap which crate artwork represents which grade instead of relaying the image's
-// own labels. See HANDOFF.md "Offene Punkte" #1 and the plan's "Qualitäts-Mapping".
+// own labels. See docs/lemon-market-ui/HANDOFF.md "Offene Punkte" #1 and the
+// plan's "Qualitäts-Mapping".
 export const CRATE_BY_GRADE: Record<Grade, string> = {
   3: cratePerfect, // was crate-q1.png — pralle, makellose Zitronen
   2: crateMinor,
@@ -105,3 +108,55 @@ export const SORTING_STATION_CARDS: Array<{ grade: Grade; box: [number, number, 
 export function laneCount(numSellers: number): number {
   return Math.max(1, Math.ceil(numSellers / SELLERS_PER_LANE))
 }
+
+// ─────────────────────────────────────────────────────────────────────────
+// Seller-view geometry, from docs/lemon-market-ui/HANDOFF-verkaeufer.md.
+// ─────────────────────────────────────────────────────────────────────────
+
+/** Same three background zooms the seller flow steps through: choosing a
+ * stand, choosing a crate at the sorting station, and standing behind the
+ * counter. Screen 4 (the live market round) reuses the plain scene at
+ * 100%/100% like the buyer view, so it isn't listed here. */
+export const SCENE_VIEWS = {
+  stallPick: { backgroundSize: '100% 100%', filter: 'brightness(.4) blur(3px) saturate(.8)' },
+  sorting: { backgroundSize: '260% 260%', backgroundPosition: '100% 56%', filter: 'brightness(.42) blur(3px) saturate(.8)' },
+  counter: { backgroundSize: '135% 135%', backgroundPosition: '31% 69%', filter: 'brightness(.55) blur(2.5px)' },
+} as const satisfies Record<string, CSSProperties>
+
+// The "Stand wählen" crop cards show a 206×250 window of the scene per
+// stall, cut from the same 1024×572 illustration — no separate images.
+export const CROP_W = 206
+export const CROP_H = 250
+export const CROP_Y = 196
+export const STALL_CROPS = [13, 231, 425, 625] // x offset per stall, same order as STALL_SLOTS
+
+// Stand titles, same order as STALL_SLOTS/STALL_CROPS — used on the
+// seller-slot join cards (JoinSlotPicker) and the seller's own lobby "Dein
+// Stand" card, per HANDOFF-verkaeufer.md's "Stand-Slots pro Marktgasse" table.
+export const STALL_NAMES = ['Holzbude', 'Pavillon', 'Lemonade-Wagen', 'Schirm-Karren']
+
+/** background-size/background-position for one stall's crop card, per
+ * HANDOFF-verkaeufer.md's "Ausschnitt 206×250 Bildpixel" formula. */
+export function cropStyle(cropX: number): CSSProperties {
+  return {
+    backgroundSize: `${(SCENE_W / CROP_W) * 100}% ${(SCENE_H / CROP_H) * 100}%`,
+    backgroundPosition: `${(cropX / (SCENE_W - CROP_W)) * 100}% ${(CROP_Y / (SCENE_H - CROP_H)) * 100}%`,
+  }
+}
+
+/** Position (within a crop card) of the mini-lemon that covers the stray
+ * icon baked into the Lemonade-Wagen background art — same cover point as
+ * STALL_SLOTS[2].cover, expressed relative to that stall's own crop window. */
+export function cropCoverStyle(cropX: number): CSSProperties {
+  const [coverX, coverY] = STALL_SLOTS[2].cover as [number, number]
+  return {
+    position: 'absolute',
+    left: pct(coverX - cropX, CROP_W),
+    top: pct(coverY - CROP_Y, CROP_H),
+    transform: 'translate(-50%, -50%)',
+  }
+}
+
+/** Status chips in the market round (Screen 4) sit at the same height as the
+ * buy button in the buyer scene — just without a button underneath. */
+export const CHIP_Y = BUY_BUTTON_Y

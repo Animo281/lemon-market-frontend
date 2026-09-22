@@ -41,19 +41,32 @@ Defined in `src/App.tsx`:
 
 ```
 src/
-├── views/            One component per route (see table above). PlayerView renders
-│                       the seller board itself and delegates to BuyerView for buyers.
+├── views/            One component per route (see table above). PlayerView is a thin
+│                       role fork: BuyerView for buyers, SellerView for sellers — both
+│                       render their own full-phase "Abendmarkt" world.
 ├── components/        MarketBoard, SupplyDemandGraph, ProfitTable, Podium,
 │                       PlayerList, PhaseIndicator, SessionCodeDisplay,
 │                       JoinSlotPicker, GameEndStats, InfoModeCompare, ThemeToggle,
 │                       ErrorBanner (canonical error display, see below),
 │                       ErrorBoundary (catches render-time throws)
-│   └── buyer/          The illustrated "Abendmarkt" buyer scene: BuyerHud,
-│                         MarketLane, StallSlot, SortingStation, icons
+│   ├── market/          Shared Abendmarkt pieces used by both roles: OfferCard
+│   │                     (crate + price + quality, or tarp-covered "Qualität ?"),
+│   │                     ClosedStall ("Licht aus" — no seller in this slot)
+│   ├── buyer/           The illustrated buyer scene: BuyerHud, MarketLane,
+│   │                     StallSlot, SortingStation, icons
+│   └── seller/           The seller flow, screens 2–4 of
+│                          docs/lemon-market-ui/HANDOFF-verkaeufer.md: SellerHud,
+│                          CrateChoiceScreen, CounterScreen, MarketPricesBoard,
+│                          PriceBoard, Ledger, SellerLane, SellerStallSlot,
+│                          RoundReceipt, WoodCounter/CashBox (decorative SVGs), icons
 ├── api/client.ts      Typed fetch wrapper — one function per backend endpoint,
 │                       throws ApiError on non-2xx responses and on network failure
 ├── lib/
-│   ├── marketScene.ts   Buyer-scene geometry (stall positions, crate-by-grade map)
+│   ├── marketScene.ts   Scene geometry shared by both roles: stall positions,
+│   │                      crate-by-grade map, seller-specific crop/zoom helpers
+│   ├── sellerStats.ts    Pure derivations from PublicSession for the seller view
+│   │                      (balance, last-round market prices, own history) — the
+│   │                      backend has no budget field, see "Known limitations"
 │   ├── theme.ts          light/dark persistence (localStorage) + <html>.dark toggle
 │   └── storage.ts        admin/player token storage — admin token in localStorage,
 │                          player token + id in sessionStorage (per-tab, so multiple
@@ -101,7 +114,7 @@ any of these views:
   `error.message` comes straight from the backend's `{ error: "..." }` body where
   available, and is German end-user text, safe to render as-is.
 - `src/components/ErrorBanner.tsx` is the one error display used across `LandingView`,
-  `JoinView`, `AdminView`, `PlayerView` (`BuyerView` keeps its own `eve-note`-styled
+  `JoinView`, `AdminView`, `PlayerView` (`BuyerView`/`SellerView` keep their own `eve-note`-styled
   block to match the illustrated scene, but uses the same `role="alert"`). Before this
   existed, each view had a slightly different hand-rolled error block.
 - Views that poll (`AdminView`, `PlayerView`) only treat an error as fatal (full-page,
@@ -137,11 +150,13 @@ theme). Summary:
   `.btn-primary` / `.btn-secondary`, `.input-base`, `.stall-card` (hover glow),
   `.my-turn-ring` (active-buyer highlight), `.label` (micro-labels).
 
-A few source comments (`marketScene.ts`, `BuyerView.tsx`, `StallSlot.tsx`, `index.css`)
-still reference a `HANDOFF.md` design handoff document — it isn't in the repo. The
-geometry and rationale it would have documented lives as inline comments at each of
-those call sites instead; treat those comments as the source of truth until/unless
-`HANDOFF.md` is restored.
+Source comments across `marketScene.ts`, `BuyerView.tsx`, `StallSlot.tsx`, `index.css`
+and the new `components/seller/*` reference the two design handoffs now checked in at
+`docs/lemon-market-ui/HANDOFF.md` (buyer) and `docs/lemon-market-ui/HANDOFF-verkaeufer.md`
+(seller). Where the mockups assume things the backend doesn't have — a budget, a server
+timer, a per-round stand choice, whole-euro prices — the handoffs' own "Offene Punkte"
+sections and this file's "Known limitations" below record how the implementation
+actually resolved each one.
 
 ## Known limitations
 
@@ -152,3 +167,15 @@ those call sites instead; treat those comments as the source of truth until/unle
   why (`currentPlayerId` is computed but not enforced server-side either).
 - `shared/types.ts` and `shared/constants.ts` are hand-mirrored from the backend, not
   imported — they can drift if the backend changes without a matching frontend update.
+- No round timer and no buyer/seller budget exist server-side at all (not "not shown" —
+  absent from the data model). The buyer's "Kontostand" and the seller's "Kasse" pills
+  are both client-side sums of `session.results[].*Decisions[].earnings`; the HUD status
+  pills are phase-derived labels, not a countdown. See `docs/lemon-market-ui/HANDOFF.md`
+  and `HANDOFF-verkaeufer.md` for the full list of mockup-vs-backend gaps this closes.
+  One mockup affordance was dropped rather than faked: the buyer scene has no "Budget zu
+  knapp" (insufficient-funds) button state, since there's no buyer budget to check it
+  against.
+- The seller's "Wenn nicht verkauft" ledger row reads `±0,00 €`, not the mockup's
+  `−Einkauf`: the backend's `computeSellerEarnings` only ever charges cost against
+  *sold* units, so an unsold crate is a real net-zero outcome, not a loss the UI should
+  pretend to show.
