@@ -115,7 +115,7 @@ export default function BuyerView({ session, me, code, playerToken, error, onSes
   return (
     <div className="min-h-screen eve-page p-3 md:p-5">
       {/* max-w-5xl (1024px), not the app's usual max-w-2xl/3xl: the scene
-          itself has min-width:880px (HANDOFF.md) and must fit uncropped
+          itself has min-width:880px (docs/lemon-market-ui/HANDOFF.md) and must fit uncropped
           well before that breakpoint, or it'd scroll on ordinary desktops. */}
       <div className="max-w-5xl mx-auto space-y-4">
         <div className="flex items-center justify-between px-1 font-hand text-sm eve-meta">
@@ -138,6 +138,8 @@ export default function BuyerView({ session, me, code, playerToken, error, onSes
               infoMode={session.infoMode}
               balance={balance}
               phase={session.phase}
+              isMyTurn={isMyTurn}
+              hasDecided={myDecision !== undefined}
             />
 
             <div className="scene-scroller" ref={scrollerRef}>
