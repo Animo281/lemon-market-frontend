@@ -1,10 +1,8 @@
 import { AvailableOffer, BuyerDecision, Player } from '../../shared/types'
-import {
-  atStyle, boxStyle, withRotation,
-  BUY_BUTTON_Y, CLOSED_BOARD_Y, CRATE_BY_GRADE, QUALITY_LABEL,
-  StallSlotGeometry,
-} from '../../lib/marketScene'
-import { MiniLemonIcon, TarpCover } from './icons'
+import { atStyle, boxStyle, withRotation, BUY_BUTTON_Y, StallSlotGeometry } from '../../lib/marketScene'
+import { MiniLemonIcon } from './icons'
+import OfferCard from '../market/OfferCard'
+import ClosedStall from '../market/ClosedStall'
 
 interface Props {
   slot: StallSlotGeometry
@@ -24,26 +22,19 @@ export default function StallSlot({ slot, seller, offer, myDecision, interactive
   // there is nothing to compare yet.
   const closed = !seller || !offer || offer.price === null
 
+  if (closed || !seller || !offer) {
+    return <ClosedStall slot={slot} />
+  }
+
   // The mini-lemon covers a stray icon baked into the background art at this
-  // spot; HANDOFF.md calls for it "auch bei geschlossenem Stand" — always.
+  // spot; docs/lemon-market-ui/HANDOFF.md calls for it "auch bei geschlossenem
+  // Stand" — always, but only dimmed while closed (ClosedStall handles that
+  // case itself), full brightness here since the stand is open.
   const cover = slot.cover && (
-    <div
-      className="stall-cover-lemon"
-      style={{ ...atStyle(slot.cover[0], slot.cover[1]), filter: closed ? 'brightness(.4) saturate(.4)' : undefined }}
-    >
+    <div className="stall-cover-lemon" style={atStyle(slot.cover[0], slot.cover[1])}>
       <MiniLemonIcon />
     </div>
   )
-
-  if (closed || !seller || !offer) {
-    return (
-      <>
-        <div className="stall-closed" style={boxStyle(slot.dim)} />
-        <div className="stall-board" style={atStyle(slot.cx, CLOSED_BOARD_Y)}>Geschlossen</div>
-        {cover}
-      </>
-    )
-  }
 
   const boughtHere = myDecision?.sellerId === seller.id
   const soldOut = !boughtHere && offer.unitsRemaining <= 0
@@ -73,35 +64,12 @@ export default function StallSlot({ slot, seller, offer, myDecision, interactive
       </div>
       {cover}
 
-      <div
-        className={`stall-offer${slot.offer.style === 'chalk' ? ' chalk' : ''}`}
+      <OfferCard
+        price={price}
+        grade={offer.grade}
+        chalk={slot.offer.style === 'chalk'}
         style={withRotation(atStyle(slot.offer.x, slot.offer.y), slot.offer.rotationDeg)}
-      >
-        {offer.grade !== null ? (
-          <>
-            <div className="stall-crate">
-              <img src={CRATE_BY_GRADE[offer.grade]} alt={`${QUALITY_LABEL[offer.grade].label}: ${QUALITY_LABEL[offer.grade].text}`} />
-            </div>
-            <div>
-              <div className="price">{price.toFixed(2)} €</div>
-              <span className="stall-qtext" style={{ color: slot.offer.style === 'chalk' ? QUALITY_LABEL[offer.grade].chalk : QUALITY_LABEL[offer.grade].paper }}>
-                {QUALITY_LABEL[offer.grade].label}
-              </span>
-            </div>
-          </>
-        ) : (
-          <>
-            <div className="stall-crate">
-              <img src={CRATE_BY_GRADE[2]} alt="Abgedeckte Kiste" />
-              <TarpCover />
-            </div>
-            <div>
-              <div className="price">{price.toFixed(2)} €</div>
-              <span className="stall-qtext stall-qunknown">Qualität ?</span>
-            </div>
-          </>
-        )}
-      </div>
+      />
 
       {boughtHere && (
         <div className={`stall-stamp${justBought ? ' fresh' : ''}`} style={atStyle(slot.offer.x, slot.offer.y)}>

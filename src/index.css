@@ -226,7 +226,7 @@ h1, h2, h3 {
 
 /* ══════════════════════════════════════════════════════════════════════
    Abendmarkt — Käuferansicht (BuyerView)
-   Illustrierte Szene statt Karten-Grid; siehe HANDOFF.md. Eigene Palette
+   Illustrierte Szene statt Karten-Grid; siehe docs/lemon-market-ui/HANDOFF.md. Eigene Palette
    (eve-*, Patrick Hand) und cqw-Einheiten, damit alles mit dem 1024×572-
    Hintergrundbild skaliert. Bleibt in Light/Dark identisch — die Szene
    ist ein Bild, nur Panels außerhalb reagieren aufs Theme.
@@ -305,7 +305,7 @@ h1, h2, h3 {
 }
 .stall-offer.chalk { background: #2E3631; color: #F3EEE2; border-color: #5A3A22; border-width: .45cqw; }
 .stall-offer .price { font-family: theme('fontFamily.caps'); font-size: 2.7cqw; line-height: 1; }
-.stall-crate { position: relative; width: 4cqw; aspect-ratio: 70 / 53; flex: none; }
+.stall-crate { position: relative; width: 4cqw; aspect-ratio: 35 / 27; flex: none; }
 .stall-crate img { width: 100%; height: 100%; display: block; }
 .stall-crate svg { position: absolute; inset: -6% -4% 20% -4%; width: 108%; height: 86%; }
 .stall-qtext { display: block; font-family: theme('fontFamily.caps'); font-size: max(12px, 1.35cqw); line-height: 1.15; }
@@ -418,3 +418,232 @@ html.dark .eve-page { background-color: #1B2230; color: #EDE2CE; }
    base color down toward invisible. */
 .eve-meta { color: #6E5646; }
 html.dark .eve-meta { color: #9FB0C4; }
+
+/* ══════════════════════════════════════════════════════════════════════
+   Abendmarkt — Verkäuferansicht (SellerView + components/seller/*)
+   Same scene, tokens, typography (Patrick Hand) and cqw-scaling system as
+   the Käuferansicht above; see docs/lemon-market-ui/HANDOFF-verkaeufer.md.
+   Screens 2–3 reuse .scene-scroller/.scene-world (defined above) for the
+   container-query + min-width/scroll mechanics — .seller-stage stands in
+   for a .scene-lane, one at a time, since the seller only ever walks their
+   own path through the wizard, never a row of stalls.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.seller-stage { position: relative; aspect-ratio: 1024 / 572; overflow: hidden; }
+.seller-bg { position: absolute; inset: -3%; background-repeat: no-repeat; }
+
+/* Generic absolute-positioning + paper-sign + CTA primitives, ported from
+   mockup-verkaeuferansicht.html (.abs / .sign / .cta). The buyer scene never
+   needed these as classes — StallSlot/MarketLane place everything via
+   atStyle()/boxStyle() directly — but the seller screens have enough
+   one-off placed elements (signs, hints, CTAs) to warrant them. */
+.abs { position: absolute; }
+.sign {
+  background: var(--eve-paper); color: #2B1B12; border: .24cqw solid #2B1B12; border-radius: .4cqw;
+  text-align: center; padding: .3cqw 2cqw .5cqw; box-shadow: var(--eve-lift);
+  font-family: theme('fontFamily.hand');
+}
+.sign h1 { margin: 0; font-family: theme('fontFamily.caps'); font-weight: 400; font-size: 3.4cqw; line-height: 1.1; white-space: nowrap; }
+.sign p { margin: 0; font-size: max(11px, 1.6cqw); color: #6E5646; }
+
+.cta {
+  font-family: theme('fontFamily.caps'); font-size: 2.4cqw; line-height: 1.2; color: #2B1B12;
+  background: #F4C542; border: .25cqw solid #2B1B12; border-radius: .6cqw; padding: .3cqw 2.4cqw .45cqw;
+  cursor: pointer; box-shadow: 0 .35cqw 0 #2B1B12; white-space: nowrap;
+}
+.cta:hover { background: #FFD65C; }
+.cta:active { transform: translateY(.3cqw); box-shadow: 0 .05cqw 0 #2B1B12; }
+.cta[aria-disabled="true"], .cta:disabled { background: #CFC4B2; color: #5A4A3C; box-shadow: none; cursor: default; }
+.cta:focus-visible {
+  outline: 3px solid #FFF0BE; outline-offset: 3px;
+  box-shadow: 0 0 0 6px rgba(20, 14, 8, .6), 0 .35cqw 0 #2B1B12;
+}
+
+.cta-link {
+  font-family: theme('fontFamily.hand'); font-size: max(12px, 1.5cqw); color: #2B1B12;
+  background: none; border: 0; text-decoration: underline; cursor: pointer; padding: .4cqw;
+}
+.cta-link:hover { color: #6E5646; }
+
+/* HUD "Verkäufer" pill + Kasse bump-on-sale — mirrors BuyerHud's phase pills. */
+.seller-pill-role { background: #DCCC62; }
+.scene-pill.bump { animation: pill-bump .4s ease; }
+@keyframes pill-bump { 50% { transform: scale(1.12); } }
+
+/* ── Lobby "Dein Stand" card + JoinSlotPicker's seller crop cards ── */
+.stallcard {
+  background: var(--eve-paper); border: .24cqw solid #2B1B12; border-radius: .8cqw;
+  padding: .6cqw .6cqw .5cqw; color: #2B1B12; text-align: center; box-shadow: var(--eve-lift);
+  font-family: theme('fontFamily.hand');
+}
+.stallcard .crop { aspect-ratio: 206 / 250; border-radius: .4cqw; border: .2cqw solid #2B1B12; background-repeat: no-repeat; position: relative; }
+.stallcard b { display: block; font-family: theme('fontFamily.caps'); font-weight: 400; font-size: 2.1cqw; margin-top: .3cqw; line-height: 1.1; }
+.stallcard span { display: block; font-size: max(11px, 1.4cqw); color: #6E5646; }
+
+/* ── Screen 2: Kiste wählen (CrateChoiceScreen) ── */
+.seller-table { left: 5%; right: 5%; top: 74%; height: 4.5%; background: #A56D38; border: .24cqw solid #2B1B12; border-radius: .3cqw; }
+.crates { left: 8%; right: 8%; top: 25%; display: grid; grid-template-columns: repeat(3, 1fr); gap: 4cqw; align-items: end; }
+.crateopt {
+  background: none; border: 0; padding: 0; cursor: pointer; display: flex; flex-direction: column;
+  align-items: center; gap: .8cqw; color: #2B1B12; transition: transform .2s ease; font-family: theme('fontFamily.hand');
+}
+.crateopt:hover { transform: translateY(-.5cqw); }
+.crateopt[aria-pressed="true"] { transform: translateY(-1.4cqw); }
+.crateopt .label {
+  background: var(--eve-paper); border: .22cqw solid #2B1B12; border-radius: .3cqw; box-shadow: var(--eve-lift);
+  padding: .3cqw 1.2cqw .5cqw; min-width: 17cqw; line-height: 1.15;
+}
+.crateopt[aria-pressed="true"] .label { background: #DCCC62; }
+.crateopt .label b { display: block; font-family: theme('fontFamily.caps'); font-weight: 400; font-size: 2.3cqw; }
+.crateopt .label span { display: block; font-size: max(11px, 1.5cqw); color: #6E5646; }
+.crateopt .label .cost { margin-top: .3cqw; font-family: theme('fontFamily.caps'); font-size: 1.9cqw; color: #2B1B12; }
+.crateopt-img { position: relative; display: block; width: 19cqw; }
+.crateopt-img img { width: 100%; display: block; }
+.crateopt-count {
+  position: absolute; right: -.6cqw; top: -.6cqw; background: #A8261C; color: #F1E4CE;
+  border: .18cqw solid #2B1B12; border-radius: 999px; font-family: theme('fontFamily.caps');
+  font-size: 1.4cqw; line-height: 1; padding: .25cqw .6cqw;
+}
+.crateopt .pick {
+  font-family: theme('fontFamily.caps'); font-size: max(11px, 1.6cqw); background: #2B1B12; color: var(--eve-paper);
+  border-radius: .3cqw; padding: 0 .8cqw; visibility: hidden;
+}
+.crateopt[aria-pressed="true"] .pick { visibility: visible; }
+
+.seller-units { left: 50%; bottom: 15%; transform: translateX(-50%); text-align: center; }
+.seller-units-label {
+  display: block; font-family: theme('fontFamily.caps'); font-size: max(12px, 1.7cqw); color: var(--eve-paper);
+  margin-bottom: .5cqw; text-shadow: 0 .1cqw 0 #2B1B12;
+}
+
+.hint {
+  display: flex; align-items: center; gap: .8cqw; background: #2E3631; color: #F3EEE2;
+  border: .35cqw solid #5A3A22; border-radius: .4cqw; padding: .4cqw 1.4cqw; font-size: max(11px, 1.6cqw);
+  font-family: theme('fontFamily.hand');
+}
+.hint svg { width: 2.2cqw; height: 2.2cqw; flex: none; color: #F3EEE2; }
+
+/* Shared wood pegs — CrateChoiceScreen's unit picker and PriceBoard's ±
+   price steppers both use these. */
+.pegs { display: flex; justify-content: center; gap: .8cqw; flex-wrap: wrap; }
+.peg {
+  font-family: theme('fontFamily.caps'); font-size: max(11px, 2cqw); min-width: 5.2cqw; color: #2B1B12;
+  background: #C98B4B; border: .22cqw solid #2B1B12; border-radius: .5cqw; padding: .1cqw .6cqw .2cqw;
+  cursor: pointer; box-shadow: 0 .3cqw 0 #2B1B12;
+}
+.peg:hover { background: #D99B5B; }
+.peg:active { transform: translateY(.25cqw); box-shadow: 0 .05cqw 0 #2B1B12; }
+.peg[aria-pressed="true"] { background: #F4C542; }
+.peg:disabled { background: #CFC4B2; color: #5A4A3C; box-shadow: none; cursor: default; }
+.peg:focus-visible { outline: 3px solid #FFF0BE; outline-offset: 2px; }
+
+/* ── Screen 3: Hinter der Theke (CounterScreen) ── */
+.chalkboard {
+  background: #2E3631; color: #F3EEE2; border: .9cqw solid #7A4A2A; border-radius: .6cqw;
+  padding: 1cqw 1.4cqw; box-shadow: var(--eve-lift); font-family: theme('fontFamily.hand');
+}
+.chalkboard h2 { margin: 0 0 .4cqw; font-family: theme('fontFamily.caps'); font-weight: 400; font-size: 2.3cqw; line-height: 1.1; }
+.chalkboard .sub { font-size: max(10px, 1.35cqw); color: #BDB6A6; margin: 0 0 .6cqw; }
+.nail::before, .nail::after {
+  content: ''; position: absolute; top: -.55cqw; width: .9cqw; height: .9cqw; border-radius: 50%;
+  background: #B9B2A5; border: .15cqw solid #2B1B12;
+}
+.nail::before { left: 1cqw; }
+.nail::after { right: 1cqw; }
+
+.board-market { left: 2.2%; top: 4%; width: 26%; transform: rotate(-1.5deg); }
+.mrow { display: flex; align-items: center; gap: .8cqw; font-size: max(11px, 1.7cqw); padding: .25cqw 0; border-bottom: .12cqw dashed rgba(243, 238, 226, .25); }
+.mrow img { width: 3.6cqw; }
+.mrow .avg { margin-left: auto; font-family: theme('fontFamily.caps'); font-size: 2.2cqw; }
+.mfoot { margin-top: .6cqw; font-size: max(10px, 1.4cqw); color: #BDB6A6; }
+
+.board-price { left: 50%; top: 5%; width: 35%; transform: translateX(-50%); text-align: center; }
+.pricewrap { display: flex; align-items: baseline; justify-content: center; gap: .4cqw; margin: .2cqw 0 .6cqw; }
+.pricewrap input {
+  width: 4ch; background: transparent; border: 0; border-bottom: .22cqw dashed #8E978F; color: #F3EEE2;
+  font-family: theme('fontFamily.caps'); font-size: 6cqw; line-height: 1; text-align: center; padding: 0;
+  -moz-appearance: textfield;
+}
+.pricewrap input::-webkit-outer-spin-button, .pricewrap input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.pricewrap input:focus-visible { outline: 3px solid #FFF0BE; outline-offset: 2px; }
+.pricewrap .eur { font-family: theme('fontFamily.caps'); font-size: 4cqw; }
+.warn { margin-top: .6cqw; font-size: max(10px, 1.5cqw); color: #F4A58A; min-height: 2cqw; }
+
+.ledger {
+  right: 2.2%; top: 4%; width: 30%; transform: rotate(1.4deg); background-color: #FBF6EA;
+  background-image: repeating-linear-gradient(to bottom, transparent 0 calc(2.3cqw - 1px), #C9D7E4 calc(2.3cqw - 1px) 2.3cqw);
+  background-position: 0 3.6cqw; border: .22cqw solid #2B1B12; border-radius: .3cqw; box-shadow: var(--eve-lift);
+  padding: .5cqw 1.2cqw 1cqw 3.2cqw; color: #2B1B12; font-size: max(10px, 1.5cqw); line-height: 2.3cqw;
+  font-family: theme('fontFamily.hand');
+}
+.ledger::before { content: ''; position: absolute; left: 2.2cqw; top: 0; bottom: 0; width: .15cqw; background: #E3A4A4; }
+.ledger h2 { margin: 0; font-family: theme('fontFamily.caps'); font-weight: 400; font-size: 2.2cqw; line-height: 3.2cqw; }
+.ledger h3 { margin: .3cqw 0 0; font-family: theme('fontFamily.caps'); font-weight: 400; font-size: max(10px, 1.6cqw); color: #6E5646; }
+.lrow { display: flex; justify-content: space-between; gap: 1cqw; }
+.lrow b { font-weight: 400; font-family: theme('fontFamily.caps'); font-size: max(11px, 1.7cqw); }
+.lrow.total b { font-size: 2cqw; }
+.pos { color: #2F5E12; }
+.neg { color: #8E2A14; }
+.ledger-note { margin: .2cqw 0 0; font-size: max(9px, 1.2cqw); color: #6E5646; line-height: 1.3; }
+.hist { display: grid; grid-template-columns: auto auto auto 1fr; column-gap: 1cqw; font-size: max(9px, 1.35cqw); }
+.hist span:nth-child(4n) { text-align: right; }
+
+.seller-counter-wood { left: 0; right: 0; bottom: 0; height: 29%; }
+.seller-counter-wood svg { width: 100%; height: 100%; display: block; }
+
+.seller-crate-on { left: 6%; bottom: 26.5%; width: 15%; }
+.seller-crate-on img { width: 100%; display: block; }
+.seller-crate-on .tag {
+  position: absolute; left: 50%; top: -1.8cqw; transform: translateX(-50%) rotate(-3deg);
+  background: var(--eve-paper); border: .18cqw solid #2B1B12; border-radius: .3cqw; padding: 0 .8cqw;
+  font-family: theme('fontFamily.caps'); font-size: max(10px, 1.5cqw); white-space: nowrap;
+}
+.seller-crate-on .crateopt-count { top: auto; bottom: -.6cqw; }
+
+.seller-preview { left: 24%; bottom: 6%; width: 26%; }
+.seller-preview small { display: block; color: var(--eve-paper); font-size: max(10px, 1.35cqw); margin-bottom: .3cqw; text-shadow: 0 .1cqw 0 #2B1B12; }
+
+.seller-hang { left: 62%; bottom: 9%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: .6cqw; }
+.eve-note.seller-waiting { padding: .4cqw 1.6cqw; font-size: max(11px, 1.7cqw); box-shadow: none; }
+
+.seller-cashbox { right: 5%; bottom: 26%; width: 12%; }
+.seller-cashbox svg { width: 100%; display: block; }
+
+/* ── Screen 4: Kaufrunde — own-stand styling, status chips, ribbon banner ── */
+.stall-name.mine { background: #F4C542; }
+.stall-name.mine small { color: #4A4214; }
+.stall-name.lemonade.mine { background: #F4C542; }
+.metag {
+  position: absolute; transform: translate(-50%, -100%); z-index: 5; background: #F4C542; color: #2B1B12;
+  border: .22cqw solid #2B1B12; border-radius: .4cqw; padding: 0 1cqw; font-family: theme('fontFamily.caps');
+  font-size: max(11px, 1.7cqw); white-space: nowrap;
+}
+.metag::after {
+  content: ''; position: absolute; left: 50%; bottom: -1cqw; transform: translateX(-50%);
+  border: .6cqw solid transparent; border-top-color: #2B1B12;
+}
+.chip {
+  position: absolute; transform: translateX(-50%); z-index: 5; background: var(--eve-paper); color: #2B1B12;
+  border: .22cqw solid #2B1B12; border-radius: .5cqw; padding: .15cqw 1.4cqw .3cqw; box-shadow: var(--eve-lift);
+  font-family: theme('fontFamily.caps'); font-size: max(11px, 1.9cqw); white-space: nowrap;
+}
+.chip.me { background: #F4C542; }
+.chip.sold { background: #C9DFA2; color: #23460C; }
+.chip .dots::after { content: '…'; }
+@media (prefers-reduced-motion: no-preference) { .chip .dots { animation: chip-blink 1.4s steps(2) infinite; } }
+@keyframes chip-blink { 50% { opacity: .3; } }
+
+.ribbon {
+  display: flex; align-items: center; justify-content: center; gap: .6rem; width: fit-content; margin: 0 auto;
+  background: #2E3631; color: #F3EEE2; border: 2px solid #7A4A2A; border-radius: 10px; padding: .5rem 1.4rem;
+  font-family: theme('fontFamily.hand'); font-size: .9rem; box-shadow: 0 3px 0 rgba(43, 27, 18, .25);
+}
+.ribbon svg { width: 1.1rem; height: 1.1rem; flex: none; color: #F3EEE2; }
+
+.seller-toast { margin: 0 auto; width: fit-content; }
+
+/* Flying coins on a sale — fixed-position DOM nodes created directly in
+   SellerView.tsx's flyCoins() (not React-rendered — a fire-and-forget WAAPI
+   animation, same pattern as mockup-verkaeuferansicht.html's flyCoins()). */
+.seller-coin { position: fixed; top: 0; left: 0; width: 22px; height: 22px; z-index: 50; pointer-events: none; }
+.seller-coin svg { width: 100%; height: 100%; display: block; }
