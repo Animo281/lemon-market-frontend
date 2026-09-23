@@ -79,20 +79,20 @@ export function sellerHistory(session: PublicSession, playerId: string): SellerH
  * (price − marginal cost) over the units sold so far. Used in the market
  * round (Screen 4) where the real per-round earnings aren't computed
  * server-side until round-end. */
-export function liveSellerEarnings(grade: Grade, price: number, unitsSold: number): number {
+export function liveSellerEarnings(firstCosts: Record<Grade, number>, grade: Grade, price: number, unitsSold: number): number {
   let total = 0
-  for (let i = 0; i < unitsSold; i++) total += price - sellerCost(grade, i)
+  for (let i = 0; i < unitsSold; i++) total += price - sellerCost(firstCosts, grade, i)
   return total
 }
 
-/** Sum of the per-unit marginal cost curve (shared/constants.ts) for
- * `units` crates of `grade` — the "Einkauf" figure shown on the label and
- * in the Kassenbuch. Purely informational: the backend never actually
- * deducts this on its own — computeSellerEarnings only subtracts cost from
- * *sold* units, so an unsold crate costs nothing in the real payout. See
- * Ledger.tsx for how that's reflected in the "Wenn nicht verkauft" row. */
-export function totalPurchaseCost(grade: Grade, units: number): number {
+/** Sum of the per-unit marginal cost curve for `units` crates of `grade` —
+ * the "Einkauf" figure shown on the label and in the Kassenbuch. Purely
+ * informational: the backend never actually deducts this on its own —
+ * computeSellerEarnings only subtracts cost from *sold* units, so an unsold
+ * crate costs nothing in the real payout. See Ledger.tsx for how that's
+ * reflected in the "Wenn nicht verkauft" row. */
+export function totalPurchaseCost(firstCosts: Record<Grade, number>, grade: Grade, units: number): number {
   let total = 0
-  for (let i = 0; i < units; i++) total += sellerCost(grade, i)
+  for (let i = 0; i < units; i++) total += sellerCost(firstCosts, grade, i)
   return total
 }

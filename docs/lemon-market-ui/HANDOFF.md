@@ -67,13 +67,20 @@ Die Sortierstation rechts ist **kein** Verkäufer, sie bleibt als Legende für d
 
 ## Qualität
 
-| Stufe | Label | Beschreibung (Sortierstation) | Farbe Papier | Farbe Kreide |
-|---|---|---|---|---|
-| 1 | Qualität 1 | Perfekt, makellos | `#2F5E12` | `#B9E28A` |
-| 2 | Qualität 2 | Geringe Mängel | `#7A5A06` | `#F4D46A` |
-| 3 | Qualität 3 | Deutliche Mängel | `#8E2A14` | `#F4A58A` |
+**Backend-Grade 3 ist die beste Qualität, Grade 1 die schlechteste** — umgekehrt zur
+Beschriftung, die im gemalten Sortierstations-Hintergrund steht (der zeigt „Qualität 1"
+über der makellosen Kiste). Die Implementierung (`lib/marketScene.ts`, `QUALITY_LABEL`)
+legt eigene Beschriftungen über das Bild und benutzt durchgehend die Backend-Nummerierung,
+weil die auch Verkäufer, Admin-Ansicht und Profit-Tabellen verwenden. Diese Tabelle war
+zuvor noch mit der (falschen) Bild-Beschriftung dokumentiert — hier der tatsächliche Stand:
 
-Bild-`alt` der Kiste: `"Qualität 1: Perfekt, makellos"` usw., in Phase 2 `"Abgedeckte Kiste"`.
+| Stufe (Backend-Grade) | Label | Beschreibung (Sortierstation) | Farbe Papier | Farbe Kreide |
+|---|---|---|---|---|
+| 3 (beste) | Qualität 3 | Perfekt, makellos | `#2F5E12` | `#B9E28A` |
+| 2 | Qualität 2 | Geringe Mängel | `#7A5A06` | `#F4D46A` |
+| 1 (schlechteste) | Qualität 1 | Deutliche Mängel | `#8E2A14` | `#F4A58A` |
+
+Bild-`alt` der Kiste: `"Qualität 3: Perfekt, makellos"` usw., in Phase 2 `"Abgedeckte Kiste"`.
 
 ## Design-Tokens
 

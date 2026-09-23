@@ -435,7 +435,6 @@ export default function AdminView() {
               results={session.results}
               sellers={sellers}
               buyers={buyers}
-              maxSellerUnits={session.maxSellerUnits}
             />
 
             {/* Podium + Info compare */}

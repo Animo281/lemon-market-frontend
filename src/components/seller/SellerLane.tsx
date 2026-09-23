@@ -13,12 +13,13 @@ interface Props {
    * doesn't contain them (or they haven't got a decision recorded). */
   myGrade: Grade | null
   infoMode: InfoMode
+  firstCosts: Record<Grade, number>
 }
 
 // One 1024×572 lane of the live market round (Screen 4), mirrors
 // buyer/MarketLane.tsx — same background, same SortingStation legend, same
 // slot geometry, just SellerStallSlot instead of StallSlot (no buy button).
-export default function SellerLane({ laneIndex, showLaneName, laneSellers, offersBySellerId, myId, myGrade, infoMode }: Props) {
+export default function SellerLane({ laneIndex, showLaneName, laneSellers, offersBySellerId, myId, myGrade, infoMode, firstCosts }: Props) {
   return (
     <section className="scene-lane" style={{ backgroundImage: `url(${MARKET_SCENE_IMAGE})` }} aria-label={`Marktgasse ${laneIndex + 1}`}>
       {showLaneName && <div className="scene-lane-name">Marktgasse {laneIndex + 1}</div>}
@@ -36,6 +37,7 @@ export default function SellerLane({ laneIndex, showLaneName, laneSellers, offer
             isMine={isMine}
             myGrade={isMine ? myGrade : null}
             infoMode={infoMode}
+            firstCosts={firstCosts}
           />
         )
       })}

@@ -18,13 +18,16 @@ interface Props {
    * the seller themselves in asymmetric mode. */
   myGrade: Grade | null
   infoMode: InfoMode
+  /** session.economics.sellerFirstCosts — only needed for the live earnings
+   * chip on the seller's own stand. */
+  firstCosts: Record<Grade, number>
 }
 
 // One stall in the live market round (Screen 4) — per
 // docs/lemon-market-ui/HANDOFF-verkaeufer.md. Same geometry and offer-card
 // styling as the buyer scene's StallSlot, but no buy button, and the
 // seller's own stand always shows its real quality to them.
-export default function SellerStallSlot({ slot, seller, offer, isMine, myGrade, infoMode }: Props) {
+export default function SellerStallSlot({ slot, seller, offer, isMine, myGrade, infoMode, firstCosts }: Props) {
   const closed = !seller || !offer || offer.price === null
   if (closed || !seller || !offer) {
     return <ClosedStall slot={slot} />
@@ -44,7 +47,7 @@ export default function SellerStallSlot({ slot, seller, offer, isMine, myGrade, 
       ? <span className="chip me abs" style={atStyle(slot.cx, CHIP_Y)}>Wartet auf Käufer<span className="dots" /></span>
       : (
         <span className="chip me abs" style={atStyle(slot.cx, CHIP_Y)}>
-          {offer.unitsSold} von {offer.unitsOffered} verkauft · {signed(liveSellerEarnings(myGrade as Grade, price, offer.unitsSold))}
+          {offer.unitsSold} von {offer.unitsOffered} verkauft · {signed(liveSellerEarnings(firstCosts, myGrade as Grade, price, offer.unitsSold))}
         </span>
       )
     : <span className={`chip abs${soldOut ? ' sold' : ''}`} style={atStyle(slot.cx, CHIP_Y)}>{soldOut ? 'Ausverkauft' : 'Offen'}</span>

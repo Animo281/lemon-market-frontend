@@ -1,6 +1,6 @@
-import { Grade, Role, PublicSession } from '../shared/types'
+import { EconomicsConfig, Grade, Role, PublicSession } from '../shared/types'
 
-const BASE = import.meta.env.VITE_API_URL ?? 'https://lemon-market-backend.onrender.com/api'
+const BASE = import.meta.env.VITE_API_URL ?? '/api'
 
 export class ApiError extends Error {
   constructor(public status: number, message: string) {
@@ -45,7 +45,7 @@ export const api = {
   createSession: (numSellers: number, numBuyers: number) =>
     post<CreateSessionResponse>('/session', { numSellers, numBuyers }),
 
-  updateSessionConfig: (code: string, adminToken: string, config: { maxSellerUnits?: number; totalRounds?: number }) =>
+  updateSessionConfig: (code: string, adminToken: string, config: { maxSellerUnits?: number; totalRounds?: number; economics?: EconomicsConfig }) =>
     request<PublicSession>(`/session/${code}/config`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json', 'x-token': adminToken },

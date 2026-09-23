@@ -16,7 +16,6 @@ export interface SellerDecision {
   price: number
   unitsOffered: number
   unitsSold: number
-  confirmed: boolean
   earnings: number
 }
 
@@ -59,6 +58,22 @@ export interface AvailableOffer {
   grade: Grade | null
 }
 
+// Host-configurable per session (set at create, editable in the lobby).
+// UNIT_COST_STEP (shared/constants.ts) is NOT part of this — the +1.00 per
+// extra unit is a fixed game rule, not a per-session parameter.
+export interface EconomicsConfig {
+  buyerValues: Record<Grade, number>
+  sellerFirstCosts: Record<Grade, number>
+}
+
+// Viewer-masked, mirroring the paper's own instructions to keep each side's
+// private-information table private: a buyer only ever gets buyerValues, a
+// seller only sellerFirstCosts, admin gets both, anonymous gets neither.
+export interface PublicEconomics {
+  buyerValues?: Record<Grade, number>
+  sellerFirstCosts?: Record<Grade, number>
+}
+
 export interface PublicSession {
   id: string
   code: string
@@ -77,10 +92,7 @@ export interface PublicSession {
   results: RoundResult[]
   currentPlayerId: string | null
   availableOffers: AvailableOffer[]
-  economics: {
-    buyerValues: Record<Grade, number>
-    sellerCosts: Array<{ grade: Grade; first: number; second: number }>
-  }
+  economics: PublicEconomics
   limits: {
     maxSellerUnits: number
     maxRounds: number

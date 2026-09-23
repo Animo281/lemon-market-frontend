@@ -1,27 +1,22 @@
 import { RoundResult, Player } from '../shared/types'
-import { BUYER_VALUES, sellerCost } from '../shared/constants'
 
 interface Props {
   results: RoundResult[]
   sellers: Player[]
   buyers: Player[]
-  maxSellerUnits: number
 }
 
-export default function GameEndStats({ results, sellers, buyers, maxSellerUnits }: Props) {
+// theoreticalMaxSurplus is computed server-side per round
+// (metrics.theoreticalMaxSurplus, gameAnalytics.ts) — capacity- and
+// marginal-cost-aware, and searches all three grades rather than assuming
+// grade 2 is optimal (true only for the Holt & Sherman default economics).
+// This used to recompute its own, grade-2-locked version here, which could
+// disagree with the per-round efficiency shown on the admin panel during
+// play. Summing the already-correct per-round figures keeps both displays
+// consistent with each other and with host-configured economics.
+export default function GameEndStats({ results, sellers, buyers }: Props) {
   const totalSurplus = results.reduce((s, r) => s + r.totalSurplus, 0)
-
-  const possibleTradesPerRound = Math.min(buyers.length, sellers.length * maxSellerUnits)
-  const optimalPerRound = (() => {
-    let max = 0
-    for (let i = 0; i < possibleTradesPerRound; i++) {
-      const unitIdx = Math.floor(i / sellers.length)
-      const surplusPerUnit = BUYER_VALUES[2] - sellerCost(2, Math.min(unitIdx, maxSellerUnits - 1))
-      if (surplusPerUnit > 0) max += surplusPerUnit
-    }
-    return max
-  })()
-  const theoreticalMax = optimalPerRound * results.length
+  const theoreticalMax = results.reduce((s, r) => s + r.metrics.theoreticalMaxSurplus, 0)
   const efficiency = theoreticalMax > 0 ? (totalSurplus / theoreticalMax) * 100 : 0
 
   const prices: number[] = []
