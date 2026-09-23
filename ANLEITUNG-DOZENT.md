@@ -13,9 +13,10 @@ obwohl alle Beteiligten eigentlich vom Handel profitieren könnten.
 - Ein Teil der Studierenden spielt **Verkäufer**, ein Teil **Käufer**.
 - Es gibt drei Qualitätsstufen (Q1 niedrig, Q2 mittel, Q3 hoch). Verkäufer kennen
   ihre eigene Qualität, legen einen Preis fest und bieten 1–2 Einheiten an.
-- In den **ersten Runden sehen Käufer die Qualität** vor dem Kauf ("volle Info").
-- In den **letzten Runden ist die Qualität für Käufer unsichtbar** ("asymmetrische
-  Info") — genau das ist der Punkt des Experiments.
+- **Zu Beginn sehen Käufer die Qualität** vor dem Kauf ("volle Info").
+- Nach ein paar Runden schaltest du (der Dozent) manuell um: **die Qualität wird
+  für Käufer unsichtbar** ("asymmetrische Info") — genau das ist der Punkt des
+  Experiments. Siehe Abschnitt 4 für den genauen Klick.
 - Am Ende siehst du eine Auswertung: Gesamtüberschuss, Effizienz im Vergleich zum
   theoretischen Optimum, und einen direkten Vergleich der beiden Phasen — gute
   Grundlage für die Nachbesprechung im Plenum.
@@ -30,9 +31,14 @@ Eine Runde dauert typischerweise 1–3 Minuten; das ganze Experiment passt in ei
    10 bzw. 20 Personen — passend zur Kursgröße wählen).
 3. Auf **"Session erstellen"** klicken.
 4. Im folgenden Fenster kannst du **Max. Einheiten** (wie viele Lemonen ein
-   Verkäufer maximal anbieten darf, 1–5) und **Anzahl Runden** (1–20) einstellen.
-   Diese Einstellungen lassen sich **nach dem Start nicht mehr ändern** — im
-   Zweifel lieber "Mit Defaults starten" (2 Einheiten, 5 Runden) nutzen.
+   Verkäufer maximal anbieten darf, 1–5), **Anzahl Runden** (1–20) und die
+   **Preise je Qualität** einstellen (Käuferwert und Einkaufspreis für die
+   1. Einheit, je Qualitätsstufe Q1–Q3; jede weitere Einheit kostet den
+   Verkäufer automatisch +1,00 € mehr). Voreingestellt sind die Werte aus
+   Holt & Sherman (1999) — Button **"Holt & Sherman Standardwerte"** setzt sie
+   jederzeit zurück. Diese Einstellungen lassen sich **nach dem Start nicht
+   mehr ändern** — im Zweifel lieber "Mit Defaults starten" (2 Einheiten,
+   5 Runden, Holt & Sherman Preise) nutzen.
 5. Du landest auf dem **Admin-Panel** — das ist dein Steuerpult für den Rest der
    Stunde. Lass dieses Fenster offen; am besten auf einem zweiten Bildschirm oder
    per Beamer projiziert.
@@ -71,10 +77,16 @@ manuell weiterschalten, außer am Rundenende:
 4. Klicke **"Nächste Runde →"**, um weiterzumachen, oder **"Ergebnisse anzeigen
    →"** in der letzten Runde.
 
-Der Wechsel von voller zu asymmetrischer Information passiert automatisch nach
-den ersten Runden — du musst nichts umstellen. Der Button **"Qualität ausblenden
-/ einblenden"** auf dem Rundenende-Bildschirm ist für Sonderfälle gedacht (z. B.
-um den Effekt gezielt vorzuführen); im Regelbetrieb kannst du ihn ignorieren.
+**Der Wechsel von voller zu asymmetrischer Information ist ein bewusster
+Schritt von dir, keine Automatik.** Die Session startet mit voller Information
+und bleibt dabei, bis du umschaltest — sobald sich die Preise in den ersten
+Runden eingependelt haben (meist nach 2–3 Runden, wie bei Holt & Sherman),
+klickst du auf dem Rundenende-Bildschirm auf **"Qualität ausblenden"**. Ab der
+nächsten Runde sehen Käufer nur noch den Preis, und das bleibt für den Rest
+der Session so — genau das ist der Moment, um den es im Experiment geht. Der
+Button funktioniert in beide Richtungen (auch zurück auf "einblenden", falls
+du den Effekt gezielt mehrfach vorführen willst) und lässt sich jederzeit
+klicken, nicht nur am Rundenende.
 
 ## 5. Was tun bei Problemen
 

@@ -21,11 +21,20 @@ export default function PlayerView() {
 
   useEffect(() => {
     if (!code || !playerToken) { navigate('/'); return }
+    let cancelled = false
+    let timer: ReturnType<typeof setTimeout>
+    // Buyer turn order is now enforced server-side (backend README, "Buyer
+    // shopping order") — a buyer whose turn just started only finds out on
+    // the next poll, so the open market gets a tighter cadence to keep that
+    // wait short. Every other phase keeps the normal 2s interval.
+    let lastPhase: PublicSession['phase'] | undefined
     const load = async () => {
       try {
         const s = await api.getSession(code, playerToken)
+        if (cancelled) return
         setSession(s)
         setError('')
+        lastPhase = s.phase
         const found = s.players.find((p: Player) => p.id === playerId)
         if (found) {
           setMe(found)
@@ -39,6 +48,7 @@ export default function PlayerView() {
         }
         hasLoadedOnce.current = true
       } catch (err: unknown) {
+        if (cancelled) return
         if (err instanceof ApiError && err.status === 403) {
           setKicked(true)
         } else if (!hasLoadedOnce.current) {
@@ -47,10 +57,10 @@ export default function PlayerView() {
         // else: transient poll failure after a successful load — keep
         // showing the last good state instead of blanking the screen.
       }
+      if (!cancelled) timer = setTimeout(load, lastPhase === 'market' ? 1000 : 2000)
     }
     load()
-    const iv = setInterval(load, 2000)
-    return () => clearInterval(iv)
+    return () => { cancelled = true; clearTimeout(timer) }
   }, [code, playerToken, playerId])
 
   if (!code || !playerToken) return null

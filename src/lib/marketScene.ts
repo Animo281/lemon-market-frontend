@@ -77,8 +77,10 @@ export const STALL_SLOTS: StallSlotGeometry[] = [
 export const BUY_BUTTON_Y = 498
 export const CLOSED_BOARD_Y = 320
 
-// Backend grade 3 is the best lemon (BUYER_VALUES[3] = 13.60€), grade 1 the worst — the
-// opposite of the mockup's painted "Qualität 1 = perfekt" sorting station. We keep the
+// Backend grade 3 is always the best lemon (highest buyerValues entry, 13.60€ under the
+// Holt & Sherman defaults — host-configurable per session, see shared/constants.ts),
+// grade 1 the worst — the opposite of the mockup's painted "Qualität 1 = perfekt"
+// sorting station. We keep the
 // backend's numbering (it's what sellers, the admin view, and the profit tables all use)
 // and remap which crate artwork represents which grade instead of relaying the image's
 // own labels. See docs/lemon-market-ui/HANDOFF.md "Offene Punkte" #1 and the

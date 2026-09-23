@@ -18,11 +18,10 @@ This is a standalone repo — start the backend separately (`lemon-market-backen
 
 The dev server proxies `/api` to `http://localhost:3001` (see `vite.config.ts`).
 
-Set `VITE_API_URL` in `.env` to point the client at a specific backend — the checked-in
-`.env` sets it to `http://localhost:3001/api` for local dev. **If `VITE_API_URL` is
-unset, `src/api/client.ts` falls back to the hosted production backend
-(`https://lemon-market-backend.onrender.com/api`), not the dev proxy** — deleting or
-misconfiguring `.env` silently points local traffic at production.
+Set `VITE_API_URL` in `.env` to point the client at a specific backend. The checked-in
+`.env` sets it to `http://localhost:3001/api` for local development, while
+`.env.production` uses the same-origin `/api` endpoint served by the Cloudflare Worker.
+If the variable is unset, `src/api/client.ts` also defaults to `/api`.
 
 ## Routes
 
@@ -53,7 +52,11 @@ src/
 │   │                     (crate + price + quality, or tarp-covered "Qualität ?"),
 │   │                     ClosedStall ("Licht aus" — no seller in this slot)
 │   ├── buyer/           The illustrated buyer scene: BuyerHud, MarketLane,
-│   │                     StallSlot, SortingStation, icons
+│   │                     StallSlot, SortingStation, ValueNote (buyerValues
+│   │                     table, the "Notizzettel" the paper hands every
+│   │                     buyer), MarketHistory (Table 1's running record of
+│   │                     price/grade/units per seller, per finished round),
+│   │                     icons
 │   └── seller/           The seller flow, screens 2–4 of
 │                          docs/lemon-market-ui/HANDOFF-verkaeufer.md: SellerHud,
 │                          CrateChoiceScreen, CounterScreen, MarketPricesBoard,
@@ -72,10 +75,16 @@ src/
 │                          player token + id in sessionStorage (per-tab, so multiple
 │                          players can play from the same browser in different tabs)
 ├── shared/
-│   ├── types.ts          PublicSession, Player, RoundResult, RoundMetrics, etc. —
-│   │                       mirrors the backend's shared/types.ts by hand, not by import
-│   └── constants.ts       BUYER_VALUES, SELLER_COSTS — also hand-mirrored; if the
-│                            backend's economics ever change, update both
+│   ├── types.ts          PublicSession, Player, RoundResult, RoundMetrics,
+│   │                       EconomicsConfig/PublicEconomics, etc. — mirrors the
+│   │                       backend's shared/types.ts by hand, not by import
+│   └── constants.ts       DEFAULT_BUYER_VALUES/DEFAULT_SELLER_FIRST_COSTS — only
+│                            the LandingView config form's starting values now;
+│                            the economics that actually apply to a session live
+│                            on session.economics (host-configurable at create,
+│                            see LandingView's price grid), not a constant. Also
+│                            hand-mirrored from the backend; if the backend's
+│                            defaults or limits ever change, update both.
 ├── index.css           Tailwind layers + the design-system component classes
 │                         (.panel, .panel-warm, .btn-primary, .btn-secondary,
 │                         .input-base, .stall-card, .my-turn-ring, plus the
@@ -163,8 +172,12 @@ actually resolved each one.
 - No reconnect UI beyond the "frühere Sessions" list on the landing page (backed by
   `sessionIndex` in `localStorage`) — closing a tab loses the in-memory `session` state,
   the reconnect list is the only way back in.
-- Buyer turn order is visual only — see the backend README's "Known Limitations" for
-  why (`currentPlayerId` is computed but not enforced server-side either).
+- Buyer turn order is now enforced server-side, not just displayed (backend README,
+  "Buyer shopping order") — `isMyTurn` in `BuyerView.tsx` reads `session.currentPlayerId`
+  directly rather than "have I already decided", and a buy attempt out of turn gets a
+  400 with a German error from `ErrorBanner`. Still 2s polling underneath (1s while
+  `phase === 'market'`, see `PlayerView.tsx`), not a push channel, so there's up to a
+  ~1s lag before "Du bist dran" appears.
 - `shared/types.ts` and `shared/constants.ts` are hand-mirrored from the backend, not
   imported — they can drift if the backend changes without a matching frontend update.
 - No round timer and no buyer/seller budget exist server-side at all (not "not shown" —

@@ -12,6 +12,9 @@ interface Props {
   units: number
   /** session.maxSellerUnits — the unit picker only shows up if it's >1. */
   maxUnits: number
+  /** session.economics.sellerFirstCosts — this session's actual cost table,
+   * host-configurable, not the Holt & Sherman defaults. */
+  firstCosts: Record<Grade, number>
   onSelectGrade: (g: Grade) => void
   onSelectUnits: (u: number) => void
   onNext: () => void
@@ -22,7 +25,7 @@ interface Props {
 // single crate; the backend lets a seller offer 1..maxSellerUnits, so a unit
 // picker is folded in here (per the plan's "Mengenwahl in Screen 2
 // integrieren" decision) instead of adding a whole extra screen.
-export default function CrateChoiceScreen({ grade, units, maxUnits, onSelectGrade, onSelectUnits, onNext }: Props) {
+export default function CrateChoiceScreen({ grade, units, maxUnits, firstCosts, onSelectGrade, onSelectUnits, onNext }: Props) {
   return (
     <div className="seller-stage">
       <div className="seller-bg" style={{ backgroundImage: `url(${MARKET_SCENE_IMAGE})`, ...SCENE_VIEWS.sorting }} />
@@ -38,7 +41,7 @@ export default function CrateChoiceScreen({ grade, units, maxUnits, onSelectGrad
           // one unit — so switching the unit count below updates every
           // crate's price tag, and picking a crate after choosing a
           // quantity shows the real total right away.
-          const cost = totalPurchaseCost(g, units)
+          const cost = totalPurchaseCost(firstCosts, g, units)
           return (
             <button
               key={g} type="button" className="crateopt" aria-pressed={selected}

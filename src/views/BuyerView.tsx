@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
 import { AvailableOffer, Player, PublicSession } from '../shared/types'
-import { BUYER_VALUES } from '../shared/constants'
+import { DEFAULT_BUYER_VALUES } from '../shared/constants'
 import { api } from '../api/client'
 import { MARKET_SCENE_IMAGE, STALL_SLOTS, laneCount } from '../lib/marketScene'
 import BuyerHud from '../components/buyer/BuyerHud'
 import MarketLane from '../components/buyer/MarketLane'
 import ProfitTable from '../components/ProfitTable'
+import ValueNote from '../components/buyer/ValueNote'
+import MarketHistory from '../components/buyer/MarketHistory'
 
 interface Props {
   session: PublicSession
@@ -18,6 +20,10 @@ interface Props {
 }
 
 export default function BuyerView({ session, me, code, playerToken, error, onSessionUpdate, onError }: Props) {
+  // session.economics is viewer-masked (toPublic.ts) — a buyer always gets
+  // buyerValues, the fallback only matters defensively (e.g. before the
+  // first successful poll response).
+  const buyerValues = session.economics.buyerValues ?? DEFAULT_BUYER_VALUES
   const [justBought, setJustBought] = useState<string | null>(null)
   const [liveMsg, setLiveMsg] = useState('')
   const scrollerRef = useRef<HTMLDivElement>(null)
@@ -63,7 +69,13 @@ export default function BuyerView({ session, me, code, playerToken, error, onSes
     : new Map<string, AvailableOffer>()
 
   const myDecision = session.phase === 'market' ? session.currentBuyerDecisions[me.id] : undefined
-  const isMyTurn = session.phase === 'market' && !(me.id in session.currentBuyerDecisions)
+  // The backend now enforces shopping order server-side (submitBuyerDecision
+  // rejects anyone but session.currentPlayerId, see backend README "Buyer
+  // shopping order") — this used to just check "have I not decided yet",
+  // which let every undecided buyer see "Du bist dran" at once. Reading the
+  // server's own turn pointer is what makes the buy button's enabled state
+  // actually match what a buy attempt will do.
+  const isMyTurn = session.phase === 'market' && session.currentPlayerId === me.id
   const isLastRound = session.currentRound >= session.totalRounds
   const lastResult = session.results[session.results.length - 1]
   const myLastBuyerResult = lastResult?.buyerDecisions.find(b => b.playerId === me.id)
@@ -87,9 +99,16 @@ export default function BuyerView({ session, me, code, playerToken, error, onSes
         const seller = sellers.find(x => x.id === sellerId)
         const bd = s.currentBuyerDecisions[me.id]
         const price = bd?.price != null ? bd.price.toFixed(2) : '—'
-        const earnings = bd ? bd.earnings.toFixed(2) : '0.00'
+        // grade/earnings are masked to null/0 by the backend while the market
+        // is still open in asymmetric mode (toPublic.ts) — even for the buyer
+        // who just bought. Saying "Gewinn: 0,00 €" there would misreport an
+        // unknown profit as a real zero, so this only claims a number when
+        // the backend actually sent one.
+        const stillHidden = s.infoMode === 'asymmetric' && s.phase === 'market'
         setJustBought(sellerId)
-        setLiveMsg(`Zitronen von ${seller?.name ?? 'diesem Stand'} für ${price} € gekauft. Dein Gewinn: ${earnings} €.`)
+        setLiveMsg(stillHidden
+          ? `Zitronen von ${seller?.name ?? 'diesem Stand'} für ${price} € gekauft. Qualität wird am Rundenende aufgedeckt.`
+          : `Zitronen von ${seller?.name ?? 'diesem Stand'} für ${price} € gekauft. Dein Gewinn: ${(bd?.earnings ?? 0).toFixed(2)} €.`)
         requestAnimationFrame(() => {
           document.querySelector<HTMLButtonElement>(`[data-seller-id="${sellerId}"]`)?.focus()
         })
@@ -141,6 +160,8 @@ export default function BuyerView({ session, me, code, playerToken, error, onSes
               isMyTurn={isMyTurn}
               hasDecided={myDecision !== undefined}
             />
+            <ValueNote buyerValues={buyerValues} />
+            <MarketHistory results={session.results} sellers={sellers} />
 
             <div className="scene-scroller" ref={scrollerRef}>
               <div className="scene-world">
@@ -226,7 +247,7 @@ export default function BuyerView({ session, me, code, playerToken, error, onSes
                     <div>
                       <div className="opacity-60 text-xs">Käuferwert</div>
                       <div className="font-caps text-base">
-                        {myLastBuyerResult.grade ? `${BUYER_VALUES[myLastBuyerResult.grade].toFixed(2)} €` : '—'}
+                        {myLastBuyerResult.grade ? `${buyerValues[myLastBuyerResult.grade].toFixed(2)} €` : '—'}
                       </div>
                     </div>
                   </div>
