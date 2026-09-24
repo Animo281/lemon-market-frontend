@@ -137,7 +137,10 @@ export default function BuyerView({ session, me, code, playerToken, error, onSes
           itself has min-width:880px (docs/lemon-market-ui/HANDOFF.md) and must fit uncropped
           well before that breakpoint, or it'd scroll on ordinary desktops. */}
       <div className="max-w-5xl mx-auto space-y-4">
-        <div className="flex items-center justify-between px-1 font-hand text-sm eve-meta">
+        {/* pr-12 reserves room for the fixed ThemeToggle (top-4 right-4, ~36px
+            wide) so the session code doesn't run underneath it below ~1120px
+            viewport width — see docs/lemon-market-ui overlap audit. */}
+        <div className="flex items-center justify-between pl-1 pr-12 font-hand text-sm eve-meta">
           <span>{me.name} · Käufer {me.slotIndex + 1}</span>
           <span className="font-caps tracking-widest">{code}</span>
         </div>

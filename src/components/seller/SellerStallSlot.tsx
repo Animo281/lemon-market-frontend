@@ -46,8 +46,8 @@ export default function SellerStallSlot({ slot, seller, offer, isMine, myGrade, 
     ? offer.unitsSold === 0
       ? <span className="chip me abs" style={atStyle(slot.cx, CHIP_Y)}>Wartet auf Käufer<span className="dots" /></span>
       : (
-        <span className="chip me abs" style={atStyle(slot.cx, CHIP_Y)}>
-          {offer.unitsSold} von {offer.unitsOffered} verkauft · {signed(liveSellerEarnings(firstCosts, myGrade as Grade, price, offer.unitsSold))}
+        <span className="chip me abs" style={atStyle(slot.cx, CHIP_Y)} title={`${offer.unitsSold} von ${offer.unitsOffered} verkauft`}>
+          {offer.unitsSold}/{offer.unitsOffered} verkauft · {signed(liveSellerEarnings(firstCosts, myGrade as Grade, price, offer.unitsSold))}
         </span>
       )
     : <span className={`chip abs${soldOut ? ' sold' : ''}`} style={atStyle(slot.cx, CHIP_Y)}>{soldOut ? 'Ausverkauft' : 'Offen'}</span>

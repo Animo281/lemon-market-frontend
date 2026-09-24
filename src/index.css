@@ -285,16 +285,30 @@ h1, h2, h3 {
 }
 
 .stall-name {
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  display: flex; flex-direction: column; align-items: stretch; justify-content: center;
   background: var(--eve-paper); border: .2cqw solid #2B1B12; border-radius: .3cqw; color: #2B1B12;
-  box-shadow: var(--eve-lift);
+  box-shadow: var(--eve-lift); padding: 0 .6cqw; overflow: hidden; text-align: center;
   transform: rotate(var(--r)); line-height: 1; z-index: 3; font-family: theme('fontFamily.hand');
 }
 .stall-name small { font-size: max(11px, 1.15cqw); color: #6E5646; }
-.stall-name b { font-weight: 400; font-family: theme('fontFamily.caps'); font-size: 2.4cqw; }
-.stall-name.lemonade { background: #DCCC62; flex-direction: row; gap: .6cqw; }
-.stall-name.lemonade small { color: #4A4214; }
-.stall-name.lemonade b { font-size: 2cqw; }
+/* Player names are free text and can outrun any box we give them — clip with
+   an ellipsis instead of wrapping, which used to spill the box downward onto
+   the crate art below it (see docs/lemon-market-ui overlap audit). align-items:
+   stretch (above) makes this column-direction flex item fill the box's cross
+   axis (width) so text-overflow has a definite width to truncate against —
+   `max-width:100%` alone collapsed to 0 width here, since a centered
+   (non-stretched) flex item's percentage width resolves against its own
+   shrink-to-fit size, not the box. min-width:0 overrides the flex item's
+   default min-width:auto so overflow can still kick in. */
+.stall-name b {
+  font-weight: 400; font-family: theme('fontFamily.caps'); font-size: 2.4cqw;
+  min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.stall-name.lemonade { background: #DCCC62; flex-direction: row; align-items: center; gap: .6cqw; }
+.stall-name.lemonade small { color: #4A4214; flex: none; }
+/* Row direction: cross-axis stretch doesn't apply here, so truncate along the
+   main (horizontal) axis instead with the standard flex-truncate pattern. */
+.stall-name.lemonade b { font-size: 2cqw; flex: 1 1 auto; min-width: 0; }
 
 .stall-offer {
   transform: translate(-50%, -50%) rotate(var(--r));
@@ -311,7 +325,11 @@ h1, h2, h3 {
 .stall-qtext { display: block; font-family: theme('fontFamily.caps'); font-size: max(12px, 1.35cqw); line-height: 1.15; }
 .stall-qunknown { color: inherit; }
 
-.stall-cover-lemon { z-index: 3; transform: translate(-50%, -50%); }
+/* z-index 6, not 3: it must sit above .stall-closed's z-5 dimmer so the patch
+   still fully covers the background art's stray icon when the stall is
+   closed — matches the original mockup (docs/lemon-market-ui/mockup-kaeuferansicht.html),
+   which the implementation had dropped. */
+.stall-cover-lemon { z-index: 6; transform: translate(-50%, -50%); }
 .stall-cover-lemon svg { width: 2.4cqw; height: 2.4cqw; display: block; }
 
 .stall-closed {
@@ -346,7 +364,7 @@ h1, h2, h3 {
 .stall-buy {
   transform: translateX(-50%); z-index: 6; font-family: theme('fontFamily.caps'); font-size: 2.1cqw;
   line-height: 1.2; color: #2B1B12; background: #F4C542; border: .25cqw solid #2B1B12;
-  border-radius: .6cqw; padding: .2cqw 2cqw .3cqw; cursor: pointer; white-space: nowrap;
+  border-radius: .6cqw; padding: .2cqw 1.4cqw .3cqw; cursor: pointer; white-space: nowrap;
   box-shadow: 0 .35cqw 0 #2B1B12, 0 .9cqw 1.5cqw rgba(8, 12, 24, .42);
 }
 .stall-buy:hover { background: #FFD65C; }
@@ -365,9 +383,13 @@ h1, h2, h3 {
   background: var(--eve-paper); border: .18cqw solid #2B1B12; border-radius: .25cqw; box-shadow: var(--eve-lift);
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   text-align: center; font-family: theme('fontFamily.hand'); line-height: 1.15; z-index: 3;
+  overflow: hidden;
 }
-.sorting-card b { font-family: theme('fontFamily.caps'); font-size: 1.5cqw; }
-.sorting-card span { font-size: max(11px, 1.15cqw); }
+.sorting-card b { font-family: theme('fontFamily.caps'); font-size: 1.3cqw; white-space: nowrap; }
+.sorting-card span {
+  font-size: max(10px, 1.1cqw); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  max-width: 100%;
+}
 
 .scene-pass-btn {
   font-family: theme('fontFamily.caps'); font-size: 1.05rem; color: #2B1B12; background: #F1E4CE;
@@ -624,8 +646,12 @@ html.dark .eve-meta { color: #9FB0C4; }
 }
 .chip {
   position: absolute; transform: translateX(-50%); z-index: 5; background: var(--eve-paper); color: #2B1B12;
-  border: .22cqw solid #2B1B12; border-radius: .5cqw; padding: .15cqw 1.4cqw .3cqw; box-shadow: var(--eve-lift);
-  font-family: theme('fontFamily.caps'); font-size: max(11px, 1.9cqw); white-space: nowrap;
+  border: .22cqw solid #2B1B12; border-radius: .5cqw; padding: .15cqw 1.2cqw .3cqw; box-shadow: var(--eve-lift);
+  font-family: theme('fontFamily.caps'); font-size: max(11px, 1.7cqw); white-space: nowrap;
+  /* 19cqw ≈ the smallest gap between two stall centers (marketScene.ts
+     STALL_SLOTS, 194 image px of 1024) — caps the chip so a high unit count
+     + a big earnings figure can't bleed into the neighbouring stall's chip. */
+  max-width: 19cqw; overflow: hidden; text-overflow: ellipsis;
 }
 .chip.me { background: #F4C542; }
 .chip.sold { background: #C9DFA2; color: #23460C; }

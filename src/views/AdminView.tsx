@@ -124,7 +124,10 @@ export default function AdminView() {
       <div className="max-w-6xl mx-auto space-y-6">
 
         {/* ── Header ────────────────────────────────── */}
-        <div className="flex items-center justify-between">
+        {/* pr-12 reserves room for the fixed ThemeToggle (top-4 right-4,
+            ~36px wide) so PhaseIndicator doesn't run underneath it — see
+            docs/lemon-market-ui overlap audit. */}
+        <div className="flex items-center justify-between pr-12">
           <div>
             <h1 className="font-display text-3xl font-bold text-lemon-400">Admin-Panel</h1>
           </div>

@@ -169,7 +169,10 @@ export default function SellerView({ session, me, code, playerToken, error, onSe
   return (
     <div className="min-h-screen eve-page p-3 md:p-5">
       <div className="max-w-5xl mx-auto space-y-4">
-        <div className="flex items-center justify-between px-1 font-hand text-sm eve-meta">
+        {/* pr-12 reserves room for the fixed ThemeToggle (top-4 right-4, ~36px
+            wide) so the session code doesn't run underneath it below ~1120px
+            viewport width — see docs/lemon-market-ui overlap audit. */}
+        <div className="flex items-center justify-between pl-1 pr-12 font-hand text-sm eve-meta">
           <span>{me.name} · Verkäufer {me.slotIndex + 1}</span>
           <span className="font-caps tracking-widest">{code}</span>
         </div>
