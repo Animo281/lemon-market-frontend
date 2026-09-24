@@ -11,6 +11,11 @@ import ErrorBanner from '../components/ErrorBanner'
 
 const GRADES: Grade[] = [1, 2, 3]
 const GRADE_LABEL: Record<Grade, string> = { 1: 'Q1 (niedrig)', 2: 'Q2 (mittel)', 3: 'Q3 (hoch)' }
+// Same grade→colour mapping as everywhere else quality shows up (quality-q1/q2/q3
+// in index.css, QUALITY_LABEL in marketScene.ts) — the config modal was using an
+// unrelated ice/lemon-by-column scheme instead of this, DESIGN.md's own canonical
+// per-grade language.
+const GRADE_COLOR: Record<Grade, string> = { 1: 'text-coral-400', 2: 'text-lemon-400', 3: 'text-lime-400' }
 
 // Deep-clone so editing the modal's working copy never mutates the shared
 // DEFAULT_ECONOMICS constant (it's a plain object literal, not frozen).
@@ -282,7 +287,7 @@ export default function LandingView() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-mkt-950/80 backdrop-blur-sm px-4">
           <div className="panel p-8 w-full max-w-md flex flex-col gap-5 animate-fade-up">
             <div>
-              <div className="label mb-1">Session erstellt · Code <span className="font-mono text-gold-500 tracking-widest">{pendingConfig.code}</span></div>
+              <div className="label mb-1">Session erstellt · Code <span className="font-mono text-lemon-500 tracking-widest">{pendingConfig.code}</span></div>
               <h2 className="text-lg font-bold text-mkt-100">Spieleinstellungen</h2>
               <p className="text-mkt-500 text-xs font-mono mt-1">Kann später nicht mehr geändert werden.</p>
             </div>
@@ -290,24 +295,24 @@ export default function LandingView() {
             <div className="grid grid-cols-2 gap-3">
               <label className="flex flex-col gap-1.5">
                 <span className="label">
-                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-violet-400 mr-1.5 align-middle -mt-0.5" />
+                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-copper-400 mr-1.5 align-middle -mt-0.5" />
                   Max. Einheiten
                 </span>
                 <input
                   type="number" min={1} max={MAX_SELLER_UNITS_LIMIT} value={modalMaxUnits}
                   onChange={e => setModalMaxUnits(Math.min(MAX_SELLER_UNITS_LIMIT, Math.max(1, Number(e.target.value))))}
-                  className="bg-mkt-850 border border-mkt-800 rounded-xl px-3 py-3 font-mono text-violet-400 font-bold text-2xl text-center focus:outline-none focus:border-violet-400/50 transition-colors"
+                  className="bg-mkt-850 border border-mkt-800 rounded-xl px-3 py-3 font-mono text-copper-400 font-bold text-2xl text-center focus:outline-none focus:border-copper-400/50 transition-colors"
                 />
               </label>
               <label className="flex flex-col gap-1.5">
                 <span className="label">
-                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-gold-500 mr-1.5 align-middle -mt-0.5" />
+                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-copper-400 mr-1.5 align-middle -mt-0.5" />
                   Anzahl Runden
                 </span>
                 <input
                   type="number" min={1} max={MAX_ROUNDS_LIMIT} value={modalRounds}
                   onChange={e => setModalRounds(Math.min(MAX_ROUNDS_LIMIT, Math.max(1, Number(e.target.value))))}
-                  className="bg-mkt-850 border border-mkt-800 rounded-xl px-3 py-3 font-mono text-gold-500 font-bold text-2xl text-center focus:outline-none focus:border-gold-500/50 transition-colors"
+                  className="bg-mkt-850 border border-mkt-800 rounded-xl px-3 py-3 font-mono text-copper-400 font-bold text-2xl text-center focus:outline-none focus:border-copper-400/50 transition-colors"
                 />
               </label>
             </div>
@@ -332,16 +337,16 @@ export default function LandingView() {
                 <span className="label text-center">Kosten 1. Einheit</span>
                 {GRADES.map(g => (
                   <Fragment key={g}>
-                    <span className="text-mkt-400 text-xs font-mono whitespace-nowrap pr-1">{GRADE_LABEL[g]}</span>
+                    <span className={`${GRADE_COLOR[g]} text-xs font-mono font-semibold whitespace-nowrap pr-1`}>{GRADE_LABEL[g]}</span>
                     <input
                       type="number" min={0} step="0.10" value={modalEconomics.buyerValues[g]}
                       onChange={e => setBuyerValue(g, e.target.value)}
-                      className="bg-mkt-850 border border-mkt-800 rounded-lg px-2 py-1.5 font-mono text-ice-400 text-sm text-center focus:outline-none focus:border-ice-500/50 transition-colors"
+                      className="bg-mkt-850 border border-mkt-800 rounded-lg px-2 py-1.5 font-mono text-mkt-100 text-sm text-center focus:outline-none focus:border-lemon-500/50 transition-colors"
                     />
                     <input
                       type="number" min={0} step="0.10" value={modalEconomics.sellerFirstCosts[g]}
                       onChange={e => setSellerCost(g, e.target.value)}
-                      className="bg-mkt-850 border border-mkt-800 rounded-lg px-2 py-1.5 font-mono text-lemon-400 text-sm text-center focus:outline-none focus:border-lemon-500/50 transition-colors"
+                      className="bg-mkt-850 border border-mkt-800 rounded-lg px-2 py-1.5 font-mono text-mkt-100 text-sm text-center focus:outline-none focus:border-lemon-500/50 transition-colors"
                     />
                   </Fragment>
                 ))}
