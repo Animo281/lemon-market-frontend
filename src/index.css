@@ -80,6 +80,19 @@ html:not(.dark) {
     caret-color: rgb(240 196 25);
   }
 
+  /* Native number-input spin arrows read as unfinished browser chrome next
+     to this app's custom mono-numeral styling. Every existing numeric field
+     already suppresses them one-off (.pricewrap, the seller price board) —
+     this makes it the default so new number inputs don't have to remember to. */
+  input[type='number'] {
+    -moz-appearance: textfield;
+  }
+  input[type='number']::-webkit-outer-spin-button,
+  input[type='number']::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
   /* Tabular numerals for data */
   .font-mono {
     font-variant-numeric: tabular-nums;
