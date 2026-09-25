@@ -321,8 +321,12 @@ export default function SellerView({ session, me, code, playerToken, error, onSe
         )}
 
         {session.phase === 'game-end' && (
-          <div className="eve-note p-6">
-            <h2 className="font-caps text-3xl mb-4">Alle Ergebnisse</h2>
+          // .panel, not .eve-note: ProfitTable's accent colors (text-lemon-400
+          // etc.) are tuned for the app's dark/light mkt tokens, not for
+          // sitting on the fixed-color illustrated paper card — that mismatch
+          // is what caused unreadable text here (see a11y contrast fix pass).
+          <div className="panel p-6">
+            <h2 className="font-display text-3xl font-bold text-lemon-400 mb-4">Alle Ergebnisse</h2>
             <ProfitTable
               results={session.results}
               sellers={session.players.filter(p => p.role === 'seller')}

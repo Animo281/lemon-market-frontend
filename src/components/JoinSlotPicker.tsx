@@ -23,7 +23,7 @@ function BuyerSlot({ index, takenBy, selectedRole, selectedSlot, onSelect }: Omi
 
   if (takenBy) {
     return (
-      <div className="px-3 py-2.5 rounded-xl border border-mkt-800 bg-mkt-850/40 text-xs text-mkt-600 text-center cursor-not-allowed truncate">
+      <div className="px-3 py-2.5 rounded-xl border border-mkt-800 bg-mkt-850/40 text-xs text-mkt-500 text-center cursor-not-allowed truncate">
         {takenBy}
       </div>
     )
@@ -96,7 +96,7 @@ export default function JoinSlotPicker({ session, selectedRole, selectedSlot, on
       <div>
         <div className="flex items-center gap-2 mb-3">
           <span className="w-2 h-2 rounded-full bg-lemon-500" />
-          <span className="label text-lemon-500/80">
+          <span className="label text-lemon-500">
             Verkäufer · {takenSellerSlots.size}/{session.numSellers} belegt
           </span>
         </div>
@@ -115,7 +115,7 @@ export default function JoinSlotPicker({ session, selectedRole, selectedSlot, on
       <div>
         <div className="flex items-center gap-2 mb-3">
           <span className="w-2 h-2 rounded-full bg-ice-500" />
-          <span className="label text-ice-500/80">
+          <span className="label text-ice-500">
             Käufer · {takenBuyerSlots.size}/{session.numBuyers} belegt
           </span>
         </div>

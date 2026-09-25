@@ -11,7 +11,9 @@
   --mkt-800: 58 42 26;
   --mkt-700: 84 64 42;
   --mkt-600: 110 86 56;
-  --mkt-500: 138 114 96;
+  /* Lightened from the original 138 114 96 — that only hit 3.98:1 against
+     panel backgrounds (mkt-900), below the 4.5:1 text needs. */
+  --mkt-500: 146 124 107;
   --mkt-400: 168 144 128;
   --mkt-300: 200 176 154;
   --mkt-200: 220 206 192;
@@ -26,6 +28,28 @@
   /* Depth shadows — dark theme casts true black */
   --shadow-rgb: 18 13 8;
   --shadow-strength: 1;
+
+  /* Accent palette (lemon/lime/coral/ice/copper/gold) — dark-theme values,
+     the original bright accents. See tailwind.config.js. */
+  --lemon-200: 253 240 160;
+  --lemon-300: 250 234 106;
+  --lemon-400: 245 216 40;
+  --lemon-500: 240 196 25;
+  --lemon-600: 200 156 8;
+  --lime-400: 120 216 72;
+  --lime-500: 92 192 48;
+  --lime-600: 66 160 32;
+  --coral-400: 240 112 96;
+  --coral-500: 232 74 42;
+  --coral-600: 192 48 24;
+  --ice-300: 136 216 245;
+  --ice-400: 90 196 236;
+  --ice-500: 56 168 216;
+  --ice-600: 26 136 190;
+  --copper-400: 208 152 72;
+  --copper-500: 184 120 40;
+  --copper-600: 148 96 16;
+  --gold-500: 240 168 64;
 }
 
 /* ── Light theme — Heller Tagesmarkt ─────────── */
@@ -51,6 +75,30 @@ html:not(.dark) {
   /* Depth shadows — light theme casts a soft warm shadow, not black */
   --shadow-rgb: 90 72 48;
   --shadow-strength: 0.35;
+
+  /* Accent palette — darkened variants of the dark-theme hues, each
+     verified >=4.5:1 against mkt-850 (light), the darkest panel background
+     these colors render text on. Computed via the WCAG relative-luminance
+     formula, not eyeballed — see the a11y contrast fix pass. */
+  --lemon-200: 100 95 63;
+  --lemon-300: 101 95 43;
+  --lemon-400: 107 94 17;
+  --lemon-500: 113 92 12;
+  --lemon-600: 116 90 5;
+  --lime-400: 58 105 35;
+  --lime-500: 51 107 27;
+  --lime-600: 44 107 21;
+  --coral-400: 150 70 60;
+  --coral-500: 169 54 31;
+  --coral-600: 177 44 22;
+  --ice-300: 63 99 113;
+  --ice-400: 46 101 122;
+  --ice-500: 34 101 130;
+  --ice-600: 19 101 141;
+  --copper-400: 121 88 42;
+  --copper-500: 130 85 28;
+  --copper-600: 130 84 14;
+  --gold-500: 124 87 33;
 }
 
 @layer base {
@@ -107,7 +155,15 @@ html:not(.dark) {
       radial-gradient(circle at 25% 25%, rgba(240, 196, 25, 0.04) 0%, transparent 50%),
       radial-gradient(circle at 75% 75%, rgba(114, 200, 50, 0.03) 0%, transparent 50%);
   }
+}
 
+/* These were previously in @layer utilities, where Tailwind's cascade puts
+   them AFTER utility classes like `text-lemon-500/80` — so a component
+   using `className="label text-lemon-500/80"` silently rendered in .label's
+   own text-mkt-500, not the accent color the component asked for. @layer
+   components sits before utilities, so utility classes on the same element
+   correctly win again. */
+@layer components {
   /* Stall-Karte: das zentrale Panel-Element */
   .panel {
     @apply bg-mkt-900 border border-mkt-800/80 rounded-2xl;
@@ -137,13 +193,25 @@ html:not(.dark) {
     box-shadow: inset 0 1px 3px rgb(var(--shadow-rgb) / calc(0.4 * var(--shadow-strength)));
   }
 
-  /* Primary CTA — Zitronen-Gelb */
+  /* Primary CTA — Zitronen-Gelb. Fixed brand fill + fixed dark ink text (not
+     bg-lemon-500/text-mkt-950): lemon-500 now darkens in light mode for text
+     contrast elsewhere, and mkt-950 flips near-white in light mode — either
+     theme-varying token here would put light-on-light or dark-on-dark text
+     on the button depending on theme. This button stays bright gold with
+     dark ink in both themes instead. Plain CSS (not @apply bg-lemon-fill):
+     the nested `fill` color key collides with Tailwind's own fill-* utility
+     namespace and never generates a bg-lemon-fill class. */
   .btn-primary {
-    @apply bg-lemon-500 text-mkt-950 font-bold rounded-xl px-5 py-3
-           hover:bg-lemon-400 disabled:opacity-35 disabled:cursor-not-allowed
+    @apply font-bold rounded-xl px-5 py-3
+           disabled:opacity-35 disabled:cursor-not-allowed
            transition-all active:scale-[0.975] active:translate-y-px;
+    background-color: rgb(240 196 25);
+    color: rgb(26 18 6);
     box-shadow: 0 1px 3px rgb(var(--shadow-rgb) / calc(0.5 * var(--shadow-strength))), 0 0 0 0 rgba(240, 196, 25, 0);
     letter-spacing: -0.01em;
+  }
+  .btn-primary:hover:not(:disabled) {
+    background-color: rgb(245 216 40);
   }
   .btn-primary:hover:not(:disabled) {
     box-shadow: 0 1px 3px rgb(var(--shadow-rgb) / calc(0.5 * var(--shadow-strength))), 0 6px 22px rgba(240, 196, 25, 0.22);

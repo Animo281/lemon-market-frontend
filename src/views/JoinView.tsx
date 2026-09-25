@@ -24,6 +24,7 @@ export default function JoinView() {
     failCount.current = 0
     setLookupFailed(false)
     if (!code || code.length !== 4) return
+    let iv: ReturnType<typeof setInterval>
     const load = async () => {
       try {
         const s = await api.getSession(code)
@@ -32,19 +33,29 @@ export default function JoinView() {
         failCount.current = 0
       } catch (err: unknown) {
         setSession(null)
-        // A single failed poll can just be a network blip — only treat the
-        // code as genuinely bad after a few consecutive misses, otherwise
-        // this used to spin on "Lade Session…" forever with no way out on
-        // a real 404 for a mistyped/expired code.
+        // A 404 is unambiguous — the backend already checked the code exists
+        // (sessionMiddleware.ts) — so show it immediately instead of waiting
+        // out the retry budget below, and stop polling a code that will
+        // never resolve. A single failed poll on anything else can just be a
+        // network blip — only treat the code as bad after a few consecutive
+        // misses, otherwise this used to spin on "Lade Session…" forever
+        // with no way out on a real error.
+        if (err instanceof ApiError && err.status === 404) {
+          setLookupFailed(true)
+          setError(err.message)
+          clearInterval(iv)
+          return
+        }
         failCount.current += 1
         if (failCount.current >= 3) {
           setLookupFailed(true)
           setError(err instanceof ApiError ? err.message : 'Session nicht gefunden — Code prüfen.')
+          clearInterval(iv)
         }
       }
     }
     load()
-    const iv = setInterval(load, 2000)
+    iv = setInterval(load, 2000)
     return () => clearInterval(iv)
   }, [code])
 

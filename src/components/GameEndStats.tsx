@@ -71,7 +71,7 @@ export default function GameEndStats({ results, sellers, buyers }: Props) {
                style={{ fontSize: 'clamp(1.5rem, 4vw, 2rem)' }}>
             {s.value}
           </div>
-          <div className="text-mkt-600 text-xs font-mono mt-1">{s.sub}</div>
+          <div className="text-mkt-500 text-xs font-mono mt-1">{s.sub}</div>
         </div>
       ))}
     </div>

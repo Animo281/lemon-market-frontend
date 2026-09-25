@@ -271,8 +271,9 @@ export default function BuyerView({ session, me, code, playerToken, error, onSes
         )}
 
         {session.phase === 'game-end' && (
-          <div className="eve-note p-6">
-            <h2 className="font-caps text-3xl mb-4">Alle Ergebnisse</h2>
+          // .panel, not .eve-note — see the matching comment in SellerView.tsx.
+          <div className="panel p-6">
+            <h2 className="font-display text-3xl font-bold text-lemon-400 mb-4">Alle Ergebnisse</h2>
             <ProfitTable results={session.results} sellers={sellers} buyers={buyers} />
           </div>
         )}

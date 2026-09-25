@@ -43,7 +43,7 @@ export default function InfoModeCompare({ results }: Props) {
     <div className="panel-warm flex-1 p-5">
       <div className="flex items-center gap-2 mb-4">
         <span className={`w-2 h-2 rounded-full shrink-0 ${mode === 'full' ? 'bg-lime-500' : 'bg-coral-500'}`} />
-        <div className={`label ${mode === 'full' ? 'text-lime-400/70' : 'text-coral-400/70'}`}>
+        <div className={`label ${mode === 'full' ? 'text-lime-400' : 'text-coral-400'}`}>
           {title}
         </div>
       </div>
@@ -59,18 +59,18 @@ export default function InfoModeCompare({ results }: Props) {
           </div>
           <div className="grid grid-cols-2 gap-3 pt-2 border-t border-mkt-800">
             <div>
-              <div className="text-mkt-600 text-[10px] mb-0.5">Transaktionen</div>
+              <div className="text-mkt-500 text-[10px] mb-0.5">Transaktionen</div>
               <div className="font-mono font-bold text-mkt-200">{stats.totalTransactions}</div>
             </div>
             <div>
-              <div className="text-mkt-600 text-[10px] mb-0.5">Ø Preis</div>
+              <div className="text-mkt-500 text-[10px] mb-0.5">Ø Preis</div>
               <div className="font-mono font-bold text-mkt-200">€{stats.avgPrice.toFixed(2)}</div>
             </div>
           </div>
-          <div className="text-mkt-700 text-[10px]">{stats.rounds} Runde{stats.rounds !== 1 ? 'n' : ''}</div>
+          <div className="text-mkt-500 text-[10px]">{stats.rounds} Runde{stats.rounds !== 1 ? 'n' : ''}</div>
         </div>
       ) : (
-        <div className="text-mkt-600 text-sm">Keine Daten</div>
+        <div className="text-mkt-500 text-sm">Keine Daten</div>
       )}
     </div>
   )
@@ -87,7 +87,7 @@ export default function InfoModeCompare({ results }: Props) {
 
         {surplusDelta !== null && (
           <div className="flex flex-col items-center justify-center px-2 gap-2 min-w-[72px]">
-            <div className="text-mkt-700 text-xl">→</div>
+            <div className="text-mkt-500 text-xl">→</div>
             <div className={`text-center font-mono font-bold text-base ${
               surplusDelta < 0 ? 'text-coral-400' : 'text-lime-400'
             }`}>

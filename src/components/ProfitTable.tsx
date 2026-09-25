@@ -66,9 +66,9 @@ export default function ProfitTable({ results, sellers, buyers }: Props) {
                             'text-lime-400'
                           }>Q{sd.grade}</span>
                           <span className="text-mkt-200">€{sd.price.toFixed(2)}</span>
-                          <span className="text-mkt-600">×{sd.unitsSold}</span>
+                          <span className="text-mkt-500">×{sd.unitsSold}</span>
                         </span>
-                      ) : <span className="text-mkt-700">—</span>}
+                      ) : <span className="text-mkt-500">—</span>}
                     </td>
                   )
                 })}
