@@ -6,7 +6,8 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test e2e/game-flow.spec.ts e2e/responsive.spec.ts",
+    "test:e2e:a11y": "playwright test e2e/a11y.spec.ts"
   },
   "dependencies": {
     "@types/react-router-dom": "^5.3.3",
