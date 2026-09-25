@@ -19,7 +19,7 @@ export default function ErrorBanner({ message, onDismiss }: Props) {
           type="button"
           onClick={onDismiss}
           aria-label="Meldung schließen"
-          className="shrink-0 text-coral-400/70 hover:text-coral-400 leading-none text-base"
+          className="shrink-0 text-coral-400 hover:text-coral-500 leading-none text-base"
         >
           ×
         </button>

@@ -276,7 +276,7 @@ export default function LandingView() {
 
       {/* ── Footer citation ─────────────────────── */}
       <p
-        className="mt-10 text-mkt-700 font-mono text-[10px] text-center animate-fade-up relative z-10"
+        className="mt-10 text-mkt-500 font-mono text-[10px] text-center animate-fade-up relative z-10"
         style={{ animationDelay: '0.32s', opacity: 0 }}
       >
         Akerlof (1970) · "The Market for 'Lemons': Quality Uncertainty and the Market Mechanism"
@@ -326,7 +326,7 @@ export default function LandingView() {
                 <button
                   type="button"
                   onClick={resetEconomicsToDefault}
-                  className="text-mkt-600 text-[10px] font-mono hover:text-mkt-400 transition-colors underline underline-offset-2"
+                  className="text-mkt-500 text-[10px] font-mono hover:text-mkt-400 transition-colors underline underline-offset-2"
                 >
                   Holt &amp; Sherman Standardwerte
                 </button>
@@ -341,17 +341,19 @@ export default function LandingView() {
                     <input
                       type="number" min={0} step="0.10" value={modalEconomics.buyerValues[g]}
                       onChange={e => setBuyerValue(g, e.target.value)}
+                      aria-label={`Käuferwert ${GRADE_LABEL[g]}`}
                       className="bg-mkt-850 border border-mkt-800 rounded-lg px-2 py-1.5 font-mono text-mkt-100 text-sm text-center focus:outline-none focus:border-lemon-500/50 transition-colors"
                     />
                     <input
                       type="number" min={0} step="0.10" value={modalEconomics.sellerFirstCosts[g]}
                       onChange={e => setSellerCost(g, e.target.value)}
+                      aria-label={`Kosten 1. Einheit ${GRADE_LABEL[g]}`}
                       className="bg-mkt-850 border border-mkt-800 rounded-lg px-2 py-1.5 font-mono text-mkt-100 text-sm text-center focus:outline-none focus:border-lemon-500/50 transition-colors"
                     />
                   </Fragment>
                 ))}
               </div>
-              <p className="text-mkt-600 text-[10px] font-mono mt-2">Jede weitere Einheit kostet den Verkäufer +1,00 € mehr.</p>
+              <p className="text-mkt-500 text-[10px] font-mono mt-2">Jede weitere Einheit kostet den Verkäufer +1,00 € mehr.</p>
             </div>
 
             {(modalError || modalEconomicsError) && <ErrorBanner message={modalError || modalEconomicsError || ''} />}
@@ -365,7 +367,7 @@ export default function LandingView() {
             </button>
             <button
               onClick={handleConfigSkip}
-              className="text-mkt-600 text-xs font-mono text-center hover:text-mkt-400 transition-colors"
+              className="text-mkt-500 text-xs font-mono text-center hover:text-mkt-400 transition-colors"
             >
               Mit Defaults starten (2 Einheiten · 5 Runden · Holt &amp; Sherman Preise)
             </button>

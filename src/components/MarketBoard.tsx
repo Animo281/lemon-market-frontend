@@ -30,7 +30,7 @@ export default function MarketBoard({ sellers, decisions, infoMode, maxSellerUni
             <path d="M8 6v4M8 11.5v.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
           </svg>
           <span className="font-semibold">Asymmetrische Information</span>
-          <span className="text-coral-400/70 text-xs">— Qualität nicht sichtbar</span>
+          <span className="text-coral-400 text-xs">— Qualität nicht sichtbar</span>
         </div>
       )}
 
@@ -64,7 +64,7 @@ export default function MarketBoard({ sellers, decisions, infoMode, maxSellerUni
               </div>
 
               {pending ? (
-                <div className="flex items-center gap-2 text-mkt-600 text-sm py-3">
+                <div className="flex items-center gap-2 text-mkt-500 text-sm py-3">
                   <span className="relative flex h-1.5 w-1.5 shrink-0">
                     <span className="dot-ping absolute inline-flex h-full w-full rounded-full bg-mkt-600 opacity-75" />
                     <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-mkt-600" />
@@ -84,7 +84,7 @@ export default function MarketBoard({ sellers, decisions, infoMode, maxSellerUni
                     <span className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-lg border ${
                       infoMode === 'full' && gradeStyle
                         ? gradeStyle.cls
-                        : 'text-mkt-600 border-mkt-800 bg-transparent'
+                        : 'text-mkt-500 border-mkt-800 bg-transparent'
                     }`}>
                       {infoMode === 'full' && gradeStyle && (
                         <span className={`w-1.5 h-1.5 rounded-full ${gradeStyle.dot}`} />
@@ -94,7 +94,7 @@ export default function MarketBoard({ sellers, decisions, infoMode, maxSellerUni
 
                     <span className="font-mono text-sm">
                       <span className="text-mkt-300 font-bold">{d?.unitsSold ?? 0}</span>
-                      <span className="text-mkt-700">/{offered}</span>
+                      <span className="text-mkt-500">/{offered}</span>
                     </span>
                   </div>
                 </>

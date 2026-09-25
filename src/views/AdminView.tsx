@@ -14,6 +14,7 @@ import GameEndStats from '../components/GameEndStats'
 import Podium from '../components/Podium'
 import InfoModeCompare from '../components/InfoModeCompare'
 import ErrorBanner from '../components/ErrorBanner'
+import ConfirmDialog, { ConfirmRequest } from '../components/ConfirmDialog'
 
 export default function AdminView() {
   const { code } = useParams<{ code: string }>()
@@ -21,6 +22,7 @@ export default function AdminView() {
   const [session, setSession] = useState<PublicSession | null>(null)
   const [error, setError]     = useState('')
   const [busy, setBusy]       = useState(false)
+  const [confirm, setConfirm] = useState<ConfirmRequest | null>(null)
   const hasLoadedOnce = useRef(false)
 
   const adminToken = code ? storage.getAdminToken(code) : null
@@ -41,9 +43,7 @@ export default function AdminView() {
         // is a real "can't reach this session" (full-page). After that, a
         // failed poll is transient — show the inline banner and keep the
         // console interactive; it clears itself on the next successful poll.
-        const msg = err instanceof ApiError ? err.message : 'Verbindung verloren — versuche es weiter…'
-        if (!hasLoadedOnce.current) setError(msg)
-        else setError(msg)
+        setError(err instanceof ApiError ? err.message : 'Verbindung verloren — versuche es weiter…')
       }
     }
     load()
@@ -100,23 +100,41 @@ export default function AdminView() {
 
   const handleToggleInfoMode = () => {
     const next = session?.infoMode === 'full' ? 'asymmetrisch (Qualität ausblenden)' : 'volle Info (Qualität einblenden)'
-    if (!window.confirm(`Informationsmodus wechseln zu: ${next}?`)) return
-    runAction(() => api.toggleInfoMode(code, adminToken))
+    setConfirm({
+      title: 'Informationsmodus wechseln?',
+      body: `Wechseln zu: ${next}`,
+      confirmLabel: 'Wechseln',
+      action: () => runAction(() => api.toggleInfoMode(code, adminToken)),
+    })
   }
 
   const handleKick = (playerId: string, name: string) => {
-    if (!window.confirm(`${name} aus der Session entfernen?`)) return
-    runAction(() => api.kickPlayer(code, playerId, adminToken))
+    setConfirm({
+      title: 'Spieler entfernen?',
+      body: `${name} wird aus der Session entfernt und kann nicht mehr zurückkehren.`,
+      confirmLabel: 'Entfernen',
+      danger: true,
+      action: () => runAction(() => api.kickPlayer(code, playerId, adminToken)),
+    })
   }
 
   const handleSkipBuyer = () => {
-    if (!window.confirm('Aktuellen Käufer überspringen?')) return
-    runAction(() => api.skipBuyer(code, adminToken))
+    setConfirm({
+      title: 'Käufer überspringen?',
+      body: 'Der aktuelle Käufer kauft in dieser Runde nichts mehr.',
+      confirmLabel: 'Überspringen',
+      action: () => runAction(() => api.skipBuyer(code, adminToken)),
+    })
   }
 
   const handleForceAdvance = () => {
-    if (!window.confirm('Fehlende Verkäufer-Entscheidungen überschreiben und Marktphase starten?')) return
-    runAction(() => api.forceAdvance(code, adminToken))
+    setConfirm({
+      title: 'Marktphase erzwingen?',
+      body: 'Fehlende Verkäufer-Entscheidungen werden überschrieben und die Marktphase startet sofort.',
+      confirmLabel: 'Erzwingen',
+      danger: true,
+      action: () => runAction(() => api.forceAdvance(code, adminToken)),
+    })
   }
 
   return (
@@ -148,7 +166,7 @@ export default function AdminView() {
                   <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono transition-all ${
                     isCurrent ? 'bg-lemon-500/15 border border-lemon-500/40 text-lemon-400' :
                     isDone    ? 'bg-mkt-850 border border-mkt-800 text-mkt-400' :
-                                'border border-mkt-800/50 text-mkt-700'
+                                'border border-mkt-800/50 text-mkt-500'
                   }`}>
                     <span className={`w-1.5 h-1.5 rounded-full ${
                       isCurrent ? 'bg-lemon-500' :
@@ -181,7 +199,7 @@ export default function AdminView() {
                 Spiel starten →
               </button>
               {(sellers.length === 0 || buyers.length === 0) && (
-                <p className="text-mkt-600 text-xs text-center font-mono">
+                <p className="text-mkt-500 text-xs text-center font-mono">
                   Mindestens 1 Verkäufer + 1 Käufer erforderlich
                 </p>
               )}
@@ -231,7 +249,7 @@ export default function AdminView() {
                 <button
                   onClick={handleForceAdvance}
                   disabled={busy}
-                  className="w-full px-4 py-2.5 rounded-xl border font-mono text-sm font-bold transition-all bg-mkt-850 border-amber-500/30 text-amber-400 hover:bg-amber-500/10 disabled:opacity-50"
+                  className="w-full px-4 py-2.5 rounded-xl border font-mono text-sm font-bold transition-all bg-mkt-850 border-copper-500/30 text-copper-400 hover:bg-copper-500/10 disabled:opacity-50"
                 >
                   Runde erzwingen →
                 </button>
@@ -278,7 +296,7 @@ export default function AdminView() {
                         {done && <CheckIcon size={10} className="ml-auto text-lime-500" />}
                         {!done && isCurrent && (
                           <button
-                            className="ml-auto text-[9px] px-1.5 py-0.5 rounded border border-amber-500/30 text-amber-400 hover:bg-amber-500/10 transition-colors font-mono disabled:opacity-50"
+                            className="ml-auto text-[9px] px-1.5 py-0.5 rounded border border-copper-500/30 text-copper-400 hover:bg-copper-500/10 transition-colors font-mono disabled:opacity-50"
                             onClick={handleSkipBuyer}
                             disabled={busy}
                           >
@@ -365,7 +383,7 @@ export default function AdminView() {
                           <td className="py-2.5 pr-4 text-mkt-200">
                             {bd.price != null ? `€${bd.price.toFixed(2)}` : sellerP ? '—' : 'Kein Kauf'}
                           </td>
-                          <td className="py-2.5 text-mkt-600">—</td>
+                          <td className="py-2.5 text-mkt-500">—</td>
                           <td className={`py-2.5 font-bold ${bd.earnings >= 0 ? 'text-lime-400' : 'text-coral-400'}`}>
                             €{bd.earnings.toFixed(2)}
                           </td>
@@ -478,6 +496,7 @@ export default function AdminView() {
           </div>
         )}
       </div>
+      <ConfirmDialog request={confirm} onCancel={() => setConfirm(null)} />
     </div>
   )
 }

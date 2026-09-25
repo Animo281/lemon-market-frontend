@@ -62,7 +62,7 @@ export default function Podium({ sellers, buyers, results }: Props) {
                 }`}>
                   {r.player.name}
                 </div>
-                <div className="text-mkt-600 text-[10px] mt-0.5">
+                <div className="text-mkt-500 text-[10px] mt-0.5">
                   {r.role === 'seller' ? 'Verkäufer' : 'Käufer'}
                 </div>
               </div>

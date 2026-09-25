@@ -143,7 +143,7 @@ export default function SupplyDemandGraph({ session, historyResult }: Props) {
             <span className="text-ice-400 font-bold">{eq.qty}</span>
           </span>
         ) : !hasData ? (
-          <span className="text-mkt-600 text-xs font-mono">Noch keine Daten</span>
+          <span className="text-mkt-500 text-xs font-mono">Noch keine Daten</span>
         ) : null}
       </div>
 

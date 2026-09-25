@@ -19,37 +19,47 @@ export default {
           100: 'rgb(var(--mkt-100) / <alpha-value>)',
         },
         // Primary: Zitronen-Gelb — Verkäufer, Preise, CTAs, Session-Codes
+        // Theme-aware (rgb(var(--x)) like `mkt`): dark-mode values are the
+        // original bright accents; light-mode values (index.css) are darkened
+        // variants of the same hues, each verified >=4.5:1 on the lightest
+        // panel background these colors are ever used as text on (mkt-850
+        // light) — see the a11y contrast fix pass.
         lemon: {
-          200: 'rgb(253 240 160 / <alpha-value>)',
-          300: 'rgb(250 234 106 / <alpha-value>)',
-          400: 'rgb(245 216 40 / <alpha-value>)',
-          500: 'rgb(240 196 25 / <alpha-value>)',
-          600: 'rgb(200 156 8 / <alpha-value>)',
+          200: 'rgb(var(--lemon-200) / <alpha-value>)',
+          300: 'rgb(var(--lemon-300) / <alpha-value>)',
+          400: 'rgb(var(--lemon-400) / <alpha-value>)',
+          500: 'rgb(var(--lemon-500) / <alpha-value>)',
+          600: 'rgb(var(--lemon-600) / <alpha-value>)',
         },
         // Positive: Limette — Gewinne, Volle-Info, Bestätigungen
         lime: {
-          400: 'rgb(120 216 72 / <alpha-value>)',
-          500: 'rgb(92 192 48 / <alpha-value>)',
-          600: 'rgb(66 160 32 / <alpha-value>)',
+          400: 'rgb(var(--lime-400) / <alpha-value>)',
+          500: 'rgb(var(--lime-500) / <alpha-value>)',
+          600: 'rgb(var(--lime-600) / <alpha-value>)',
         },
         // Negative: Coral — Asymm.-Info, Verluste, Q1-Qualität, Fehler
         coral: {
-          400: 'rgb(240 112 96 / <alpha-value>)',
-          500: 'rgb(232 74 42 / <alpha-value>)',
-          600: 'rgb(192 48 24 / <alpha-value>)',
+          400: 'rgb(var(--coral-400) / <alpha-value>)',
+          500: 'rgb(var(--coral-500) / <alpha-value>)',
+          600: 'rgb(var(--coral-600) / <alpha-value>)',
         },
         // Käufer: Eis-Blau
         ice: {
-          300: 'rgb(136 216 245 / <alpha-value>)',
-          400: 'rgb(90 196 236 / <alpha-value>)',
-          500: 'rgb(56 168 216 / <alpha-value>)',
-          600: 'rgb(26 136 190 / <alpha-value>)',
+          300: 'rgb(var(--ice-300) / <alpha-value>)',
+          400: 'rgb(var(--ice-400) / <alpha-value>)',
+          500: 'rgb(var(--ice-500) / <alpha-value>)',
+          600: 'rgb(var(--ice-600) / <alpha-value>)',
         },
         // Kupfer — Sekundärakzent, Konfiguration
         copper: {
-          400: 'rgb(208 152 72 / <alpha-value>)',
-          500: 'rgb(184 120 40 / <alpha-value>)',
-          600: 'rgb(148 96 16 / <alpha-value>)',
+          400: 'rgb(var(--copper-400) / <alpha-value>)',
+          500: 'rgb(var(--copper-500) / <alpha-value>)',
+          600: 'rgb(var(--copper-600) / <alpha-value>)',
+        },
+        // Dekorativ (Landing-Hero, Session-Codes) — vorher gar nicht
+        // definiert (unstyled `text-gold-500`/`bg-gold-500`).
+        gold: {
+          500: 'rgb(var(--gold-500) / <alpha-value>)',
         },
         // Abendmarkt (Käuferansicht): illustrierte Szene, eigene Palette
         eve: {

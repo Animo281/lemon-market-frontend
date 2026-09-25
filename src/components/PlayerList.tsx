@@ -29,7 +29,7 @@ function RoleColumn({
           const p = players.find(pl => pl.slotIndex === i)
           return (
             <div key={i} className={`flex items-center gap-2 py-1.5 px-2 rounded-lg text-xs transition-colors ${
-              p ? 'text-mkt-100' : 'text-mkt-700'
+              p ? 'text-mkt-100' : 'text-mkt-500'
             }`}>
               <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${p ? filledDot : 'bg-mkt-800'}`} />
               <span className="truncate font-sans">{p ? p.name : `Slot ${i + 1}`}</span>
@@ -61,7 +61,7 @@ export default function PlayerList({ session, onKick }: Props) {
         <div className="label">Teilnehmer</div>
         <span className="font-mono text-xs text-mkt-400">
           <span className="text-mkt-100 font-bold">{joined}</span>
-          <span className="text-mkt-600">/{total}</span>
+          <span className="text-mkt-500">/{total}</span>
         </span>
       </div>
 
@@ -76,11 +76,11 @@ export default function PlayerList({ session, onKick }: Props) {
       <div className="grid grid-cols-2 gap-4">
         <RoleColumn
           label="Verkäufer" players={sellers} count={session.numSellers}
-          headerDot="bg-lemon-500" filledDot="bg-lemon-400" labelColor="text-lemon-500/80" onKick={onKick}
+          headerDot="bg-lemon-500" filledDot="bg-lemon-400" labelColor="text-lemon-500" onKick={onKick}
         />
         <RoleColumn
           label="Käufer" players={buyers} count={session.numBuyers}
-          headerDot="bg-ice-500" filledDot="bg-ice-400" labelColor="text-ice-500/80" onKick={onKick}
+          headerDot="bg-ice-500" filledDot="bg-ice-400" labelColor="text-ice-500" onKick={onKick}
         />
       </div>
     </div>
