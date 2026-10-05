@@ -55,8 +55,10 @@ den Chat/das LMS posten).
 Studierende gehen auf die Startseite → Feld **"Als Spieler"** → Code eingeben →
 Namen eintragen → einen freien Platz auswählen → "Beitreten". Käufer wählen
 einfach K1, K2, …; Verkäufer wählen einen von vier illustrierten Marktständen
-(Holzbude, Pavillon, Lemonade-Wagen, Schirm-Karren) — bei mehr als 4 Verkäufern
-wiederholen sich die Standbilder, das ist nur optisch und ändert nichts am Spiel.
+(Holzbude, Pavillon, Lemonade-Wagen, Schirm-Karren). Ab 5 Verkäufern teilt sich
+der Markt in mehrere **Marktgassen** zu je 4 Ständen auf — die Standbilder
+wiederholen sich dann zwar, jede Karte zeigt aber zusätzlich ihre Marktgasse
+("Marktgasse 1", "Marktgasse 2", …), sodass Stände eindeutig bleiben.
 Wer über den kopierten Link (statt über die Startseite) beitritt, landet direkt
 auf der Beitrittsseite mit bereits eingetragenem Code.
 

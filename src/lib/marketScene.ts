@@ -137,6 +137,20 @@ export const STALL_CROPS = [13, 231, 425, 625] // x offset per stall, same order
 // Stand" card, per HANDOFF-verkaeufer.md's "Stand-Slots pro Marktgasse" table.
 export const STALL_NAMES = ['Holzbude', 'Pavillon', 'Lemonade-Wagen', 'Schirm-Karren']
 
+/** Stall name + its Marktgasse (1-based) for a seller slot. There are only
+ * 4 stall designs (STALL_NAMES/STALL_CROPS), so sessions with >4 sellers
+ * reuse them across lanes — e.g. two "Holzbude" cards for slot 0 and slot 4.
+ * `lane` disambiguates those in the UI; it's null when everyone fits in one
+ * lane (laneCount === 1), so small sessions render exactly as before. */
+export function stallInfo(slotIndex: number, numSellers: number): { cropIndex: number; name: string; lane: number | null } {
+  const cropIndex = slotIndex % SELLERS_PER_LANE
+  return {
+    cropIndex,
+    name: STALL_NAMES[cropIndex],
+    lane: laneCount(numSellers) > 1 ? Math.floor(slotIndex / SELLERS_PER_LANE) + 1 : null,
+  }
+}
+
 /** background-size/background-position for one stall's crop card, per
  * HANDOFF-verkaeufer.md's "Ausschnitt 206×250 Bildpixel" formula. */
 export function cropStyle(cropX: number): CSSProperties {

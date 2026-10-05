@@ -1,5 +1,5 @@
 import { PublicSession, Role } from '../shared/types'
-import { cropCoverStyle, cropStyle, MARKET_SCENE_IMAGE, STALL_CROPS, STALL_NAMES } from '../lib/marketScene'
+import { cropCoverStyle, cropStyle, MARKET_SCENE_IMAGE, stallInfo, STALL_CROPS } from '../lib/marketScene'
 import { MiniLemonIcon } from './buyer/icons'
 
 interface Props {
@@ -49,17 +49,17 @@ function BuyerSlot({ index, takenBy, selectedRole, selectedSlot, onSelect }: Omi
 // button, per the plan's "Stand-Auswahl beim Beitreten". JoinView itself
 // stays in the dark Nacht-Markt chrome (mkt-* surfaces, dark border) so only
 // the thumbnail brings the illustrated scene in, not the whole page.
-function SellerSlot({ index, takenBy, selectedRole, selectedSlot, onSelect }: Omit<SlotProps, 'role'>) {
+function SellerSlot({ index, numSellers, takenBy, selectedRole, selectedSlot, onSelect }: Omit<SlotProps, 'role'> & { numSellers: number }) {
   const isSelected = selectedRole === 'seller' && selectedSlot === index
-  const cropIndex = index % 4
-  const stallName = STALL_NAMES[cropIndex]
+  const { cropIndex, name: stallName, lane } = stallInfo(index, numSellers)
+  const laneLabel = lane !== null ? `Marktgasse ${lane}` : null
 
   return (
     <button
       type="button"
       disabled={!!takenBy}
       aria-pressed={isSelected}
-      aria-label={`${stallName}${takenBy ? `, vergeben an ${takenBy}` : isSelected ? ', ausgewählt' : ', frei'}`}
+      aria-label={`${stallName}${laneLabel ? `, ${laneLabel}` : ''}${takenBy ? `, vergeben an ${takenBy}` : isSelected ? ', ausgewählt' : ', frei'}`}
       onClick={() => onSelect('seller', index)}
       className={`rounded-xl border p-2 text-center transition-all ${
         takenBy
@@ -76,6 +76,7 @@ function SellerSlot({ index, takenBy, selectedRole, selectedSlot, onSelect }: Om
         {cropIndex === 2 && <span style={cropCoverStyle(STALL_CROPS[2])}><MiniLemonIcon /></span>}
       </div>
       <div className={`mt-1.5 text-xs font-semibold truncate ${isSelected ? 'text-lemon-400' : 'text-mkt-200'}`}>{stallName}</div>
+      {laneLabel && <div className="text-[9px] text-mkt-500 truncate">{laneLabel}</div>}
       <div className="text-[10px] text-mkt-500 truncate">
         {takenBy ? `Vergeben an ${takenBy}` : isSelected ? 'Dein Stand' : 'Frei'}
       </div>
@@ -103,7 +104,7 @@ export default function JoinSlotPicker({ session, selectedRole, selectedSlot, on
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 max-w-md">
           {Array.from({ length: session.numSellers }, (_, i) => (
             <SellerSlot
-              key={i} index={i}
+              key={i} index={i} numSellers={session.numSellers}
               takenBy={takenSellerSlots.get(i)}
               selectedRole={selectedRole} selectedSlot={selectedSlot}
               onSelect={onSelect}

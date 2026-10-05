@@ -3,7 +3,7 @@ import { Grade, Player, PublicSession } from '../shared/types'
 import { DEFAULT_SELLER_FIRST_COSTS, sellerCost } from '../shared/constants'
 import { api, ApiError } from '../api/client'
 import {
-  MARKET_SCENE_IMAGE, SCENE_VIEWS, STALL_CROPS, STALL_NAMES, cropCoverStyle, cropStyle, laneCount,
+  MARKET_SCENE_IMAGE, SCENE_VIEWS, STALL_CROPS, cropCoverStyle, cropStyle, laneCount, stallInfo,
 } from '../lib/marketScene'
 import { lastRoundMarketPrices, liveSellerEarnings, sellerBalance, sellerHistory } from '../lib/sellerStats'
 import SellerHud from '../components/seller/SellerHud'
@@ -196,7 +196,9 @@ export default function SellerView({ session, me, code, playerToken, error, onSe
           />
         )}
 
-        {session.phase === 'lobby' && (
+        {session.phase === 'lobby' && (() => {
+          const myStall = stallInfo(me.slotIndex, session.numSellers)
+          return (
           <div className="scene-scroller">
             <div className="scene-world">
               <div className="seller-stage">
@@ -207,19 +209,23 @@ export default function SellerView({ session, me, code, playerToken, error, onSe
                 </div>
                 <div className="abs" style={{ left: '50%', top: '48%', transform: 'translate(-50%, -50%)', width: '22%' }}>
                   <div className="stallcard" aria-pressed="true">
-                    <div className="crop" style={cropStyle(STALL_CROPS[me.slotIndex % 4])}>
-                      {me.slotIndex % 4 === 2 && (
+                    <div className="crop" style={cropStyle(STALL_CROPS[myStall.cropIndex])}>
+                      {myStall.cropIndex === 2 && (
                         <span style={cropCoverStyle(STALL_CROPS[2])}><MiniLemonIcon /></span>
                       )}
                     </div>
-                    <b>{STALL_NAMES[me.slotIndex % 4]}</b>
-                    <span>Dein Stand, {me.name}</span>
+                    <b>{myStall.name}</b>
+                    <span>
+                      Dein Stand, {me.name}
+                      {myStall.lane !== null && ` · Marktgasse ${myStall.lane}`}
+                    </span>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        )}
+          )
+        })()}
 
         {session.phase === 'seller-input' && editable && step === 'crate' && (
           <div className="scene-scroller">
