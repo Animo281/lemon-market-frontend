@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Zahlungsbereitschaft vs. Kosten je Qualitätsstufe</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --paper: #fcf8ee; --paper-2: #f4eee0; --ink: #120c06; --ink-strong: #111111;
+      --muted: #4c4438; --soft: #908470; --rule: rgba(18,12,6,0.12); --rule-solid: #dad0be;
+      --accent: #a9361f; --accent-tint: rgba(169,54,31,0.08); --link: #226582;
+      --sans: 'Geist', system-ui, sans-serif; --serif: 'Instrument Serif', serif;
+      --mono: 'Geist Mono', ui-monospace, monospace;
+    }
+    body { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2.5rem 2rem; background: var(--paper); color: var(--ink); font-family: var(--sans); }
+    .frame { width: 100%; max-width: 1320px; }
+    .eyebrow { margin-bottom: 0.5rem; color: var(--muted); font: 500 0.7rem var(--mono); letter-spacing: 0.18em; text-transform: uppercase; }
+    h1 { margin-bottom: 1.25rem; color: var(--ink); font: 400 2rem var(--serif); letter-spacing: -0.02em; }
+    .diagram-container { width: 100%; overflow-x: auto; }
+    svg { display: block; width: 100%; min-width: 1280px; }
+    @media print { .diagram-container { overflow-x: visible; } svg { min-width: 0; } }
+  </style>
+</head>
+<body>
+  <main class="frame">
+    <p class="eyebrow">Bar · Lemon Market</p>
+    <h1>Zahlungsbereitschaft vs. Kosten je Qualitätsstufe</h1>
+
+    <div class="diagram-container">
+      <svg viewBox="0 0 1280 720" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="wtp-cost-title wtp-cost-desc">
+        <title id="wtp-cost-title">Zahlungsbereitschaft vs. Kosten je Qualitätsstufe</title>
+        <desc id="wtp-cost-desc">Gruppierter Balkenchart: Käufer-Zahlungsbereitschaft und Verkäufer-Grenzkosten der ersten Einheit für Grade 1 bis 3, mit Grade 3 als fokale Stufe mit den höchsten Preisen.</desc>
+        <rect width="1280" height="720" fill="#fcf8ee"/>
+
+        <!-- Y-axis rotated title -->
+        <text transform="rotate(-90 36 290)" x="36" y="290" fill="#4c4438" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.14em" text-anchor="middle">PREIS (SPIELWÄHRUNG)</text>
+
+        <!-- Gridlines (drawn before bars) -->
+        <line x1="140" y1="405" x2="1180" y2="405" stroke="rgba(18,12,6,0.08)" stroke-width="0.8"/>
+        <line x1="140" y1="290" x2="1180" y2="290" stroke="rgba(18,12,6,0.08)" stroke-width="0.8"/>
+        <line x1="140" y1="175" x2="1180" y2="175" stroke="rgba(18,12,6,0.08)" stroke-width="0.8"/>
+        <line x1="140" y1="60"  x2="1180" y2="60"  stroke="rgba(18,12,6,0.06)" stroke-width="0.8"/>
+
+        <!-- Axis line + baseline -->
+        <line x1="140" y1="60" x2="140" y2="520" stroke="rgba(18,12,6,0.25)" stroke-width="1"/>
+        <line x1="140" y1="520" x2="1180" y2="520" stroke="rgba(18,12,6,0.25)" stroke-width="1"/>
+
+        <!-- Y tick labels -->
+        <text x="132" y="524" fill="#4c4438" font-size="11" font-family="'Geist Mono', monospace" text-anchor="end">0</text>
+        <text x="132" y="409" fill="#4c4438" font-size="11" font-family="'Geist Mono', monospace" text-anchor="end">4</text>
+        <text x="132" y="294" fill="#4c4438" font-size="11" font-family="'Geist Mono', monospace" text-anchor="end">8</text>
+        <text x="132" y="179" fill="#4c4438" font-size="11" font-family="'Geist Mono', monospace" text-anchor="end">12</text>
+        <text x="132" y="64"  fill="#4c4438" font-size="11" font-family="'Geist Mono', monospace" text-anchor="end">16</text>
+
+        <!-- ─── GRADE 1 (group center x=320) ─── -->
+        <rect x="216" y="405" width="96" height="115" fill="rgba(76,68,56,0.14)" stroke="#4c4438" stroke-width="1"/>
+        <text x="264" y="397" fill="#4c4438" font-size="11" font-family="'Geist Mono', monospace" text-anchor="middle">4.0</text>
+        <rect x="328" y="480" width="96" height="40" fill="rgba(76,68,56,0.06)" stroke="#4c4438" stroke-width="0.8"/>
+        <text x="376" y="472" fill="#4c4438" font-size="11" font-family="'Geist Mono', monospace" text-anchor="middle">1.4</text>
+        <rect x="298" y="352" width="44" height="15" rx="2" fill="#fcf8ee"/>
+        <text x="320" y="363" fill="#908470" font-size="10" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.04em">Δ 2.6</text>
+        <text x="320" y="550" fill="#120c06" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Grade 1</text>
+
+        <!-- ─── GRADE 2 (group center x=660) ─── -->
+        <rect x="556" y="267" width="96" height="253" fill="rgba(76,68,56,0.14)" stroke="#4c4438" stroke-width="1"/>
+        <text x="604" y="259" fill="#4c4438" font-size="11" font-family="'Geist Mono', monospace" text-anchor="middle">8.8</text>
+        <rect x="668" y="388" width="96" height="132" fill="rgba(76,68,56,0.06)" stroke="#4c4438" stroke-width="0.8"/>
+        <text x="716" y="380" fill="#4c4438" font-size="11" font-family="'Geist Mono', monospace" text-anchor="middle">4.6</text>
+        <rect x="638" y="214" width="44" height="15" rx="2" fill="#fcf8ee"/>
+        <text x="660" y="225" fill="#908470" font-size="10" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.04em">Δ 4.2</text>
+        <text x="660" y="550" fill="#120c06" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Grade 2</text>
+
+        <!-- ─── GRADE 3 (group center x=1000) — focal pair, coral accent ─── -->
+        <rect x="896" y="129" width="96" height="391" fill="rgba(169,54,31,0.08)" stroke="#a9361f" stroke-width="1.2"/>
+        <text x="944" y="121" fill="#a9361f" font-size="11" font-weight="600" font-family="'Geist Mono', monospace" text-anchor="middle">13.6</text>
+        <rect x="1008" y="204" width="96" height="316" fill="rgba(169,54,31,0.04)" stroke="#a9361f" stroke-width="0.9"/>
+        <text x="1056" y="196" fill="#a9361f" font-size="11" font-weight="600" font-family="'Geist Mono', monospace" text-anchor="middle">11.0</text>
+        <rect x="978" y="76" width="44" height="15" rx="2" fill="#fcf8ee"/>
+        <text x="1000" y="87" fill="#a9361f" font-size="10" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.04em">Δ 2.6</text>
+        <text x="1000" y="550" fill="#a9361f" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Grade 3</text>
+
+        <!-- Legend -->
+        <line x1="100" y1="600" x2="1180" y2="600" stroke="rgba(18,12,6,0.10)" stroke-width="0.8"/>
+        <text x="100" y="620" fill="#4c4438" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.18em">LEGEND</text>
+
+        <rect x="100" y="634" width="16" height="11" rx="2" fill="rgba(76,68,56,0.14)" stroke="#4c4438" stroke-width="1"/>
+        <text x="124" y="643" fill="#4c4438" font-size="10.5" font-family="'Geist', sans-serif">Käufer-WTP (buyerValues)</text>
+
+        <rect x="420" y="634" width="16" height="11" rx="2" fill="rgba(76,68,56,0.06)" stroke="#4c4438" stroke-width="0.8"/>
+        <text x="444" y="643" fill="#4c4438" font-size="10.5" font-family="'Geist', sans-serif">Verkäufer-Grenzkosten, 1. Einheit</text>
+
+        <rect x="820" y="634" width="16" height="11" rx="2" fill="rgba(169,54,31,0.08)" stroke="#a9361f" stroke-width="1.2"/>
+        <text x="844" y="643" fill="#4c4438" font-size="10.5" font-family="'Geist', sans-serif">Grade 3 · größter Einsatz, zuerst verloren</text>
+      </svg>
+    </div>
+  </main>
+</body>
+</html>

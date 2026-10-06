@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Angebot &amp; Nachfrage — volle vs. verdeckte Information</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --paper: #fcf8ee; --paper-2: #f4eee0; --ink: #120c06; --ink-strong: #111111;
+      --muted: #4c4438; --soft: #908470; --rule: rgba(18,12,6,0.12); --rule-solid: #dad0be;
+      --accent: #a9361f; --accent-tint: rgba(169,54,31,0.08); --link: #226582;
+      --sans: 'Geist', system-ui, sans-serif; --serif: 'Instrument Serif', serif;
+      --mono: 'Geist Mono', ui-monospace, monospace;
+    }
+    body { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2.5rem 2rem; background: var(--paper); color: var(--ink); font-family: var(--sans); }
+    .frame { width: 100%; max-width: 1320px; }
+    .eyebrow { margin-bottom: 0.5rem; color: var(--muted); font: 500 0.7rem var(--mono); letter-spacing: 0.18em; text-transform: uppercase; }
+    h1 { margin-bottom: 1.25rem; color: var(--ink); font: 400 2rem var(--serif); letter-spacing: -0.02em; }
+    .diagram-container { width: 100%; overflow-x: auto; }
+    svg { display: block; width: 100%; min-width: 1280px; }
+    @media print { .diagram-container { overflow-x: visible; } svg { min-width: 0; } }
+  </style>
+</head>
+<body>
+  <main class="frame">
+    <p class="eyebrow">Line · Lemon Market</p>
+    <h1>Angebot &amp; Nachfrage — volle vs. verdeckte Information</h1>
+
+    <div class="diagram-container">
+      <svg viewBox="0 0 1280 720" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="demand-curves-title demand-curves-desc">
+        <title id="demand-curves-title">Angebot &amp; Nachfrage — volle vs. verdeckte Information</title>
+        <desc id="demand-curves-desc">Liniendiagramm über fünf Spielrunden: unter voller Information steigt die Nachfrage stufenweise mit der besten verfügbaren Qualität, unter verdeckter Information bricht sie ab Runde 3 ein und sinkt weiter, sobald gute Verkäufer den Markt verlassen.</desc>
+        <rect width="1280" height="720" fill="#fcf8ee"/>
+
+        <!-- Y-axis rotated title -->
+        <text transform="rotate(-90 36 290)" x="36" y="290" fill="#4c4438" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.14em" text-anchor="middle">WTP (SPIELWÄHRUNG)</text>
+
+        <!-- Gridlines -->
+        <line x1="140" y1="405" x2="1180" y2="405" stroke="rgba(18,12,6,0.08)" stroke-width="0.8"/>
+        <line x1="140" y1="290" x2="1180" y2="290" stroke="rgba(18,12,6,0.08)" stroke-width="0.8"/>
+        <line x1="140" y1="175" x2="1180" y2="175" stroke="rgba(18,12,6,0.08)" stroke-width="0.8"/>
+        <line x1="140" y1="60"  x2="1180" y2="60"  stroke="rgba(18,12,6,0.06)" stroke-width="0.8"/>
+
+        <!-- Axes -->
+        <line x1="140" y1="60" x2="140" y2="520" stroke="rgba(18,12,6,0.25)" stroke-width="1"/>
+        <line x1="140" y1="520" x2="1180" y2="520" stroke="rgba(18,12,6,0.25)" stroke-width="1"/>
+
+        <!-- Y tick labels -->
+        <text x="132" y="524" fill="#4c4438" font-size="11" font-family="'Geist Mono', monospace" text-anchor="end">0</text>
+        <text x="132" y="409" fill="#4c4438" font-size="11" font-family="'Geist Mono', monospace" text-anchor="end">4</text>
+        <text x="132" y="294" fill="#4c4438" font-size="11" font-family="'Geist Mono', monospace" text-anchor="end">8</text>
+        <text x="132" y="179" fill="#4c4438" font-size="11" font-family="'Geist Mono', monospace" text-anchor="end">12</text>
+        <text x="132" y="64"  fill="#4c4438" font-size="11" font-family="'Geist Mono', monospace" text-anchor="end">16</text>
+
+        <!-- Toggle marker at Runde 3: dozent switches infoMode full -> asymmetric -->
+        <line x1="660" y1="60" x2="660" y2="520" stroke="rgba(18,12,6,0.30)" stroke-width="1" stroke-dasharray="3 3"/>
+        <rect x="598" y="40" width="124" height="15" rx="2" fill="#fcf8ee"/>
+        <text x="660" y="51" fill="#4c4438" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.10em" text-anchor="middle">TOGGLE-INFO-MODE</text>
+
+        <!-- Volle Information: step function on bestGradeWTP, non-focal -->
+        <path d="M140,405 H400 V267 H660 V129 H1180"
+              fill="none" stroke="#4c4438" stroke-width="1.2" stroke-linejoin="round"/>
+
+        <!-- Verdeckte Information: calcAsymmetricWTP, focal — coincides with the full-info step
+             through Runde 1-2 (mode not yet toggled), then breaks at Runde 3. -->
+        <path d="M140,405 H400 V267 H660 V264 L920,336 L1180,376"
+              fill="none" stroke="#a9361f" stroke-width="1.8" stroke-linejoin="round"/>
+        <circle cx="140" cy="405" r="4" fill="#a9361f"/>
+        <circle cx="400" cy="267" r="4" fill="#a9361f"/>
+        <circle cx="660" cy="264" r="4" fill="#a9361f"/>
+        <circle cx="920" cy="336" r="4" fill="#a9361f"/>
+        <circle cx="1180" cy="376" r="4" fill="#a9361f"/>
+
+        <!-- X-axis labels -->
+        <text x="140"  y="540" fill="#4c4438" font-size="11" font-family="'Geist Mono', monospace" text-anchor="middle">R1</text>
+        <text x="400"  y="540" fill="#4c4438" font-size="11" font-family="'Geist Mono', monospace" text-anchor="middle">R2</text>
+        <text x="660"  y="540" fill="#4c4438" font-size="11" font-family="'Geist Mono', monospace" text-anchor="middle">R3</text>
+        <text x="920"  y="540" fill="#4c4438" font-size="11" font-family="'Geist Mono', monospace" text-anchor="middle">R4</text>
+        <text x="1180" y="540" fill="#4c4438" font-size="11" font-family="'Geist Mono', monospace" text-anchor="middle">R5</text>
+        <text x="660" y="562" fill="#908470" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.14em" text-anchor="middle">SPIELRUNDE</text>
+
+        <!-- Legend -->
+        <line x1="100" y1="600" x2="1180" y2="600" stroke="rgba(18,12,6,0.10)" stroke-width="0.8"/>
+        <text x="100" y="620" fill="#4c4438" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.18em">LEGEND</text>
+
+        <line x1="100" y1="636" x2="124" y2="636" stroke="#4c4438" stroke-width="1.2"/>
+        <text x="132" y="640" fill="#4c4438" font-size="10.5" font-family="'Geist', sans-serif">Volle Information · bestGradeWTP</text>
+
+        <line x1="460" y1="636" x2="484" y2="636" stroke="#a9361f" stroke-width="1.8"/>
+        <circle cx="472" cy="636" r="4" fill="#a9361f"/>
+        <text x="492" y="640" fill="#4c4438" font-size="10.5" font-family="'Geist', sans-serif">Verdeckte Information · calcAsymmetricWTP (fokal)</text>
+      </svg>
+    </div>
+  </main>
+</body>
+</html>

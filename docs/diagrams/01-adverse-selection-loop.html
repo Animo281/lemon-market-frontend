@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Die Lemons-Spirale</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --paper: #fcf8ee; --paper-2: #f4eee0; --ink: #120c06; --ink-strong: #111111;
+      --muted: #4c4438; --soft: #908470; --rule: rgba(18,12,6,0.12); --rule-solid: #dad0be;
+      --accent: #a9361f; --accent-tint: rgba(169,54,31,0.08); --link: #226582;
+      --sans: 'Geist', system-ui, sans-serif; --serif: 'Instrument Serif', serif;
+      --mono: 'Geist Mono', ui-monospace, monospace;
+    }
+    body { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2.5rem 2rem; background: var(--paper); color: var(--ink); font-family: var(--sans); }
+    .frame { width: 100%; max-width: 1320px; }
+    .eyebrow { margin-bottom: 0.5rem; color: var(--muted); font: 500 0.7rem var(--mono); letter-spacing: 0.18em; text-transform: uppercase; }
+    h1 { margin-bottom: 1.25rem; color: var(--ink); font: 400 2rem var(--serif); letter-spacing: -0.02em; }
+    .diagram-container { width: 100%; overflow-x: auto; }
+    svg { display: block; width: 100%; min-width: 1280px; }
+    @media print { .diagram-container { overflow-x: visible; } svg { min-width: 0; } }
+
+    .ring { fill: none; stroke: var(--muted); stroke-width: 1.2; }
+    .spoke { fill: none; stroke: var(--soft); stroke-width: 1; stroke-dasharray: 5 4; }
+    .station { fill: var(--paper); stroke: var(--ink); stroke-width: 1; }
+    .hub { fill: var(--accent-tint); stroke: var(--accent); stroke-width: 1.6; }
+    .node-name { fill: var(--ink); font: 600 16px var(--sans); text-anchor: middle; }
+    .sublabel { fill: var(--soft); font: 400 12px var(--mono); text-anchor: middle; }
+    .hub-name { fill: var(--accent); font: 600 16px var(--sans); text-anchor: middle; }
+    .hub-sub { fill: var(--muted); font: 400 12px var(--mono); text-anchor: middle; }
+    .callout { fill: var(--ink); font: 400 italic 16px var(--serif); text-anchor: end; }
+    .leader { fill: none; stroke: rgba(18,12,6,0.40); stroke-width: 1; stroke-dasharray: 4 3; }
+  </style>
+</head>
+<body>
+  <main class="frame">
+    <p class="eyebrow">Loop · Lemon Market</p>
+    <h1>Die Lemons-Spirale</h1>
+
+    <div class="diagram-container">
+      <svg viewBox="0 0 1280 720" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="lemons-loop-title lemons-loop-desc">
+        <title id="lemons-loop-title">Die Lemons-Spirale</title>
+        <desc id="lemons-loop-desc">Loop-Diagramm: verdeckte Qualität drückt die Nachfrage auf den Durchschnitt, gute Verkäufer verlassen den Markt, nur noch Grade 1 bleibt übrig, und die Markteffizienz sinkt weiter — ein sich selbst verstärkender Kreislauf.</desc>
+        <defs>
+          <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4c4438"/></marker>
+          <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#a9361f"/></marker>
+          <marker id="arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#226582"/></marker>
+          <marker id="arrow-soft" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#908470"/></marker>
+        </defs>
+
+        <rect width="1280" height="720" fill="#fcf8ee"/>
+
+        <!-- Ring flow: four clockwise arcs on the r=240 station circle, top -> right -> bottom -> left -> top. -->
+        <path class="ring" d="M760.000,152.154 A240 240 0 0 1 874.908,310.825" marker-end="url(#arrow)"/>
+        <path class="ring" d="M875.151,408.000 A240 240 0 0 1 761.038,567.243" marker-end="url(#arrow)"/>
+        <path class="ring" d="M520.000,567.846 A240 240 0 0 1 405.092,409.175" marker-end="url(#arrow)"/>
+        <path class="ring" d="M404.849,312.000 A240 240 0 0 1 518.960,152.754" marker-end="url(#arrow)"/>
+
+        <!-- Dashed write-back spokes: each station's outcome accumulates into the efficiency hub. -->
+        <path class="spoke" d="M640,168 V294" marker-end="url(#arrow-soft)"/>
+        <path class="spoke" d="M760,360 L736,360" marker-end="url(#arrow-soft)"/>
+        <path class="spoke" d="M640,552 V426" marker-end="url(#arrow-soft)"/>
+        <path class="spoke" d="M520,360 L544,360" marker-end="url(#arrow-soft)"/>
+
+        <!-- Stations -->
+        <rect class="station" x="520" y="72" width="240" height="96" rx="6"/>
+        <text x="640" y="113" class="node-name">Qualität verdeckt</text>
+        <text x="640" y="134" class="sublabel">Grade → null in Offers</text>
+
+        <rect class="station" x="760" y="312" width="240" height="96" rx="6"/>
+        <text x="880" y="353" class="node-name">Nachfrage sinkt</text>
+        <text x="880" y="374" class="sublabel">Ø-WTP, nicht Bestgrade</text>
+
+        <rect class="station" x="520" y="552" width="240" height="96" rx="6"/>
+        <text x="640" y="593" class="node-name">Gute Verkäufer gehen</text>
+        <text x="640" y="614" class="sublabel">Grade 3 verlässt Markt</text>
+
+        <rect class="station" x="280" y="312" width="240" height="96" rx="6"/>
+        <text x="400" y="353" class="node-name">Nur Grade 1 bleibt</text>
+        <text x="400" y="374" class="sublabel">billige Ware dominiert</text>
+
+        <!-- The one shared-state hub — the focal coral node. -->
+        <rect class="hub" x="550" y="300" width="180" height="120" rx="8"/>
+        <text x="640" y="353" class="hub-name">Effizienz sinkt</text>
+        <text x="640" y="374" class="hub-sub">Surplus / Maximum ↓</text>
+
+        <!-- Editorial callout -->
+        <text x="1240" y="90" class="callout">Akerlofs Lemons-Effekt:</text>
+        <text x="1240" y="112" class="callout">schlechte Ware verdrängt gute,</text>
+        <text x="1240" y="134" class="callout">wenn Qualität unsichtbar wird.</text>
+        <path class="leader" d="M 1000 118 Q 930 150 872 178"/>
+        <circle cx="872" cy="178" r="2" fill="#120c06"/>
+      </svg>
+    </div>
+  </main>
+</body>
+</html>

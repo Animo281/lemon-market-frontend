@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spielverlauf · Lemon Market</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&family=Noto+Serif:ital@0;1&family=Noto+Sans+KR:wght@400;500;600&family=Noto+Serif+KR:wght@400&family=Noto+Sans+TC:wght@400;500;600&family=Noto+Serif+TC:wght@400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --color-paper:       #fcf8ee;
+      --color-paper-2:     #f4eee0;
+      --color-ink:         #120c06;
+      --color-ink-strong:  #111111;
+      --color-muted:       #4c4438;
+      --color-soft:        #908470;
+      --color-rule:        rgba(18,12,6,0.12);
+      --color-rule-solid:  #dad0be;
+      --color-accent:      #a9361f;
+      --color-accent-tint: rgba(169,54,31,0.08);
+      --color-link:        #226582;
+      --font-sans:  'Geist', system-ui, sans-serif;
+      --font-serif: 'Instrument Serif', 'Noto Serif', 'Noto Serif KR', serif;
+      --font-mono:  'Geist Mono', ui-monospace, monospace;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--color-paper);
+      color: var(--color-ink);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 2rem;
+    }
+
+    .frame { max-width: 1320px; width: 100%; }
+    .diagram-container { width: 100%; overflow-x: auto; }
+
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--color-muted);
+      margin-bottom: 0.5rem;
+    }
+
+    h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(1.8rem, 2.6vw + 1rem, 2.5rem);
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      color: var(--color-ink-strong);
+      margin-bottom: 1.5rem;
+    }
+
+    svg { width: 100%; min-width: 1280px; display: block; }
+
+    @media print {
+      .diagram-container { overflow-x: visible; }
+      svg { min-width: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <p class="eyebrow">Timeline · Lemon Market</p>
+    <h1>5 Runden, ein Umschaltpunkt</h1>
+
+    <div class="diagram-container">
+      <svg viewBox="0 0 1280 720" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="spielverlauf-title spielverlauf-desc">
+        <title id="spielverlauf-title">Spielverlauf über 5 Runden mit einem Umschaltpunkt</title>
+        <desc id="spielverlauf-desc">Timeline mit fünf Spielrunden: Runde 1 und 2 laufen mit voller Information, ab Runde 3 — einer Dozenten-Entscheidung ohne festen Code-Trigger — wechselt das Spiel zu verdeckter, asymmetrischer Information bis Runde 5.</desc>
+        <defs>
+          <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4c4438"/></marker>
+          <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#a9361f"/></marker>
+          <marker id="arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#226582"/></marker>
+        </defs>
+
+        <rect width="100%" height="100%" fill="#fcf8ee"/>
+
+        <!-- Phase zone headers -->
+        <text x="40"  y="88" fill="#4c4438" font-size="12" font-family="'Geist Mono', monospace" letter-spacing="0.14em">VOLLE INFORMATION</text>
+        <text x="540" y="88" fill="#a9361f" font-size="12" font-family="'Geist Mono', monospace" letter-spacing="0.14em">VERDECKTE INFORMATION (ASYMMETRIC)</text>
+
+        <!-- Switch-point divider (focal, coral, dashed) -->
+        <line x1="520" y1="114" x2="520" y2="600" stroke="#a9361f" stroke-width="1.4" stroke-dasharray="6,4"/>
+
+        <!-- Baseline -->
+        <line x1="40" y1="400" x2="1240" y2="400" stroke="#4c4438" stroke-width="1"/>
+        <text x="40" y="420" fill="#908470" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.1em">RUNDE 1 – 5 · totalRounds = 5</text>
+
+        <!-- Tick marks -->
+        <line x1="160"  y1="396" x2="160"  y2="404" stroke="#4c4438" stroke-width="1"/>
+        <line x1="400"  y1="396" x2="400"  y2="404" stroke="#4c4438" stroke-width="1"/>
+        <line x1="640"  y1="394" x2="640"  y2="406" stroke="#a9361f" stroke-width="1.2"/>
+        <line x1="880"  y1="396" x2="880"  y2="404" stroke="#4c4438" stroke-width="1"/>
+        <line x1="1120" y1="396" x2="1120" y2="404" stroke="#4c4438" stroke-width="1"/>
+
+        <!-- Drop lines (vertical hairlines, share x with their circle: straight lines allowed) -->
+        <line x1="160"  y1="340" x2="160"  y2="396" stroke="rgba(18,12,6,0.30)" stroke-width="1"/>
+        <line x1="400"  y1="404" x2="400"  y2="448" stroke="rgba(18,12,6,0.30)" stroke-width="1"/>
+        <line x1="640"  y1="300" x2="640"  y2="394" stroke="rgba(169,54,31,0.45)" stroke-width="1"/>
+        <line x1="880"  y1="404" x2="880"  y2="452" stroke="rgba(18,12,6,0.30)" stroke-width="1"/>
+        <line x1="1120" y1="348" x2="1120" y2="396" stroke="rgba(18,12,6,0.30)" stroke-width="1"/>
+
+        <!-- Event circles -->
+        <circle cx="160"  cy="400" r="4" fill="#120c06" stroke="#120c06" stroke-width="1"/>
+        <circle cx="400"  cy="400" r="4" fill="#120c06" stroke="#120c06" stroke-width="1"/>
+        <circle cx="640"  cy="400" r="6" fill="rgba(169,54,31,0.12)" stroke="#a9361f" stroke-width="1.4"/>
+        <circle cx="880"  cy="400" r="4" fill="#120c06" stroke="#120c06" stroke-width="1"/>
+        <circle cx="1120" cy="400" r="4" fill="#120c06" stroke="#120c06" stroke-width="1"/>
+
+        <!-- R1: Runde 1 (above) -->
+        <text x="160" y="328" fill="#120c06" font-size="16" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Runde 1</text>
+
+        <!-- R2: Runde 2 (below) -->
+        <text x="400" y="466" fill="#120c06" font-size="16" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Runde 2</text>
+
+        <!-- R3: Runde 3 (above, focal milestone) -->
+        <text x="640" y="252" fill="#908470" font-size="12" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.04em">Dozenten-Entscheidung</text>
+        <text x="640" y="272" fill="#4c4438" font-size="12" font-family="'Geist Mono', monospace" text-anchor="middle">Verdeckte Information</text>
+        <text x="640" y="292" fill="#120c06" font-size="16" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Runde 3</text>
+
+        <!-- R4: Runde 4 (below) -->
+        <text x="880" y="470" fill="#120c06" font-size="16" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Runde 4</text>
+        <text x="880" y="490" fill="#4c4438" font-size="12" font-family="'Geist Mono', monospace" text-anchor="middle">Effizienz sinkt</text>
+
+        <!-- R5: Runde 5 (above) -->
+        <text x="1120" y="336" fill="#120c06" font-size="16" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Runde 5</text>
+        <text x="1120" y="316" fill="#4c4438" font-size="12" font-family="'Geist Mono', monospace" text-anchor="middle">Spielende</text>
+
+        <!-- ============ LEGEND ============ -->
+        <line x1="40" y1="636" x2="1240" y2="636" stroke="rgba(18,12,6,0.10)" stroke-width="0.8"/>
+        <text x="40" y="656" fill="#4c4438" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.18em">LEGENDE</text>
+
+        <circle cx="48" cy="678" r="4" fill="#120c06" stroke="#120c06" stroke-width="1"/>
+        <text x="64" y="682" fill="#4c4438" font-size="10.5" font-family="'Geist', sans-serif">Spielrunde</text>
+
+        <circle cx="200" cy="678" r="6" fill="rgba(169,54,31,0.12)" stroke="#a9361f" stroke-width="1.4"/>
+        <text x="216" y="682" fill="#4c4438" font-size="10.5" font-family="'Geist', sans-serif">Umschalt-Moment (Dozent)</text>
+
+        <rect x="455" y="673" width="10" height="10" fill="none" stroke="#a9361f" stroke-width="1.4" stroke-dasharray="4,3"/>
+        <text x="476" y="682" fill="#4c4438" font-size="10.5" font-family="'Geist', sans-serif">Phasengrenze voll → verdeckt</text>
+      </svg>
+    </div>
+  </div>
+</body>
+</html>
