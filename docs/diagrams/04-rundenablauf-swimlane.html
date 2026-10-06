@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rundenablauf · Lemon Market</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&family=Noto+Serif:ital@0;1&family=Noto+Sans+KR:wght@400;500;600&family=Noto+Serif+KR:wght@400&family=Noto+Sans+TC:wght@400;500;600&family=Noto+Serif+TC:wght@400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --color-paper:       #fcf8ee;
+      --color-paper-2:     #f4eee0;
+      --color-ink:         #120c06;
+      --color-ink-strong:  #111111;
+      --color-muted:       #4c4438;
+      --color-soft:        #908470;
+      --color-rule:        rgba(18,12,6,0.12);
+      --color-rule-solid:  #dad0be;
+      --color-accent:      #a9361f;
+      --color-accent-tint: rgba(169,54,31,0.08);
+      --color-link:        #226582;
+      --font-sans:  'Geist', system-ui, sans-serif;
+      --font-serif: 'Instrument Serif', 'Noto Serif', 'Noto Serif KR', serif;
+      --font-mono:  'Geist Mono', ui-monospace, monospace;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--color-paper);
+      color: var(--color-ink);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 2rem;
+    }
+
+    .frame { max-width: 1320px; width: 100%; }
+    .diagram-container { width: 100%; overflow-x: auto; }
+
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--color-muted);
+      margin-bottom: 0.5rem;
+    }
+
+    h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(1.8rem, 2.6vw + 1rem, 2.5rem);
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      color: var(--color-ink-strong);
+      margin-bottom: 1.5rem;
+    }
+
+    svg { width: 100%; min-width: 1280px; display: block; }
+
+    @media print {
+      .diagram-container { overflow-x: visible; }
+      svg { min-width: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <p class="eyebrow">Swimlane · Lemon Market</p>
+    <h1>Rundenablauf: eine Spielrunde</h1>
+
+    <div class="diagram-container">
+      <svg viewBox="0 0 1280 720" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="rundenablauf-title rundenablauf-desc">
+        <title id="rundenablauf-title">Rundenablauf in Lemon Market</title>
+        <desc id="rundenablauf-desc">Swimlane-Diagramm einer Spielrunde: der Dozent startet die Runde und kann jederzeit den Info-Modus umschalten, Verkäufer legen Grade, Preis und Menge fest, Käufer sichten Angebote und entscheiden sich, bevor der Dozent die Runde beendet.</desc>
+        <defs>
+          <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4c4438"/></marker>
+          <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#a9361f"/></marker>
+          <marker id="arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#226582"/></marker>
+        </defs>
+
+        <rect width="100%" height="100%" fill="#fcf8ee"/>
+
+        <!-- Lane dividers -->
+        <line x1="40" y1="40"  x2="1240" y2="40"  stroke="rgba(18,12,6,0.22)" stroke-width="1"/>
+        <line x1="40" y1="216" x2="1240" y2="216" stroke="rgba(18,12,6,0.12)" stroke-width="1"/>
+        <line x1="40" y1="392" x2="1240" y2="392" stroke="rgba(18,12,6,0.12)" stroke-width="1"/>
+        <line x1="40" y1="568" x2="1240" y2="568" stroke="rgba(18,12,6,0.22)" stroke-width="1"/>
+
+        <!-- Actor column divider -->
+        <line x1="220" y1="40" x2="220" y2="568" stroke="rgba(18,12,6,0.22)" stroke-width="1"/>
+
+        <!-- Lane labels -->
+        <text x="56" y="132" fill="#4c4438" font-size="12" font-family="'Geist Mono', monospace" letter-spacing="0.18em">DOZENT</text>
+        <text x="56" y="148" fill="#908470" font-size="9"  font-family="'Geist Mono', monospace" letter-spacing="0.12em">ADMIN</text>
+        <text x="56" y="308" fill="#4c4438" font-size="12" font-family="'Geist Mono', monospace" letter-spacing="0.18em">VERKÄUFER</text>
+        <text x="56" y="324" fill="#908470" font-size="9"  font-family="'Geist Mono', monospace" letter-spacing="0.12em">SELLER</text>
+        <text x="56" y="484" fill="#4c4438" font-size="12" font-family="'Geist Mono', monospace" letter-spacing="0.18em">KÄUFER</text>
+        <text x="56" y="500" fill="#908470" font-size="9"  font-family="'Geist Mono', monospace" letter-spacing="0.12em">BUYER</text>
+
+        <!-- ============ ARROWS (drawn before boxes) ============ -->
+
+        <!-- A1: Runde startet -> Grade/Preis/Menge festlegen (Dozent -> Verkäufer, phase seller-input) -->
+        <path d="M 350,168 V 200 Q 350,208 358,208 H 542 Q 550,208 550,216 V 264"
+              fill="none" stroke="#4c4438" stroke-width="1.2" marker-end="url(#arrow)"/>
+        <rect x="406" y="193" width="88" height="16" rx="2" fill="#fcf8ee"/>
+        <text x="450" y="205" fill="#4c4438" font-size="12" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">SELLER-INPUT</text>
+
+        <!-- A2: Grade/Preis/Menge festlegen -> Angebote ansehen (Verkäufer -> Käufer, phase market) -->
+        <line x1="550" y1="344" x2="550" y2="440" stroke="#4c4438" stroke-width="1.2" marker-end="url(#arrow)"/>
+        <rect x="516" y="382" width="48" height="16" rx="2" fill="#fcf8ee"/>
+        <text x="540" y="394" fill="#4c4438" font-size="12" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">MARKET</text>
+
+        <!-- A3: Angebote ansehen -> Kaufen oder passen (within Käufer) -->
+        <line x1="650" y1="480" x2="690" y2="480" stroke="#4c4438" stroke-width="1.2" marker-end="url(#arrow)"/>
+
+        <!-- A4: Kaufen oder passen -> Runde beenden (Käufer -> Dozent, phase round-end) -->
+        <path d="M 810,440 V 240 Q 810,232 818,232 H 1082 Q 1090,232 1090,224 V 168"
+              fill="none" stroke="#4c4438" stroke-width="1.2" marker-end="url(#arrow)"/>
+        <rect x="906" y="217" width="88" height="16" rx="2" fill="#fcf8ee"/>
+        <text x="950" y="229" fill="#4c4438" font-size="12" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">ROUND-END</text>
+
+        <!-- A5: Runde startet -> Info-Modus umschalten (within Dozent, optional, jederzeit) -->
+        <line x1="440" y1="128" x2="600" y2="128" stroke="#4c4438" stroke-width="1.2" stroke-dasharray="5,4" marker-end="url(#arrow)"/>
+        <rect x="478" y="113" width="88" height="16" rx="2" fill="#fcf8ee"/>
+        <text x="522" y="125" fill="#4c4438" font-size="12" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">JEDERZEIT</text>
+
+        <!-- A6: Info-Modus umschalten -> Angebote ansehen (Dozent -> Käufer, Wirkung: Maskierung) -->
+        <path d="M 690,168 V 394 Q 690,402 682,402 H 608 Q 600,402 600,410 V 440"
+              fill="none" stroke="#4c4438" stroke-width="1.2" stroke-dasharray="5,4" marker-end="url(#arrow)"/>
+        <rect x="642" y="358" width="96" height="16" rx="2" fill="#fcf8ee"/>
+        <text x="690" y="370" fill="#4c4438" font-size="12" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">MASKIERUNG</text>
+
+        <!-- ============ NODES ============ -->
+
+        <!-- N1: Runde startet (Dozent) -->
+        <rect x="260" y="88" width="180" height="80" rx="6" fill="#fcf8ee"/>
+        <rect x="260" y="88" width="180" height="80" rx="6" fill="#ffffff" stroke="#120c06" stroke-width="1"/>
+        <text x="350" y="124" fill="#120c06" font-size="16" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Runde startet</text>
+        <text x="350" y="146" fill="#4c4438" font-size="12" font-family="'Geist Mono', monospace" text-anchor="middle">POST /start</text>
+
+        <!-- N2: Info-Modus umschalten (Dozent, focal) -->
+        <rect x="600" y="88" width="180" height="80" rx="6" fill="#fcf8ee"/>
+        <rect x="600" y="88" width="180" height="80" rx="6" fill="rgba(169,54,31,0.08)" stroke="#a9361f" stroke-width="1.2"/>
+        <text x="690" y="118" fill="#120c06" font-size="16" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Info-Modus</text>
+        <text x="690" y="136" fill="#120c06" font-size="16" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">umschalten</text>
+        <text x="690" y="156" fill="#a9361f" font-size="12" font-family="'Geist Mono', monospace" text-anchor="middle">toggle-info-mode</text>
+
+        <!-- N3: Runde beenden (Dozent) -->
+        <rect x="1000" y="88" width="180" height="80" rx="6" fill="#fcf8ee"/>
+        <rect x="1000" y="88" width="180" height="80" rx="6" fill="#ffffff" stroke="#120c06" stroke-width="1"/>
+        <text x="1090" y="124" fill="#120c06" font-size="16" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Runde beenden</text>
+        <text x="1090" y="146" fill="#4c4438" font-size="12" font-family="'Geist Mono', monospace" text-anchor="middle">phase: round-end</text>
+
+        <!-- N4: Grade, Preis, Menge festlegen (Verkäufer) -->
+        <rect x="430" y="264" width="240" height="80" rx="6" fill="#fcf8ee"/>
+        <rect x="430" y="264" width="240" height="80" rx="6" fill="#ffffff" stroke="#120c06" stroke-width="1"/>
+        <text x="550" y="300" fill="#120c06" font-size="16" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Grade, Preis, Menge</text>
+        <text x="550" y="318" fill="#120c06" font-size="16" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">festlegen</text>
+        <text x="550" y="336" fill="#4c4438" font-size="12" font-family="'Geist Mono', monospace" text-anchor="middle">seller-decision</text>
+
+        <!-- N5: Angebote ansehen (Käufer) -->
+        <rect x="450" y="440" width="200" height="80" rx="6" fill="#fcf8ee"/>
+        <rect x="450" y="440" width="200" height="80" rx="6" fill="#ffffff" stroke="#120c06" stroke-width="1"/>
+        <text x="550" y="476" fill="#120c06" font-size="16" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Angebote ansehen</text>
+        <text x="550" y="498" fill="#4c4438" font-size="12" font-family="'Geist Mono', monospace" text-anchor="middle">availableOffers</text>
+
+        <!-- N6: Kaufen oder passen (Käufer) -->
+        <rect x="690" y="440" width="240" height="80" rx="6" fill="#fcf8ee"/>
+        <rect x="690" y="440" width="240" height="80" rx="6" fill="#ffffff" stroke="#120c06" stroke-width="1"/>
+        <text x="810" y="470" fill="#120c06" font-size="16" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Kaufen oder</text>
+        <text x="810" y="488" fill="#120c06" font-size="16" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">passen</text>
+        <text x="810" y="508" fill="#4c4438" font-size="12" font-family="'Geist Mono', monospace" text-anchor="middle">buyer-decision</text>
+
+        <!-- ============ LEGEND ============ -->
+        <line x1="40" y1="600" x2="1240" y2="600" stroke="rgba(18,12,6,0.10)" stroke-width="0.8"/>
+        <text x="40" y="620" fill="#4c4438" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.18em">LEGENDE</text>
+
+        <rect x="40" y="638" width="14" height="10" rx="2" fill="#ffffff" stroke="#120c06" stroke-width="1"/>
+        <text x="60" y="647" fill="#4c4438" font-size="10.5" font-family="'Geist', sans-serif">Schritt</text>
+
+        <rect x="160" y="638" width="14" height="10" rx="2" fill="rgba(169,54,31,0.08)" stroke="#a9361f" stroke-width="1.2"/>
+        <text x="180" y="647" fill="#4c4438" font-size="10.5" font-family="'Geist', sans-serif">Dramaturgischer Kipppunkt</text>
+
+        <line x1="420" y1="642" x2="448" y2="642" stroke="#4c4438" stroke-width="1.2" marker-end="url(#arrow)"/>
+        <text x="456" y="647" fill="#4c4438" font-size="10.5" font-family="'Geist', sans-serif">Ablauf / Handoff</text>
+
+        <line x1="640" y1="642" x2="668" y2="642" stroke="#4c4438" stroke-width="1.2" stroke-dasharray="5,4" marker-end="url(#arrow)"/>
+        <text x="676" y="647" fill="#4c4438" font-size="10.5" font-family="'Geist', sans-serif">Optional · jederzeit möglich</text>
+      </svg>
+    </div>
+  </div>
+</body>
+</html>

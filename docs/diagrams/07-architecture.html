@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Deployment-Architektur</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&family=Noto+Serif:ital@0;1&family=Noto+Sans+KR:wght@400;500;600&family=Noto+Serif+KR:wght@400&family=Noto+Sans+TC:wght@400;500;600&family=Noto+Serif+TC:wght@400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --color-paper:   #fcf8ee;
+      --color-paper-2: #f4eee0;
+      --color-ink:     #120c06;
+      --color-muted:   #4c4438;
+      --color-accent:  #a9361f;
+      --color-rule:    rgba(18,12,6,0.12);
+      --font-sans:     'Geist', system-ui, sans-serif;
+      --font-serif:    'Instrument Serif', 'Noto Serif', 'Noto Serif KR', serif;
+      --font-mono:     'Geist Mono', ui-monospace, monospace;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--color-paper);
+      color: var(--color-ink);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 2rem;
+    }
+
+    .frame { max-width: 1320px; width: 100%; }
+    .diagram-container { width: 100%; overflow-x: auto; }
+
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--color-muted);
+      margin-bottom: 0.5rem;
+    }
+
+    h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(1.9rem, 2.4vw + 1rem, 2.5rem);
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      color: var(--color-ink);
+      margin-bottom: 1.5rem;
+    }
+
+    svg { width: 100%; min-width: 1280px; display: block; }
+    @media print {
+      .diagram-container { overflow-x: visible; }
+      svg { min-width: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <p class="eyebrow">Architecture · Lemon Market</p>
+    <h1>Deployment-Architektur</h1>
+
+    <div class="diagram-container">
+      <svg viewBox="0 0 1280 720" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="lm-arch-title lm-arch-desc">
+        <title id="lm-arch-title">Deployment-Architektur von Lemon Market</title>
+        <desc id="lm-arch-desc">Der Browser spricht per HTTP mit dem Cloudflare Worker lemon-market-game, der statische Assets ausliefert und /api/*-Routen bedient; die API-Routen leiten an ein SessionDurableObject pro Session weiter, das seinen Zustand in angehängtem SQLite persistiert.</desc>
+        <defs>
+          <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4c4438"/></marker>
+          <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#a9361f"/></marker>
+          <marker id="arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#226582"/></marker>
+        </defs>
+
+        <rect width="100%" height="100%" fill="#fcf8ee"/>
+
+        <!-- ===== Zone: Cloudflare Worker ===== -->
+        <rect x="480" y="40" width="360" height="284" rx="8" fill="rgba(18,12,6,0.02)" stroke="rgba(18,12,6,0.20)" stroke-width="1" stroke-dasharray="5,4"/>
+        <rect x="500" y="44" width="300" height="12" fill="#fcf8ee"/>
+        <text x="500" y="53" fill="rgba(18,12,6,0.55)" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.14em">CLOUDFLARE WORKER · LEMON-MARKET-GAME</text>
+
+        <!-- ===== Arrows (drawn before nodes) ===== -->
+
+        <!-- Browser -> /api/* Express-Routen -->
+        <path d="M360,104 H402 Q410,104 410,112 Q410,120 418,120 H500" fill="none" stroke="#226582" stroke-width="1.2" marker-end="url(#arrow-link)"/>
+        <!-- Browser -> Static Assets -->
+        <path d="M360,136 H442 Q450,136 450,144 V248 Q450,256 458,256 H500" fill="none" stroke="#226582" stroke-width="1.2" marker-end="url(#arrow-link)"/>
+        <!-- /api/* Express-Routen -> SessionDurableObject (headline path) -->
+        <path d="M820,120 H882 Q890,120 890,128 V192 Q890,200 898,200 H960" fill="none" stroke="#a9361f" stroke-width="1.2" marker-end="url(#arrow-accent)"/>
+        <!-- SessionDurableObject -> SQLite -->
+        <line x1="1080" y1="256" x2="1080" y2="296" stroke="#4c4438" stroke-width="1.2" marker-end="url(#arrow)"/>
+
+        <!-- ===== Arrow labels (masked, gap-respecting) ===== -->
+
+        <!-- "fetch" on final straight run x418-500,y120 (8px gap above stroke) -->
+        <rect x="434" y="98" width="50" height="14" rx="2" fill="#fcf8ee"/>
+        <text x="459" y="108" fill="#226582" font-size="12" font-family="'Geist Mono', monospace" text-anchor="middle">fetch</text>
+
+        <!-- "GET" on final straight run x458-500,y256 (8px gap above stroke) -->
+        <rect x="464" y="234" width="30" height="14" rx="2" fill="#fcf8ee"/>
+        <text x="479" y="244" fill="#226582" font-size="12" font-family="'Geist Mono', monospace" text-anchor="middle">GET</text>
+
+        <!-- "leitet" on final straight run x898-960,y200 (8px gap above stroke, clears DO node at x960) -->
+        <rect x="902" y="178" width="54" height="14" rx="2" fill="#fcf8ee"/>
+        <text x="929" y="188" fill="#a9361f" font-size="12" font-family="'Geist Mono', monospace" text-anchor="middle">leitet</text>
+
+        <!-- "schreibt" beside vertical segment x1080,y256-296 -->
+        <rect x="1088" y="266" width="64" height="14" rx="2" fill="#fcf8ee"/>
+        <text x="1120" y="276" fill="#4c4438" font-size="12" font-family="'Geist Mono', monospace" text-anchor="middle">schreibt</text>
+
+        <!-- ===== Nodes ===== -->
+
+        <!-- Browser (input/client) -->
+        <rect x="40" y="72" width="320" height="96" rx="6" fill="#fcf8ee"/>
+        <rect x="40" y="72" width="320" height="96" rx="6" fill="rgba(76,68,56,0.10)" stroke="#908470" stroke-width="1"/>
+        <rect x="48" y="80" width="56" height="16" rx="2" fill="transparent" stroke="rgba(144,132,112,0.6)" stroke-width="0.8"/>
+        <text x="76" y="92" fill="#908470" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">CLIENT</text>
+        <text x="200" y="128" fill="#120c06" font-size="16" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Browser</text>
+        <text x="200" y="148" fill="#4c4438" font-size="12" font-family="'Geist Mono', monospace" text-anchor="middle">React SPA · Dozent &amp; Studierende</text>
+
+        <!-- Static Assets (backend) -->
+        <rect x="500" y="208" width="320" height="96" rx="6" fill="#fcf8ee"/>
+        <rect x="500" y="208" width="320" height="96" rx="6" fill="#ffffff" stroke="#120c06" stroke-width="1"/>
+        <rect x="508" y="216" width="56" height="16" rx="2" fill="transparent" stroke="rgba(18,12,6,0.4)" stroke-width="0.8"/>
+        <text x="536" y="228" fill="#120c06" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">STATIC</text>
+        <text x="660" y="264" fill="#120c06" font-size="16" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Static Assets (SPA)</text>
+        <text x="660" y="284" fill="#4c4438" font-size="12" font-family="'Geist Mono', monospace" text-anchor="middle">alle Nicht-/api-Routen · Routing-Fallback</text>
+
+        <!-- /api/* Express-Routen (backend) -->
+        <rect x="500" y="72" width="320" height="96" rx="6" fill="#fcf8ee"/>
+        <rect x="500" y="72" width="320" height="96" rx="6" fill="#ffffff" stroke="#120c06" stroke-width="1"/>
+        <rect x="508" y="80" width="36" height="16" rx="2" fill="transparent" stroke="rgba(18,12,6,0.4)" stroke-width="0.8"/>
+        <text x="526" y="92" fill="#120c06" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">API</text>
+        <text x="660" y="128" fill="#120c06" font-size="16" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">/api/* Express-Routen</text>
+        <text x="660" y="148" fill="#4c4438" font-size="12" font-family="'Geist Mono', monospace" text-anchor="middle">erster Code-Pfad im Worker</text>
+
+        <!-- SessionDurableObject (FOCAL) -->
+        <rect x="960" y="144" width="240" height="112" rx="6" fill="#fcf8ee"/>
+        <rect x="960" y="144" width="240" height="112" rx="6" fill="rgba(169,54,31,0.08)" stroke="#a9361f" stroke-width="1.2"/>
+        <rect x="968" y="152" width="32" height="16" rx="2" fill="transparent" stroke="rgba(169,54,31,0.6)" stroke-width="0.8"/>
+        <text x="984" y="164" fill="#a9361f" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">DO</text>
+        <text x="1080" y="204" fill="#120c06" font-size="16" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">SessionDurableObject</text>
+        <text x="1080" y="224" fill="#4c4438" font-size="12" font-family="'Geist Mono', monospace" text-anchor="middle">1 pro 4-stelligem Session-Code</text>
+
+        <!-- SQLite (store) -->
+        <rect x="960" y="296" width="240" height="96" rx="6" fill="#fcf8ee"/>
+        <rect x="960" y="296" width="240" height="96" rx="6" fill="rgba(18,12,6,0.05)" stroke="#4c4438" stroke-width="1"/>
+        <rect x="968" y="304" width="40" height="16" rx="2" fill="transparent" stroke="rgba(76,68,56,0.6)" stroke-width="0.8"/>
+        <text x="988" y="316" fill="#4c4438" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">STORE</text>
+        <text x="1080" y="352" fill="#120c06" font-size="16" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">SQLite</text>
+        <text x="1080" y="372" fill="#4c4438" font-size="12" font-family="'Geist Mono', monospace" text-anchor="middle">im Durable Object</text>
+
+        <!-- ===== Annotation callout ===== -->
+        <text x="1240" y="56" fill="#120c06" font-size="14" font-style="italic" font-family="'Instrument Serif', serif" text-anchor="end">Keine Secrets nötig — Tokens laufzeit-generiert</text>
+        <path d="M1160 64 Q1120 100 1082 140" fill="none" stroke="rgba(18,12,6,0.40)" stroke-width="1" stroke-dasharray="4,3"/>
+        <circle cx="1082" cy="140" r="2" fill="#120c06"/>
+
+        <!-- ===== Legend ===== -->
+        <line x1="40" y1="652" x2="1240" y2="652" stroke="rgba(18,12,6,0.12)" stroke-width="0.8"/>
+
+        <rect x="40" y="672" width="14" height="14" rx="3" fill="rgba(76,68,56,0.10)" stroke="#908470" stroke-width="1"/>
+        <text x="62" y="683" fill="#4c4438" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.1em">CLIENT</text>
+
+        <rect x="196" y="672" width="14" height="14" rx="3" fill="#ffffff" stroke="#120c06" stroke-width="1"/>
+        <text x="218" y="683" fill="#4c4438" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.1em">BACKEND / WORKER</text>
+
+        <rect x="420" y="672" width="14" height="14" rx="3" fill="rgba(169,54,31,0.08)" stroke="#a9361f" stroke-width="1.2"/>
+        <text x="442" y="683" fill="#4c4438" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.1em">FOCAL · DURABLE OBJECT</text>
+
+        <rect x="652" y="672" width="14" height="14" rx="3" fill="rgba(18,12,6,0.05)" stroke="#4c4438" stroke-width="1"/>
+        <text x="674" y="683" fill="#4c4438" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.1em">STORE</text>
+
+        <line x1="800" y1="679" x2="828" y2="679" stroke="#226582" stroke-width="1.2" marker-end="url(#arrow-link)"/>
+        <text x="836" y="683" fill="#4c4438" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.1em">HTTP</text>
+
+        <line x1="930" y1="679" x2="958" y2="679" stroke="#4c4438" stroke-width="1.2" marker-end="url(#arrow)"/>
+        <text x="966" y="683" fill="#4c4438" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.1em">INTERN</text>
+      </svg>
+    </div>
+  </div>
+</body>
+</html>
