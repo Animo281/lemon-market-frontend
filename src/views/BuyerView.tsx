@@ -80,13 +80,6 @@ export default function BuyerView({ session, me, code, playerToken, error, onSes
   const lastResult = session.results[session.results.length - 1]
   const myLastBuyerResult = lastResult?.buyerDecisions.find(b => b.playerId === me.id)
 
-  // Stands in for the mockup's "Budget" pill, which has no backend counterpart:
-  // running total of this buyer's earnings across finished rounds.
-  const balance = session.results.reduce((sum, r) => {
-    const bd = r.buyerDecisions.find(b => b.playerId === me.id)
-    return sum + (bd?.earnings ?? 0)
-  }, 0)
-
   const [buying, setBuying] = useState(false)
 
   const handleBuy = async (sellerId: string | null) => {
@@ -158,7 +151,6 @@ export default function BuyerView({ session, me, code, playerToken, error, onSes
               round={session.currentRound}
               totalRounds={session.totalRounds}
               infoMode={session.infoMode}
-              balance={balance}
               phase={session.phase}
               isMyTurn={isMyTurn}
               hasDecided={myDecision !== undefined}

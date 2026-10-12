@@ -20,7 +20,7 @@ const GRADE_COLOR: Record<Grade, string> = { 1: 'text-coral-400', 2: 'text-lemon
 // Deep-clone so editing the modal's working copy never mutates the shared
 // DEFAULT_ECONOMICS constant (it's a plain object literal, not frozen).
 function cloneEconomics(e: EconomicsConfig): EconomicsConfig {
-  return { buyerValues: { ...e.buyerValues }, sellerFirstCosts: { ...e.sellerFirstCosts } }
+  return { buyerValues: { ...e.buyerValues }, sellerFirstCosts: { ...e.sellerFirstCosts }, unitCostStep: e.unitCostStep }
 }
 
 // Mirrors the backend's Zod check (schemas/session.ts): both tables must be
@@ -28,9 +28,10 @@ function cloneEconomics(e: EconomicsConfig): EconomicsConfig {
 // anything everywhere else in the app (crate art, best-grade-first lists,
 // the theoreticalMaxSurplus search).
 function economicsError(e: EconomicsConfig): string | null {
-  const { buyerValues: v, sellerFirstCosts: c } = e
+  const { buyerValues: v, sellerFirstCosts: c, unitCostStep } = e
   if (!(v[1] < v[2] && v[2] < v[3])) return 'Käuferwerte müssen mit der Qualität steigen: Q1 < Q2 < Q3.'
   if (!(c[1] < c[2] && c[2] < c[3])) return 'Verkäuferkosten müssen mit der Qualität steigen: Q1 < Q2 < Q3.'
+  if (!(unitCostStep > 0)) return 'Der Aufpreis je weiterer Einheit muss größer als 0 sein.'
   return null
 }
 
@@ -59,6 +60,10 @@ export default function LandingView() {
   const setSellerCost = (grade: Grade, raw: string) => {
     const v = raw === '' ? 0 : Number(raw)
     setModalEconomics(prev => ({ ...prev, sellerFirstCosts: { ...prev.sellerFirstCosts, [grade]: v } }))
+  }
+  const setUnitCostStep = (raw: string) => {
+    const v = raw === '' ? 0 : Number(raw)
+    setModalEconomics(prev => ({ ...prev, unitCostStep: v }))
   }
   const resetEconomicsToDefault = () => setModalEconomics(cloneEconomics(DEFAULT_ECONOMICS))
   const modalEconomicsError = economicsError(modalEconomics)
@@ -353,7 +358,16 @@ export default function LandingView() {
                   </Fragment>
                 ))}
               </div>
-              <p className="text-mkt-500 text-[10px] font-mono mt-2">Jede weitere Einheit kostet den Verkäufer +1,00 € mehr.</p>
+              <div className="flex items-center gap-2 mt-2">
+                <label className="text-mkt-500 text-[10px] font-mono" htmlFor="unitCostStep">Aufpreis je weiterer Einheit</label>
+                <input
+                  id="unitCostStep"
+                  type="number" min={0.01} step="0.10" value={modalEconomics.unitCostStep}
+                  onChange={e => setUnitCostStep(e.target.value)}
+                  className="bg-mkt-850 border border-mkt-800 rounded-lg px-2 py-1 font-mono text-mkt-100 text-xs text-center w-20 focus:outline-none focus:border-lemon-500/50 transition-colors"
+                />
+                <span className="text-mkt-500 text-[10px] font-mono">€ (Standard: 1,00 €)</span>
+              </div>
             </div>
 
             {(modalError || modalEconomicsError) && <ErrorBanner message={modalError || modalEconomicsError || ''} />}

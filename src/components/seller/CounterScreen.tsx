@@ -20,6 +20,8 @@ interface Props {
   history: SellerHistoryEntry[]
   /** session.economics.sellerFirstCosts — this session's actual cost table. */
   firstCosts: Record<Grade, number>
+  /** session.economics.unitCostStep — host-configurable per-unit surcharge. */
+  unitCostStep: number
   /** True once the offer has been submitted for this round — freezes the
    * price board and swaps the CTA for a waiting state + "Angebot ändern". */
   frozen: boolean
@@ -35,7 +37,7 @@ interface Props {
 // never loses their place mid-round.
 export default function CounterScreen({
   grade, units, price, onPriceChange, infoMode, marketSummary, lastRound, history,
-  firstCosts, frozen, submitting, onSubmit, onBack, onEditAgain,
+  firstCosts, unitCostStep, frozen, submitting, onSubmit, onBack, onEditAgain,
 }: Props) {
   // The mockup's own "Phase 1/2" numbering (1 = quality visible, 2 = hidden)
   // — kept here only for this preview caption, matching HANDOFF-verkaeufer.md
@@ -54,7 +56,7 @@ export default function CounterScreen({
         marketAvg={marketSummary?.all ?? null}
         readOnly={frozen}
       />
-      <Ledger grade={grade} units={units} price={price} history={history} firstCosts={firstCosts} />
+      <Ledger grade={grade} units={units} price={price} history={history} firstCosts={firstCosts} unitCostStep={unitCostStep} />
 
       <div className="abs seller-counter-wood" aria-hidden="true"><WoodCounter /></div>
 

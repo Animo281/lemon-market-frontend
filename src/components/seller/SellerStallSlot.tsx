@@ -1,5 +1,6 @@
 import { AvailableOffer, Grade, InfoMode, Player } from '../../shared/types'
 import { atStyle, boxStyle, withRotation, CHIP_Y, StallSlotGeometry } from '../../lib/marketScene'
+import { sellerCost } from '../../shared/constants'
 import { liveSellerEarnings } from '../../lib/sellerStats'
 import { MiniLemonIcon } from '../buyer/icons'
 import OfferCard from '../market/OfferCard'
@@ -21,13 +22,16 @@ interface Props {
   /** session.economics.sellerFirstCosts — only needed for the live earnings
    * chip on the seller's own stand. */
   firstCosts: Record<Grade, number>
+  /** session.economics.unitCostStep — used to reveal the 2nd crate's cost
+   * the moment the 1st one sells (see the chip below). */
+  unitCostStep: number
 }
 
 // One stall in the live market round (Screen 4) — per
 // docs/lemon-market-ui/HANDOFF-verkaeufer.md. Same geometry and offer-card
 // styling as the buyer scene's StallSlot, but no buy button, and the
 // seller's own stand always shows its real quality to them.
-export default function SellerStallSlot({ slot, seller, offer, isMine, myGrade, infoMode, firstCosts }: Props) {
+export default function SellerStallSlot({ slot, seller, offer, isMine, myGrade, infoMode, firstCosts, unitCostStep }: Props) {
   const closed = !seller || !offer || offer.price === null
   if (closed || !seller || !offer) {
     return <ClosedStall slot={slot} />
@@ -42,12 +46,20 @@ export default function SellerStallSlot({ slot, seller, offer, isMine, myGrade, 
   const price = offer.price as number
   const soldOut = offer.unitsRemaining <= 0
 
+  // The 2nd crate's cost is hidden until the 1st actually sells (a
+  // deliberate deviation from the paper, where sellers know both costs
+  // upfront) — so it's revealed here, the first place a sale is visible.
+  const nextCost = isMine && offer.unitsSold > 0 && offer.unitsSold < offer.unitsOffered
+    ? sellerCost(firstCosts, myGrade as Grade, offer.unitsSold, unitCostStep)
+    : null
+
   const chip = isMine
     ? offer.unitsSold === 0
       ? <span className="chip me abs" style={atStyle(slot.cx, CHIP_Y)}>Wartet auf Käufer<span className="dots" /></span>
       : (
         <span className="chip me abs" style={atStyle(slot.cx, CHIP_Y)} title={`${offer.unitsSold} von ${offer.unitsOffered} verkauft`}>
-          {offer.unitsSold}/{offer.unitsOffered} verkauft · {signed(liveSellerEarnings(firstCosts, myGrade as Grade, price, offer.unitsSold))}
+          {offer.unitsSold}/{offer.unitsOffered} verkauft · {signed(liveSellerEarnings(firstCosts, myGrade as Grade, price, offer.unitsSold, unitCostStep))}
+          {nextCost != null && <> · nächste Kiste kostet {nextCost.toFixed(2)} €</>}
         </span>
       )
     : <span className={`chip abs${soldOut ? ' sold' : ''}`} style={atStyle(slot.cx, CHIP_Y)}>{soldOut ? 'Ausverkauft' : 'Offen'}</span>
