@@ -236,6 +236,7 @@ export default function SellerView({ session, me, code, playerToken, error, onSe
                 units={units}
                 maxUnits={session.maxSellerUnits}
                 firstCosts={firstCosts}
+                unitCostStep={unitCostStep}
                 onSelectGrade={setGrade}
                 onSelectUnits={setUnits}
                 onNext={() => setStep('counter')}
