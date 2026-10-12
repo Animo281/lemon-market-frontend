@@ -50,6 +50,10 @@ export default function LandingView() {
   const [modalMaxUnits, setModalMaxUnits] = useState(DEFAULT_MAX_SELLER_UNITS)
   const [modalRounds, setModalRounds] = useState(DEFAULT_TOTAL_ROUNDS)
   const [modalEconomics, setModalEconomics] = useState<EconomicsConfig>(() => cloneEconomics(DEFAULT_ECONOMICS))
+  // Collapsed by default: modalEconomics already carries the Holt & Sherman
+  // defaults either way, so a lecturer who never opens this only ever
+  // submits those defaults — expanding is purely to review/customize.
+  const [economicsExpanded, setEconomicsExpanded] = useState(false)
   const [modalLoading, setModalLoading] = useState(false)
   const [modalError, setModalError] = useState('')
 
@@ -323,51 +327,72 @@ export default function LandingView() {
             </div>
 
             <div>
-              <div className="flex items-center justify-between mb-2">
+              <button
+                type="button"
+                onClick={() => setEconomicsExpanded(x => !x)}
+                aria-expanded={economicsExpanded}
+                className="flex items-center justify-between w-full mb-2 text-left"
+              >
                 <span className="label">
                   <span className="inline-block w-1.5 h-1.5 rounded-full bg-lemon-500 mr-1.5 align-middle -mt-0.5" />
                   Preise je Qualität
                 </span>
-                <button
-                  type="button"
-                  onClick={resetEconomicsToDefault}
-                  className="text-mkt-500 text-[10px] font-mono hover:text-mkt-400 transition-colors underline underline-offset-2"
-                >
-                  Holt &amp; Sherman Standardwerte
-                </button>
-              </div>
-              <div className="grid grid-cols-[auto_1fr_1fr] gap-x-2 gap-y-1.5 items-center">
-                <span />
-                <span className="label text-center">Käuferwert</span>
-                <span className="label text-center">Kosten 1. Einheit</span>
-                {GRADES.map(g => (
-                  <Fragment key={g}>
-                    <span className={`${GRADE_COLOR[g]} text-xs font-mono font-semibold whitespace-nowrap pr-1`}>{GRADE_LABEL[g]}</span>
-                    <input
-                      type="number" min={0} step="0.10" value={modalEconomics.buyerValues[g]}
-                      onChange={e => setBuyerValue(g, e.target.value)}
-                      aria-label={`Käuferwert ${GRADE_LABEL[g]}`}
-                      className="bg-mkt-850 border border-mkt-800 rounded-lg px-2 py-1.5 font-mono text-mkt-100 text-sm text-center focus:outline-none focus:border-lemon-500/50 transition-colors"
-                    />
-                    <input
-                      type="number" min={0} step="0.10" value={modalEconomics.sellerFirstCosts[g]}
-                      onChange={e => setSellerCost(g, e.target.value)}
-                      aria-label={`Kosten 1. Einheit ${GRADE_LABEL[g]}`}
-                      className="bg-mkt-850 border border-mkt-800 rounded-lg px-2 py-1.5 font-mono text-mkt-100 text-sm text-center focus:outline-none focus:border-lemon-500/50 transition-colors"
-                    />
-                  </Fragment>
-                ))}
-              </div>
-              <div className="flex items-center gap-2 mt-2">
-                <label className="text-mkt-500 text-[10px] font-mono" htmlFor="unitCostStep">Aufpreis je weiterer Einheit</label>
-                <input
-                  id="unitCostStep"
-                  type="number" min={0.01} step="0.10" value={modalEconomics.unitCostStep}
-                  onChange={e => setUnitCostStep(e.target.value)}
-                  className="bg-mkt-850 border border-mkt-800 rounded-lg px-2 py-1 font-mono text-mkt-100 text-xs text-center w-20 focus:outline-none focus:border-lemon-500/50 transition-colors"
-                />
-                <span className="text-mkt-500 text-[10px] font-mono">€ (Standard: 1,00 €)</span>
-              </div>
+                <span className="text-mkt-500 text-xs">{economicsExpanded ? '▾' : '▸'}</span>
+              </button>
+              {!economicsExpanded && (
+                <p className="text-mkt-500 text-[10px] font-mono">
+                  Q1 {modalEconomics.buyerValues[1].toFixed(2)} € · Q2 {modalEconomics.buyerValues[2].toFixed(2)} € · Q3 {modalEconomics.buyerValues[3].toFixed(2)} € · +{modalEconomics.unitCostStep.toFixed(2)} €/Kiste
+                </p>
+              )}
+              {economicsExpanded && (
+                <>
+                  <div className="flex justify-end mb-2">
+                    <button
+                      type="button"
+                      onClick={resetEconomicsToDefault}
+                      className="text-mkt-500 text-[10px] font-mono hover:text-mkt-400 transition-colors underline underline-offset-2"
+                    >
+                      Holt &amp; Sherman Standardwerte
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-[auto_1fr_1fr] gap-x-2 gap-y-1.5 items-center">
+                    <span />
+                    <span className="label text-center">Käuferwert</span>
+                    <span className="label text-center">Kosten 1. Einheit</span>
+                    {GRADES.map(g => (
+                      <Fragment key={g}>
+                        <span className={`${GRADE_COLOR[g]} text-xs font-mono font-semibold whitespace-nowrap pr-1`}>{GRADE_LABEL[g]}</span>
+                        <input
+                          type="number" min={0} step="0.10" value={modalEconomics.buyerValues[g]}
+                          onChange={e => setBuyerValue(g, e.target.value)}
+                          aria-label={`Käuferwert ${GRADE_LABEL[g]}`}
+                          className="bg-mkt-850 border border-mkt-800 rounded-lg px-2 py-1.5 font-mono text-mkt-100 text-sm text-center focus:outline-none focus:border-lemon-500/50 transition-colors"
+                        />
+                        <input
+                          type="number" min={0} step="0.10" value={modalEconomics.sellerFirstCosts[g]}
+                          onChange={e => setSellerCost(g, e.target.value)}
+                          aria-label={`Kosten 1. Einheit ${GRADE_LABEL[g]}`}
+                          className="bg-mkt-850 border border-mkt-800 rounded-lg px-2 py-1.5 font-mono text-mkt-100 text-sm text-center focus:outline-none focus:border-lemon-500/50 transition-colors"
+                        />
+                      </Fragment>
+                    ))}
+                  </div>
+                  <div className="mt-2">
+                    <label className="block text-mkt-500 text-[10px] font-mono mb-1" htmlFor="unitCostStep">
+                      Aufpreis je weiterer Einheit (Standard: 1,00 €)
+                    </label>
+                    <div className="flex items-center gap-1.5">
+                      <input
+                        id="unitCostStep"
+                        type="number" min={0.01} step="0.10" value={modalEconomics.unitCostStep}
+                        onChange={e => setUnitCostStep(e.target.value)}
+                        className="bg-mkt-850 border border-mkt-800 rounded-lg px-2 py-1 font-mono text-mkt-100 text-xs text-center w-20 focus:outline-none focus:border-lemon-500/50 transition-colors"
+                      />
+                      <span className="text-mkt-500 text-[10px] font-mono">€</span>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
 
             {(modalError || modalEconomicsError) && <ErrorBanner message={modalError || modalEconomicsError || ''} />}
