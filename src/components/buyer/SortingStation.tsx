@@ -5,8 +5,7 @@ import { Grade } from '../../shared/types'
 // Qualität 1 (perfect) → 3 (blemished) — the opposite of the backend's
 // grading, where 3 is the best lemon. This overlays corrected labels
 // directly on top of the painted cards. Not a seller — always visible,
-// in every phase, as the legend for the quality colors used everywhere
-// else (see plan: "Qualitäts-Mapping").
+// in every phase, as the legend for the quality colors used everywhere else.
 //
 // The cards are tiny (58×37 image px — see SORTING_STATION_CARDS) and were
 // overflowing their boxes with QUALITY_LABEL's full "Qualität 3" / "Perfekt,

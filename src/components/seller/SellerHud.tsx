@@ -9,17 +9,14 @@ interface Props {
    * info-mode pill once the board is actually open. */
   infoMode: 'full' | 'asymmetric' | null
   balance: number
-  /** Replaces the mockup's countdown pill — the backend has no timer or
-   * deadline at all (see plan), so this is a status label instead of a
-   * clock: "Kiste wählen", "Kaufrunde läuft", etc. */
+  /** The backend has no timer or deadline, so this is a status label
+   * instead of a countdown clock: "Kiste wählen", "Kaufrunde läuft", etc. */
   statusLabel: string
 }
 
-// Same HUD shell as BuyerHud (buyer/BuyerHud.tsx), yellow "Verkäufer" pill
-// instead of a round-only headline, and "Kasse" instead of "Kontostand" —
-// per docs/lemon-market-ui/HANDOFF-verkaeufer.md. The Kasse pill takes a
-// ref so the market-round screen can fly coins into it and bump-animate it
-// on a sale.
+// Same HUD shell as BuyerHud (buyer/BuyerHud.tsx), with a "Kasse" pill that
+// takes a ref so the market-round screen can fly coins into it and
+// bump-animate it on a sale.
 const SellerHud = forwardRef<HTMLSpanElement, Props>(function SellerHud(
   { sellerName, round, totalRounds, infoMode, balance, statusLabel },
   moneyRef,

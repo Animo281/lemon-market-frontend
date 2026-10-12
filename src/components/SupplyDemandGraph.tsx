@@ -38,7 +38,7 @@ function buildPath(prices: number[], max: number, maxP: number, asc: boolean): s
 }
 
 // Design-system colors — Nacht-Markt palette
-const GRADE_COLOR: Record<number, string> = {
+const GRADE_COLOR: Record<Grade, string> = {
   1: '#F07060',  // coral-400
   2: '#F5D828',  // lemon-400
   3: '#78D848',  // lime-400
@@ -247,7 +247,7 @@ export default function SupplyDemandGraph({ session, historyResult }: Props) {
           )}
 
           {/* Supply curve — colored per grade */}
-          {sortedSupplyItems.length > 0 && sortedSupplyItems.map((item, i) => {
+          {sortedSupplyItems.map((item, i) => {
             const x1 = qX(i, maxQty)
             const x2 = qX(i + 1, maxQty)
             const y  = pY(item.price, MAX_P)
@@ -286,7 +286,7 @@ export default function SupplyDemandGraph({ session, historyResult }: Props) {
           <text
             key={`slbl-${animKey}`}
             x={qX(supplyPrices.length, maxQty) - 4}
-            y={pY([...supplyPrices].sort((a, b) => b - a)[0], MAX_P) - 8}
+            y={pY(supplyPrices[supplyPrices.length - 1], MAX_P) - 8}
             fontSize={12} fill="#e8e8ff" fontWeight="700"
             textAnchor="end"
             style={{ animation: 'sdg-fade 0.4s ease 0.65s both', opacity: 0 }}

@@ -1,7 +1,5 @@
 import { Grade } from '../../shared/types'
-import { QUALITY_LABEL } from '../../lib/marketScene'
-
-const GRADES_BEST_FIRST: Grade[] = [3, 2, 1]
+import { QUALITY_LABEL, GRADES_BEST_FIRST } from '../../lib/marketScene'
 
 interface Props {
   buyerValues: Record<Grade, number>

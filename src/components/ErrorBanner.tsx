@@ -4,26 +4,15 @@
 // error in the app was announced at all.
 interface Props {
   message: string
-  onDismiss?: () => void
 }
 
-export default function ErrorBanner({ message, onDismiss }: Props) {
+export default function ErrorBanner({ message }: Props) {
   return (
     <div
       role="alert"
       className="flex items-start gap-3 text-coral-400 text-sm font-mono bg-coral-500/8 border border-coral-500/25 rounded-xl px-4 py-3"
     >
       <span className="flex-1">{message}</span>
-      {onDismiss && (
-        <button
-          type="button"
-          onClick={onDismiss}
-          aria-label="Meldung schließen"
-          className="shrink-0 text-coral-400 hover:text-coral-500 leading-none text-base"
-        >
-          ×
-        </button>
-      )}
     </div>
   )
 }

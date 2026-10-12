@@ -20,9 +20,7 @@ export default function StallSlot({ slot, seller, offer, myDecision, interactive
   // A slot with no seller assigned, or one whose seller hasn't set a price yet
   // (lobby, seller-input, or still deciding), reads the same "Licht aus" way —
   // there is nothing to compare yet.
-  const closed = !seller || !offer || offer.price === null
-
-  if (closed || !seller || !offer) {
+  if (!seller || !offer || offer.price === null) {
     return <ClosedStall slot={slot} />
   }
 

@@ -57,16 +57,18 @@ export default function LandingView() {
   const [modalLoading, setModalLoading] = useState(false)
   const [modalError, setModalError] = useState('')
 
+  // An emptied number input reads as '' — treat that as 0 rather than NaN.
+  const toNum = (raw: string) => raw === '' ? 0 : Number(raw)
   const setBuyerValue = (grade: Grade, raw: string) => {
-    const v = raw === '' ? 0 : Number(raw)
+    const v = toNum(raw)
     setModalEconomics(prev => ({ ...prev, buyerValues: { ...prev.buyerValues, [grade]: v } }))
   }
   const setSellerCost = (grade: Grade, raw: string) => {
-    const v = raw === '' ? 0 : Number(raw)
+    const v = toNum(raw)
     setModalEconomics(prev => ({ ...prev, sellerFirstCosts: { ...prev.sellerFirstCosts, [grade]: v } }))
   }
   const setUnitCostStep = (raw: string) => {
-    const v = raw === '' ? 0 : Number(raw)
+    const v = toNum(raw)
     setModalEconomics(prev => ({ ...prev, unitCostStep: v }))
   }
   const resetEconomicsToDefault = () => setModalEconomics(cloneEconomics(DEFAULT_ECONOMICS))

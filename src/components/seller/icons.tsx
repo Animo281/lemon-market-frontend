@@ -11,13 +11,3 @@ export function EyeIcon({ className }: { className?: string }) {
     </svg>
   )
 }
-
-/** One coin, flown from the offer card to the Kasse pill on a sale. */
-export function CoinIcon({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 22 22" aria-hidden="true" className={className}>
-      <circle cx="11" cy="11" r="9.5" fill="#E9B949" stroke="#2B1B12" strokeWidth="2" />
-      <circle cx="11" cy="11" r="5.5" fill="none" stroke="#9C7420" strokeWidth="1.4" />
-    </svg>
-  )
-}

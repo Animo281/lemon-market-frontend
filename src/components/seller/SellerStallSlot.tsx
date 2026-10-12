@@ -1,11 +1,9 @@
 import { AvailableOffer, Grade, InfoMode, Player } from '../../shared/types'
 import { atStyle, boxStyle, withRotation, CHIP_Y, StallSlotGeometry } from '../../lib/marketScene'
-import { liveSellerEarnings } from '../../lib/sellerStats'
+import { liveSellerEarnings, signed } from '../../lib/sellerStats'
 import { MiniLemonIcon } from '../buyer/icons'
 import OfferCard from '../market/OfferCard'
 import ClosedStall from '../market/ClosedStall'
-
-const signed = (n: number) => `${n > 0 ? '+' : n < 0 ? '−' : '±'}${Math.abs(n).toFixed(2)} €`
 
 interface Props {
   slot: StallSlotGeometry
@@ -31,8 +29,7 @@ interface Props {
 // styling as the buyer scene's StallSlot, but no buy button, and the
 // seller's own stand always shows its real quality to them.
 export default function SellerStallSlot({ slot, seller, offer, isMine, myGrade, infoMode, firstCosts, unitCostStep }: Props) {
-  const closed = !seller || !offer || offer.price === null
-  if (closed || !seller || !offer) {
+  if (!seller || !offer || offer.price === null) {
     return <ClosedStall slot={slot} />
   }
 

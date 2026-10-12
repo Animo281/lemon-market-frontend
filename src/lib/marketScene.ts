@@ -91,6 +91,8 @@ export const CRATE_BY_GRADE: Record<Grade, string> = {
   1: cratePoor, // was crate-q3.png — fleckige Zitronen
 }
 
+export const GRADES_BEST_FIRST: Grade[] = [3, 2, 1]
+
 export const QUALITY_LABEL: Record<Grade, { label: string; text: string; paper: string; chalk: string }> = {
   3: { label: 'Qualität 3', text: 'Perfekt, makellos', paper: '#2F5E12', chalk: '#B9E28A' },
   2: { label: 'Qualität 2', text: 'Geringe Mängel', paper: '#7A5A06', chalk: '#F4D46A' },

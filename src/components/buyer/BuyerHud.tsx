@@ -28,9 +28,9 @@ export default function BuyerHud({ round, totalRounds, infoMode, phase, isMyTurn
   // info-mode to show — lobby/seller-input haven't opened the board yet.
   const showInfoMode = phase === 'market'
 
-  // Replaces the mockup's countdown pill — the backend has no timer or
-  // deadline at all (see plan), so this is a status label instead of a
-  // clock. During the market phase it narrows further to whose turn it is.
+  // The backend has no timer or deadline, so this is a status label instead
+  // of a countdown clock. During the market phase it narrows further to
+  // whose turn it is.
   const statusLabel = phase === 'market'
     ? (hasDecided ? 'Warte auf andere Käufer' : isMyTurn ? 'Du bist dran' : 'Warte auf deinen Zug')
     : STATUS_LABEL[phase]

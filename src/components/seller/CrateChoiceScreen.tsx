@@ -1,11 +1,7 @@
 import { Grade } from '../../shared/types'
-import { CRATE_BY_GRADE, MARKET_SCENE_IMAGE, QUALITY_LABEL, SCENE_VIEWS } from '../../lib/marketScene'
+import { CRATE_BY_GRADE, GRADES_BEST_FIRST, MARKET_SCENE_IMAGE, QUALITY_LABEL, SCENE_VIEWS } from '../../lib/marketScene'
 import { sellerCost } from '../../shared/constants'
 import { EyeIcon } from './icons'
-
-// Best lemon first — matches the sorting-station legend and Q-ordering used
-// everywhere else in the scene (see marketScene.ts's grade↔crate remap).
-const GRADES_BEST_FIRST: Grade[] = [3, 2, 1]
 
 interface Props {
   grade: Grade | null

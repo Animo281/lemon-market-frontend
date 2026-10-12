@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
-import { Grade, Player, PublicSession } from '../shared/types'
+import { Grade, GamePhase, Player, PublicSession } from '../shared/types'
 import { DEFAULT_SELLER_FIRST_COSTS, UNIT_COST_STEP, sellerCost } from '../shared/constants'
 import { api, ApiError } from '../api/client'
 import {
-  MARKET_SCENE_IMAGE, SCENE_VIEWS, STALL_CROPS, cropCoverStyle, cropStyle, laneCount, stallInfo,
+  MARKET_SCENE_IMAGE, SCENE_VIEWS, STALL_CROPS, STALL_SLOTS, cropCoverStyle, cropStyle, laneCount, stallInfo,
 } from '../lib/marketScene'
 import { lastRoundMarketPrices, liveSellerEarnings, sellerBalance, sellerHistory } from '../lib/sellerStats'
 import SellerHud from '../components/seller/SellerHud'
@@ -25,7 +25,7 @@ interface Props {
   onError: (msg: string) => void
 }
 
-const STATUS_LABEL: Record<string, string> = {
+const STATUS_LABEL: Record<GamePhase, string> = {
   lobby: 'Warte auf Spielstart',
   'seller-input': 'Kiste & Preis wählen',
   market: 'Kaufrunde läuft',
@@ -40,7 +40,7 @@ export default function SellerView({ session, me, code, playerToken, error, onSe
   const [price, setPrice] = useState(1)
   // Purely local UI toggle: lets the seller re-open the counter after
   // submitting (submitSellerDecision allows overwriting while the phase is
-  // still 'seller-input' — see plan). It does not undo the submission.
+  // still 'seller-input'). It does not undo the submission.
   const [forceEdit, setForceEdit] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [liveMsg, setLiveMsg] = useState('')
@@ -84,9 +84,15 @@ export default function SellerView({ session, me, code, playerToken, error, onSe
 
   const myOffer = session.phase === 'market' ? session.availableOffers.find(o => o.sellerId === me.id) : undefined
 
+  const lanes = laneCount(session.numSellers)
+  const sellerBySlot = new Map(
+    session.players.filter(p => p.role === 'seller').map(s => [s.slotIndex, s])
+  )
+  const offersBySellerId = new Map(session.availableOffers.map(o => [o.sellerId, o]))
+
   // Coin flight + toast when this seller's unitsSold climbs — poll-driven
   // (2s interval from PlayerView), not event-driven; the backend has no
-  // websocket (see plan). Fires once per detected jump, however big.
+  // websocket. Fires once per detected jump, however big.
   useEffect(() => {
     if (session.phase !== 'market' || !myOffer || myGrade === null) {
       prevUnitsSoldRef.current = null
@@ -104,7 +110,6 @@ export default function SellerView({ session, me, code, playerToken, error, onSe
       flyCoins()
     }
     prevUnitsSoldRef.current = myOffer.unitsSold
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session.phase, myOffer?.unitsSold])
 
   const flyCoins = () => {
@@ -122,10 +127,8 @@ export default function SellerView({ session, me, code, playerToken, error, onSe
       const el = document.createElement('div')
       el.className = 'seller-coin'
       document.body.appendChild(el)
-      const root = document.createElement('div')
-      el.appendChild(root)
       // Lightweight inline SVG instead of mounting a React tree for a
-      // fire-and-forget DOM node — same shape as icons/CoinIcon.tsx.
+      // fire-and-forget DOM node.
       el.innerHTML = '<svg viewBox="0 0 22 22"><circle cx="11" cy="11" r="9.5" fill="#E9B949" stroke="#2B1B12" stroke-width="2"/><circle cx="11" cy="11" r="5.5" fill="none" stroke="#9C7420" stroke-width="1.4"/></svg>'
       const jx = (Math.random() - 0.5) * 60, jy = -40 - Math.random() * 50
       const anim = el.animate([
@@ -306,14 +309,14 @@ export default function SellerView({ session, me, code, playerToken, error, onSe
             </div>
             <div className="scene-scroller">
               <div className="scene-world">
-                {Array.from({ length: laneCount(session.numSellers) }, (_, l) => (
+                {Array.from({ length: lanes }, (_, l) => (
                   <SellerLane
                     key={l}
                     laneIndex={l}
-                    showLaneName={laneCount(session.numSellers) > 1}
-                    laneSellers={Array.from({ length: 4 }, (_, k) =>
-                      session.players.find(p => p.role === 'seller' && p.slotIndex === l * 4 + k))}
-                    offersBySellerId={new Map(session.availableOffers.map(o => [o.sellerId, o]))}
+                    showLaneName={lanes > 1}
+                    laneSellers={Array.from({ length: STALL_SLOTS.length }, (_, k) =>
+                      sellerBySlot.get(l * STALL_SLOTS.length + k))}
+                    offersBySellerId={offersBySellerId}
                     myId={me.id}
                     myGrade={myGrade}
                     infoMode={session.infoMode}
