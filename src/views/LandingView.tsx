@@ -1,4 +1,4 @@
-import { Fragment, useState } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../api/client'
 import { storage, sessionIndex } from '../lib/storage'
@@ -294,7 +294,7 @@ export default function LandingView() {
       {/* ── Config Modal ────────────────────────── */}
       {pendingConfig && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-mkt-950/80 backdrop-blur-sm px-4">
-          <div className="panel p-8 w-full max-w-md flex flex-col gap-5 animate-fade-up">
+          <div className="panel p-8 w-full max-w-lg flex flex-col gap-5 animate-fade-up">
             <div>
               <div className="label mb-1">Session erstellt · Code <span className="font-mono text-lemon-500 tracking-widest">{pendingConfig.code}</span></div>
               <h2 className="text-lg font-bold text-mkt-100">Spieleinstellungen</h2>
@@ -355,26 +355,31 @@ export default function LandingView() {
                       Holt &amp; Sherman Standardwerte
                     </button>
                   </div>
-                  <div className="grid grid-cols-[auto_1fr_1fr] gap-x-2 gap-y-1.5 items-center">
-                    <span />
-                    <span className="label text-center">Käuferwert</span>
-                    <span className="label text-center">Kosten 1. Einheit</span>
+                  <div className="space-y-3">
                     {GRADES.map(g => (
-                      <Fragment key={g}>
-                        <span className={`${GRADE_COLOR[g]} text-xs font-mono font-semibold whitespace-nowrap pr-1`}>{GRADE_LABEL[g]}</span>
-                        <input
-                          type="number" min={0} step="0.10" value={modalEconomics.buyerValues[g]}
-                          onChange={e => setBuyerValue(g, e.target.value)}
-                          aria-label={`Käuferwert ${GRADE_LABEL[g]}`}
-                          className="bg-mkt-850 border border-mkt-800 rounded-lg px-2 py-1.5 font-mono text-mkt-100 text-sm text-center focus:outline-none focus:border-lemon-500/50 transition-colors"
-                        />
-                        <input
-                          type="number" min={0} step="0.10" value={modalEconomics.sellerFirstCosts[g]}
-                          onChange={e => setSellerCost(g, e.target.value)}
-                          aria-label={`Kosten 1. Einheit ${GRADE_LABEL[g]}`}
-                          className="bg-mkt-850 border border-mkt-800 rounded-lg px-2 py-1.5 font-mono text-mkt-100 text-sm text-center focus:outline-none focus:border-lemon-500/50 transition-colors"
-                        />
-                      </Fragment>
+                      <div key={g}>
+                        <span className={`${GRADE_COLOR[g]} text-xs font-mono font-semibold`}>{GRADE_LABEL[g]}</span>
+                        <div className="grid grid-cols-2 gap-2 mt-1">
+                          <label className="flex flex-col gap-0.5">
+                            <span className="label text-[9px]">Käuferwert</span>
+                            <input
+                              type="number" min={0} step="0.10" value={modalEconomics.buyerValues[g]}
+                              onChange={e => setBuyerValue(g, e.target.value)}
+                              aria-label={`Käuferwert ${GRADE_LABEL[g]}`}
+                              className="bg-mkt-850 border border-mkt-800 rounded-lg px-2 py-1.5 font-mono text-mkt-100 text-sm text-center focus:outline-none focus:border-lemon-500/50 transition-colors"
+                            />
+                          </label>
+                          <label className="flex flex-col gap-0.5">
+                            <span className="label text-[9px]">Kosten 1. Einheit</span>
+                            <input
+                              type="number" min={0} step="0.10" value={modalEconomics.sellerFirstCosts[g]}
+                              onChange={e => setSellerCost(g, e.target.value)}
+                              aria-label={`Kosten 1. Einheit ${GRADE_LABEL[g]}`}
+                              className="bg-mkt-850 border border-mkt-800 rounded-lg px-2 py-1.5 font-mono text-mkt-100 text-sm text-center focus:outline-none focus:border-lemon-500/50 transition-colors"
+                            />
+                          </label>
+                        </div>
+                      </div>
                     ))}
                   </div>
                   <div className="mt-2">
