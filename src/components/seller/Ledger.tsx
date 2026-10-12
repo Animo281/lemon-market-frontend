@@ -13,11 +13,8 @@ interface Props {
   history: SellerHistoryEntry[]
   /** session.economics.sellerFirstCosts — this session's actual cost table. */
   firstCosts: Record<Grade, number>
-  /** session.economics.unitCostStep — kept out of the visible cost line on
-   * purpose: the 2nd crate's cost is only revealed once it's actually sold
-   * (see SellerStallSlot), so this screen (pre-market) only ever shows the
-   * 1st crate's cost — but the forecasted "Wenn alles verkauft" total still
-   * needs the real step to be accurate. */
+  /** session.economics.unitCostStep — used for the 2nd crate's cost line
+   * (when offering 2) and the "Wenn alles verkauft" total. */
   unitCostStep: number
 }
 
@@ -30,6 +27,7 @@ interface Props {
 // diverging from what actually gets paid out.
 export default function Ledger({ grade, units, price, history, firstCosts, unitCostStep }: Props) {
   const cost1 = sellerCost(firstCosts, grade, 0)
+  const cost2 = units === 2 ? sellerCost(firstCosts, grade, 1, unitCostStep) : null
   const gain = price * units - totalPurchaseCost(firstCosts, grade, units, unitCostStep)
   const recent = history.slice(-5).reverse()
 
@@ -39,6 +37,7 @@ export default function Ledger({ grade, units, price, history, firstCosts, unitC
       <div className="lrow"><span>Kiste</span><b>{QUALITY_LABEL[grade].label}</b></div>
       <div className="lrow"><span>Einheiten</span><b>{units}</b></div>
       <div className="lrow"><span>Kosten 1. Kiste</span><b className="neg">−{cost1.toFixed(2)} €</b></div>
+      {cost2 != null && <div className="lrow"><span>Kosten 2. Kiste</span><b className="neg">−{cost2.toFixed(2)} €</b></div>}
       <div className="lrow"><span>Dein Preis</span><b>{price.toFixed(2)} € × {units}</b></div>
       <div className="lrow total">
         <span>Wenn alles verkauft</span>

@@ -15,6 +15,8 @@ interface Props {
   /** session.economics.sellerFirstCosts — this session's actual cost table,
    * host-configurable, not the Holt & Sherman defaults. */
   firstCosts: Record<Grade, number>
+  /** session.economics.unitCostStep — needed to show the 2nd crate's cost. */
+  unitCostStep: number
   onSelectGrade: (g: Grade) => void
   onSelectUnits: (u: number) => void
   onNext: () => void
@@ -25,7 +27,7 @@ interface Props {
 // single crate; the backend lets a seller offer 1..maxSellerUnits, so a unit
 // picker is folded in here (per the plan's "Mengenwahl in Screen 2
 // integrieren" decision) instead of adding a whole extra screen.
-export default function CrateChoiceScreen({ grade, units, maxUnits, firstCosts, onSelectGrade, onSelectUnits, onNext }: Props) {
+export default function CrateChoiceScreen({ grade, units, maxUnits, firstCosts, unitCostStep, onSelectGrade, onSelectUnits, onNext }: Props) {
   return (
     <div className="seller-stage">
       <div className="seller-bg" style={{ backgroundImage: `url(${MARKET_SCENE_IMAGE})`, ...SCENE_VIEWS.sorting }} />
@@ -37,15 +39,15 @@ export default function CrateChoiceScreen({ grade, units, maxUnits, firstCosts, 
       <div className="abs crates">
         {GRADES_BEST_FIRST.map(g => {
           const selected = grade === g
-          // Only the 1st crate's cost — a deliberate deviation from the
-          // paper's "both costs known upfront": what a 2nd crate costs is
-          // only revealed once the 1st one actually sells (see
-          // SellerStallSlot's live reveal during the market phase).
+          // Both costs known upfront, per the paper's own seller
+          // instructions (Appendix): a seller sees the 1st AND 2nd unit's
+          // cost before ever making a sale.
           const cost1 = sellerCost(firstCosts, g, 0)
+          const cost2 = maxUnits > 1 ? sellerCost(firstCosts, g, 1, unitCostStep) : null
           return (
             <button
               key={g} type="button" className="crateopt" aria-pressed={selected}
-              aria-label={`${QUALITY_LABEL[g].label}, ${QUALITY_LABEL[g].text}, 1. Kiste ${cost1.toFixed(2)} Euro`}
+              aria-label={`${QUALITY_LABEL[g].label}, ${QUALITY_LABEL[g].text}, 1. Kiste ${cost1.toFixed(2)} Euro${cost2 != null ? `, 2. Kiste ${cost2.toFixed(2)} Euro` : ''}`}
               onClick={() => onSelectGrade(g)}
             >
               <span className="pick">Ausgewählt</span>
@@ -53,6 +55,7 @@ export default function CrateChoiceScreen({ grade, units, maxUnits, firstCosts, 
                 <b style={{ color: QUALITY_LABEL[g].paper }}>{QUALITY_LABEL[g].label}</b>
                 <span>{QUALITY_LABEL[g].text}</span>
                 <span className="cost">1. Kiste {cost1.toFixed(2)} €</span>
+                {cost2 != null && <span className="cost">2. Kiste {cost2.toFixed(2)} €</span>}
               </span>
               <span className="crateopt-img">
                 <img src={CRATE_BY_GRADE[g]} alt="" />
