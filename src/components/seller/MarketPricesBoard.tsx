@@ -1,5 +1,4 @@
-import { Grade } from '../../shared/types'
-import { CRATE_BY_GRADE, QUALITY_LABEL } from '../../lib/marketScene'
+import { CRATE_BY_GRADE, GRADES_BEST_FIRST, QUALITY_LABEL } from '../../lib/marketScene'
 import { MarketPriceSummary } from '../../lib/sellerStats'
 
 interface Props {
@@ -7,8 +6,6 @@ interface Props {
   /** The round the summary describes — null when there isn't one yet. */
   lastRound: number | null
 }
-
-const GRADES_BEST_FIRST: Grade[] = [3, 2, 1]
 
 // "Marktpreise" chalkboard, top-left of the counter screen (Screen 3) — per
 // docs/lemon-market-ui/HANDOFF-verkaeufer.md. Shows what the market paid per

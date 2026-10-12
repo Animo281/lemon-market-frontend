@@ -2,12 +2,13 @@ import { useEffect, useRef, useState } from 'react'
 import { AvailableOffer, Player, PublicSession } from '../shared/types'
 import { DEFAULT_BUYER_VALUES } from '../shared/constants'
 import { api } from '../api/client'
-import { MARKET_SCENE_IMAGE, STALL_SLOTS, laneCount } from '../lib/marketScene'
+import { STALL_SLOTS, laneCount } from '../lib/marketScene'
 import BuyerHud from '../components/buyer/BuyerHud'
 import MarketLane from '../components/buyer/MarketLane'
 import ProfitTable from '../components/ProfitTable'
 import ValueNote from '../components/buyer/ValueNote'
 import MarketHistory from '../components/buyer/MarketHistory'
+import RoundEndCard from '../components/RoundEndCard'
 
 interface Props {
   session: PublicSession
@@ -69,12 +70,10 @@ export default function BuyerView({ session, me, code, playerToken, error, onSes
     : new Map<string, AvailableOffer>()
 
   const myDecision = session.phase === 'market' ? session.currentBuyerDecisions[me.id] : undefined
-  // The backend now enforces shopping order server-side (submitBuyerDecision
-  // rejects anyone but session.currentPlayerId, see backend README "Buyer
-  // shopping order") — this used to just check "have I not decided yet",
-  // which let every undecided buyer see "Du bist dran" at once. Reading the
-  // server's own turn pointer is what makes the buy button's enabled state
-  // actually match what a buy attempt will do.
+  // The backend enforces shopping order server-side (submitBuyerDecision
+  // rejects anyone but session.currentPlayerId) — reading the server's own
+  // turn pointer is what makes the buy button's enabled state actually
+  // match what a buy attempt will do.
   const isMyTurn = session.phase === 'market' && session.currentPlayerId === me.id
   const isLastRound = session.currentRound >= session.totalRounds
   const lastResult = session.results[session.results.length - 1]
@@ -210,56 +209,37 @@ export default function BuyerView({ session, me, code, playerToken, error, onSes
         )}
 
         {session.phase === 'round-end' && lastResult && (
-          <div className="relative rounded-2xl overflow-hidden" style={{ border: '3px solid #2B1B12', aspectRatio: '1024 / 572' }}>
-            <div
-              className="absolute inset-0 bg-cover bg-center"
-              style={{ backgroundImage: `url(${MARKET_SCENE_IMAGE})`, filter: 'brightness(.32) saturate(.4)' }}
-              aria-hidden="true"
-            />
-            <div className="absolute inset-0 flex items-center justify-center p-4">
-              <div className="eve-note w-full max-w-sm p-5 space-y-4">
-                <div className="flex items-center justify-between border-b-2 pb-3" style={{ borderColor: 'rgba(43,27,18,.2)' }}>
-                  <h2 className="font-caps text-lg">Runde {lastResult.round}</h2>
-                  <span className="text-xs px-2 py-1 rounded-md border font-hand">
-                    {lastResult.infoMode === 'full' ? 'Volle Info' : 'Asymm. Info'}
-                  </span>
+          <RoundEndCard
+            round={lastResult.round}
+            infoMode={lastResult.infoMode}
+            earnings={myLastBuyerResult?.earnings ?? 0}
+            isLastRound={isLastRound}
+          >
+            {myLastBuyerResult?.sellerId ? (
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div>
+                  <div className="opacity-60 text-xs">Gekauft bei</div>
+                  <div className="font-caps text-base">{sellers.find(s => s.id === myLastBuyerResult.sellerId)?.name ?? '—'}</div>
                 </div>
-
-                {myLastBuyerResult?.sellerId ? (
-                  <div className="grid grid-cols-2 gap-3 text-sm">
-                    <div>
-                      <div className="opacity-60 text-xs">Gekauft bei</div>
-                      <div className="font-caps text-base">{sellers.find(s => s.id === myLastBuyerResult.sellerId)?.name ?? '—'}</div>
-                    </div>
-                    <div>
-                      <div className="opacity-60 text-xs">Qualität</div>
-                      <div className="font-caps text-base">{myLastBuyerResult.grade ? `Q${myLastBuyerResult.grade}` : '—'}</div>
-                    </div>
-                    <div>
-                      <div className="opacity-60 text-xs">Preis bezahlt</div>
-                      <div className="font-caps text-base">{myLastBuyerResult.price?.toFixed(2)} €</div>
-                    </div>
-                    <div>
-                      <div className="opacity-60 text-xs">Käuferwert</div>
-                      <div className="font-caps text-base">
-                        {myLastBuyerResult.grade ? `${buyerValues[myLastBuyerResult.grade].toFixed(2)} €` : '—'}
-                      </div>
-                    </div>
+                <div>
+                  <div className="opacity-60 text-xs">Qualität</div>
+                  <div className="font-caps text-base">{myLastBuyerResult.grade ? `Q${myLastBuyerResult.grade}` : '—'}</div>
+                </div>
+                <div>
+                  <div className="opacity-60 text-xs">Preis bezahlt</div>
+                  <div className="font-caps text-base">{myLastBuyerResult.price?.toFixed(2)} €</div>
+                </div>
+                <div>
+                  <div className="opacity-60 text-xs">Käuferwert</div>
+                  <div className="font-caps text-base">
+                    {myLastBuyerResult.grade ? `${buyerValues[myLastBuyerResult.grade].toFixed(2)} €` : '—'}
                   </div>
-                ) : (
-                  <div className="text-sm opacity-70">Kein Kauf in dieser Runde</div>
-                )}
-
-                <div className="flex justify-between items-center pt-2 border-t-2 font-caps text-lg" style={{ borderColor: 'rgba(43,27,18,.2)' }}>
-                  <span>Dein Gewinn</span>
-                  <span>{(myLastBuyerResult?.earnings ?? 0).toFixed(2)} €</span>
-                </div>
-                <div className="text-center text-xs opacity-60">
-                  {isLastRound ? 'Spiel endet…' : 'Warte auf nächste Runde…'}
                 </div>
               </div>
-            </div>
-          </div>
+            ) : (
+              <div className="text-sm opacity-70">Kein Kauf in dieser Runde</div>
+            )}
+          </RoundEndCard>
         )}
 
         {session.phase === 'game-end' && (

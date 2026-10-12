@@ -32,7 +32,6 @@ export default function ConfirmDialog({ request, onCancel }: Props) {
       document.removeEventListener('keydown', onKey)
       if (triggerRef.current instanceof HTMLElement) triggerRef.current.focus()
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [request])
 
   if (!request) return null

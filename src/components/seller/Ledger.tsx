@@ -2,9 +2,7 @@ import { Fragment } from 'react'
 import { Grade } from '../../shared/types'
 import { QUALITY_LABEL } from '../../lib/marketScene'
 import { sellerCost } from '../../shared/constants'
-import { SellerHistoryEntry, totalPurchaseCost } from '../../lib/sellerStats'
-
-const signed = (n: number) => `${n > 0 ? '+' : n < 0 ? '−' : '±'}${Math.abs(n).toFixed(2)} €`
+import { SellerHistoryEntry, totalPurchaseCost, signed } from '../../lib/sellerStats'
 
 interface Props {
   grade: Grade

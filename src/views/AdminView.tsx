@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { PublicSession, Player, SellerDecision, BuyerDecision, RoundResult } from '../shared/types'
+import { PublicSession } from '../shared/types'
 import { api, ApiError } from '../api/client'
 import { CheckIcon } from '../components/icons'
 import { storage } from '../lib/storage'
+import LoadingScreen from '../components/LoadingScreen'
 import SessionCodeDisplay from '../components/SessionCodeDisplay'
 import PlayerList from '../components/PlayerList'
 import PhaseIndicator from '../components/PhaseIndicator'
@@ -60,17 +61,7 @@ export default function AdminView() {
       </div>
     </div>
   )
-  if (!session) return (
-    <div className="min-h-screen market-bg flex items-center justify-center">
-      <div className="flex items-center gap-2.5 text-mkt-500 text-sm font-mono">
-        <span className="relative flex h-2 w-2">
-          <span className="dot-ping absolute inline-flex h-full w-full rounded-full bg-lemon-500 opacity-75" />
-          <span className="relative inline-flex h-2 w-2 rounded-full bg-lemon-500" />
-        </span>
-        Lade…
-      </div>
-    </div>
-  )
+  if (!session) return <LoadingScreen />
 
   const sellers    = session.players.filter(p => p.role === 'seller')
   const buyers     = session.players.filter(p => p.role === 'buyer')
@@ -99,7 +90,7 @@ export default function AdminView() {
   const handleNextRound = () => runAction(() => api.nextRound(code, adminToken))
 
   const handleToggleInfoMode = () => {
-    const next = session?.infoMode === 'full' ? 'asymmetrisch (Qualität ausblenden)' : 'volle Info (Qualität einblenden)'
+    const next = session.infoMode === 'full' ? 'asymmetrisch (Qualität ausblenden)' : 'volle Info (Qualität einblenden)'
     setConfirm({
       title: 'Informationsmodus wechseln?',
       body: `Wechseln zu: ${next}`,
@@ -146,9 +137,7 @@ export default function AdminView() {
             ~36px wide) so PhaseIndicator doesn't run underneath it — see
             docs/lemon-market-ui overlap audit. */}
         <div className="flex items-center justify-between pr-12">
-          <div>
-            <h1 className="font-display text-3xl font-bold text-lemon-400">Admin-Panel</h1>
-          </div>
+          <h1 className="font-display text-3xl font-bold text-lemon-400">Admin-Panel</h1>
           {session.phase !== 'lobby' && session.phase !== 'game-end' && (
             <PhaseIndicator round={session.currentRound} total={session.totalRounds} infoMode={session.infoMode} />
           )}
@@ -216,7 +205,7 @@ export default function AdminView() {
             <div className="md:col-span-3 panel-warm p-6">
               <div className="label mb-4">Verkäufer-Entscheidungen</div>
               <div className="space-y-2">
-                {sellers.sort((a: Player, b: Player) => a.slotIndex - b.slotIndex).map((s: Player) => {
+                {[...sellers].sort((a, b) => a.slotIndex - b.slotIndex).map(s => {
                   const done = s.id in session.currentSellerDecisions
                   return (
                     <div key={s.id} className={`flex items-center gap-3 py-2.5 px-3 rounded-xl transition-colors ${
@@ -245,7 +234,7 @@ export default function AdminView() {
             </div>
             <div className="md:col-span-2 space-y-3">
               <PlayerList session={session} onKick={handleKick} />
-              {sellers.some((s: Player) => !(s.id in session.currentSellerDecisions)) && (
+              {sellers.some(s => !(s.id in session.currentSellerDecisions)) && (
                 <button
                   onClick={handleForceAdvance}
                   disabled={busy}
@@ -272,7 +261,7 @@ export default function AdminView() {
               <div className="panel p-5">
                 <div className="label mb-3">Käufer-Status</div>
                 <div className="grid grid-cols-2 gap-2">
-                  {buyers.map((b: Player) => {
+                  {buyers.map(b => {
                     const done = b.id in session.currentBuyerDecisions
                     const isCurrent = session.currentPlayerId === b.id
                     return (
@@ -352,9 +341,8 @@ export default function AdminView() {
                     </tr>
                   </thead>
                   <tbody>
-                    {lastResult.sellerDecisions.map((sd: SellerDecision) => {
-                      const s = sellers.find((p: Player) => p.id === sd.playerId)
-                      const profit = sd.earnings
+                    {lastResult.sellerDecisions.map(sd => {
+                      const s = sellers.find(p => p.id === sd.playerId)
                       return (
                         <tr key={sd.playerId} className="border-b border-mkt-800/40">
                           <td className="py-2.5 pr-4 text-lemon-400 font-bold">{s?.name}</td>
@@ -367,15 +355,15 @@ export default function AdminView() {
                           </td>
                           <td className="py-2.5 pr-4 text-mkt-200">€{sd.price.toFixed(2)}</td>
                           <td className="py-2.5 text-mkt-300">{sd.unitsSold}</td>
-                          <td className={`py-2.5 font-bold ${profit >= 0 ? 'text-lime-400' : 'text-coral-400'}`}>
-                            €{profit.toFixed(2)}
+                          <td className={`py-2.5 font-bold ${sd.earnings >= 0 ? 'text-lime-400' : 'text-coral-400'}`}>
+                            €{sd.earnings.toFixed(2)}
                           </td>
                         </tr>
                       )
                     })}
-                    {lastResult.buyerDecisions.map((bd: BuyerDecision) => {
-                      const b      = buyers.find((p: Player) => p.id === bd.playerId)
-                      const sellerP = sellers.find((p: Player) => p.id === bd.sellerId)
+                    {lastResult.buyerDecisions.map(bd => {
+                      const b      = buyers.find(p => p.id === bd.playerId)
+                      const sellerP = sellers.find(p => p.id === bd.sellerId)
                       return (
                         <tr key={bd.playerId} className="border-b border-mkt-800/40">
                           <td className="py-2.5 pr-4 text-ice-400 font-bold">{b?.name}</td>
@@ -454,7 +442,6 @@ export default function AdminView() {
             {/* Hero stats */}
             <GameEndStats
               results={session.results}
-              sellers={sellers}
               buyers={buyers}
             />
 
@@ -472,7 +459,7 @@ export default function AdminView() {
             <div>
               <div className="label mb-3">Marktverlauf je Runde</div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {session.results.map((r: RoundResult) => (
+                {session.results.map(r => (
                   <div key={r.round}>
                     <div className="label mb-2">
                       Runde {r.round} ·

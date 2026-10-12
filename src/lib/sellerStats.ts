@@ -2,9 +2,10 @@ import { Grade, PublicSession } from '../shared/types'
 import { sellerCost } from '../shared/constants'
 
 // Pure derivations from PublicSession for the seller view. The backend has
-// no budget/balance field (see plan) — everything here is computed
-// client-side from session.results, the same trick BuyerView.tsx already
-// uses for its "Kontostand" pill.
+// no budget/balance field — everything here is computed client-side from
+// session.results.
+
+export const signed = (n: number) => `${n > 0 ? '+' : n < 0 ? '−' : '±'}${Math.abs(n).toFixed(2)} €`
 
 /** Sum of this seller's earnings across finished rounds — the seller-side
  * "Kasse" pill. Can be negative if they ever priced below cost. */

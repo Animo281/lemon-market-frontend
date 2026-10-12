@@ -2,7 +2,6 @@ import { RoundResult, Player } from '../shared/types'
 
 interface Props {
   results: RoundResult[]
-  sellers: Player[]
   buyers: Player[]
 }
 
@@ -14,7 +13,7 @@ interface Props {
 // disagree with the per-round efficiency shown on the admin panel during
 // play. Summing the already-correct per-round figures keeps both displays
 // consistent with each other and with host-configured economics.
-export default function GameEndStats({ results, sellers, buyers }: Props) {
+export default function GameEndStats({ results, buyers }: Props) {
   const totalSurplus = results.reduce((s, r) => s + r.totalSurplus, 0)
   const theoreticalMax = results.reduce((s, r) => s + r.metrics.theoreticalMaxSurplus, 0)
   const efficiency = theoreticalMax > 0 ? (totalSurplus / theoreticalMax) * 100 : 0

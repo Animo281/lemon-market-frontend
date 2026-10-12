@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { PublicSession, Player } from '../shared/types'
 import { api, ApiError } from '../api/client'
 import { storage, sessionIndex } from '../lib/storage'
+import LoadingScreen from '../components/LoadingScreen'
 import BuyerView from './BuyerView'
 import SellerView from './SellerView'
 
@@ -91,17 +92,7 @@ export default function PlayerView() {
     </div>
   )
 
-  if (!session || !me) return (
-    <div className="min-h-screen market-bg flex items-center justify-center">
-      <div className="flex items-center gap-2.5 text-mkt-500 text-sm font-mono">
-        <span className="relative flex h-2 w-2">
-          <span className="dot-ping absolute inline-flex h-full w-full rounded-full bg-lemon-500 opacity-75" />
-          <span className="relative inline-flex h-2 w-2 rounded-full bg-lemon-500" />
-        </span>
-        Lade…
-      </div>
-    </div>
-  )
+  if (!session || !me) return <LoadingScreen />
 
   // Both roles get their own "Abendmarkt" world across every phase — see
   // docs/lemon-market-ui/HANDOFF.md / HANDOFF-verkaeufer.md and the plan.
