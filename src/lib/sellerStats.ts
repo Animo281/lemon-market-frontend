@@ -79,9 +79,9 @@ export function sellerHistory(session: PublicSession, playerId: string): SellerH
  * (price − marginal cost) over the units sold so far. Used in the market
  * round (Screen 4) where the real per-round earnings aren't computed
  * server-side until round-end. */
-export function liveSellerEarnings(firstCosts: Record<Grade, number>, grade: Grade, price: number, unitsSold: number): number {
+export function liveSellerEarnings(firstCosts: Record<Grade, number>, grade: Grade, price: number, unitsSold: number, unitCostStep?: number): number {
   let total = 0
-  for (let i = 0; i < unitsSold; i++) total += price - sellerCost(firstCosts, grade, i)
+  for (let i = 0; i < unitsSold; i++) total += price - sellerCost(firstCosts, grade, i, unitCostStep)
   return total
 }
 
@@ -91,8 +91,8 @@ export function liveSellerEarnings(firstCosts: Record<Grade, number>, grade: Gra
  * computeSellerEarnings only subtracts cost from *sold* units, so an unsold
  * crate costs nothing in the real payout. See Ledger.tsx for how that's
  * reflected in the "Wenn nicht verkauft" row. */
-export function totalPurchaseCost(firstCosts: Record<Grade, number>, grade: Grade, units: number): number {
+export function totalPurchaseCost(firstCosts: Record<Grade, number>, grade: Grade, units: number, unitCostStep?: number): number {
   let total = 0
-  for (let i = 0; i < units; i++) total += sellerCost(firstCosts, grade, i)
+  for (let i = 0; i < units; i++) total += sellerCost(firstCosts, grade, i, unitCostStep)
   return total
 }

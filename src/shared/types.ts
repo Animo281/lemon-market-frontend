@@ -59,19 +59,22 @@ export interface AvailableOffer {
 }
 
 // Host-configurable per session (set at create, editable in the lobby).
-// UNIT_COST_STEP (shared/constants.ts) is NOT part of this — the +1.00 per
-// extra unit is a fixed game rule, not a per-session parameter.
+// unitCostStep is a deliberate deviation from Holt & Sherman (1999), where
+// it's a fixed +$1 rule: here the host can set it per session instead.
 export interface EconomicsConfig {
   buyerValues: Record<Grade, number>
   sellerFirstCosts: Record<Grade, number>
+  unitCostStep: number
 }
 
 // Viewer-masked, mirroring the paper's own instructions to keep each side's
 // private-information table private: a buyer only ever gets buyerValues, a
-// seller only sellerFirstCosts, admin gets both, anonymous gets neither.
+// seller only sellerFirstCosts (+ unitCostStep, needed to know what their
+// next unit costs), admin gets both, anonymous gets neither.
 export interface PublicEconomics {
   buyerValues?: Record<Grade, number>
   sellerFirstCosts?: Record<Grade, number>
+  unitCostStep?: number
 }
 
 export interface PublicSession {

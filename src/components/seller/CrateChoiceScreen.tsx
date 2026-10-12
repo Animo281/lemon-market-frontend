@@ -1,6 +1,6 @@
 import { Grade } from '../../shared/types'
 import { CRATE_BY_GRADE, MARKET_SCENE_IMAGE, QUALITY_LABEL, SCENE_VIEWS } from '../../lib/marketScene'
-import { totalPurchaseCost } from '../../lib/sellerStats'
+import { sellerCost } from '../../shared/constants'
 import { EyeIcon } from './icons'
 
 // Best lemon first — matches the sorting-station legend and Q-ordering used
@@ -37,22 +37,22 @@ export default function CrateChoiceScreen({ grade, units, maxUnits, firstCosts, 
       <div className="abs crates">
         {GRADES_BEST_FIRST.map(g => {
           const selected = grade === g
-          // Reflects the total for the currently chosen quantity, not just
-          // one unit — so switching the unit count below updates every
-          // crate's price tag, and picking a crate after choosing a
-          // quantity shows the real total right away.
-          const cost = totalPurchaseCost(firstCosts, g, units)
+          // Only the 1st crate's cost — a deliberate deviation from the
+          // paper's "both costs known upfront": what a 2nd crate costs is
+          // only revealed once the 1st one actually sells (see
+          // SellerStallSlot's live reveal during the market phase).
+          const cost1 = sellerCost(firstCosts, g, 0)
           return (
             <button
               key={g} type="button" className="crateopt" aria-pressed={selected}
-              aria-label={`${QUALITY_LABEL[g].label}, ${QUALITY_LABEL[g].text}, Einkauf ${cost.toFixed(2)} Euro`}
+              aria-label={`${QUALITY_LABEL[g].label}, ${QUALITY_LABEL[g].text}, 1. Kiste ${cost1.toFixed(2)} Euro`}
               onClick={() => onSelectGrade(g)}
             >
               <span className="pick">Ausgewählt</span>
               <span className="label">
                 <b style={{ color: QUALITY_LABEL[g].paper }}>{QUALITY_LABEL[g].label}</b>
                 <span>{QUALITY_LABEL[g].text}</span>
-                <span className="cost">Einkauf {cost.toFixed(2)} €</span>
+                <span className="cost">1. Kiste {cost1.toFixed(2)} €</span>
               </span>
               <span className="crateopt-img">
                 <img src={CRATE_BY_GRADE[g]} alt="" />

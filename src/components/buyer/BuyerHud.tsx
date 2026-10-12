@@ -6,9 +6,6 @@ interface Props {
   totalRounds: number
   infoMode: InfoMode
   phase: GamePhase
-  /** Sum of this buyer's earnings across finished rounds — stands in for the
-   * mockup's "Budget" pill, which has no backend equivalent (see plan). */
-  balance: number
   /** Whether it's this buyer's turn to act during the market phase — only
    * meaningful when phase === 'market'. */
   isMyTurn: boolean
@@ -25,7 +22,7 @@ const STATUS_LABEL: Record<GamePhase, string> = {
   'game-end': 'Spiel beendet',
 }
 
-export default function BuyerHud({ round, totalRounds, infoMode, phase, balance, isMyTurn, hasDecided }: Props) {
+export default function BuyerHud({ round, totalRounds, infoMode, phase, isMyTurn, hasDecided }: Props) {
   const full = infoMode === 'full'
   // Only the market phase (and the reveal it implies) has a meaningful
   // info-mode to show — lobby/seller-input haven't opened the board yet.
@@ -50,7 +47,6 @@ export default function BuyerHud({ round, totalRounds, infoMode, phase, balance,
           {showInfoMode ? (full ? 'Phase: Qualität sichtbar' : 'Phase: Qualität verdeckt') : 'Vorbereitung'}
         </span>
         <span className="scene-pill">{statusLabel}</span>
-        <span className="scene-pill">Kontostand <span className="v">{balance.toFixed(2)} €</span></span>
       </div>
     </header>
   )

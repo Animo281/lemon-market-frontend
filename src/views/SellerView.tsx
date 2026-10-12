@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Grade, Player, PublicSession } from '../shared/types'
-import { DEFAULT_SELLER_FIRST_COSTS, sellerCost } from '../shared/constants'
+import { DEFAULT_SELLER_FIRST_COSTS, UNIT_COST_STEP, sellerCost } from '../shared/constants'
 import { api, ApiError } from '../api/client'
 import {
   MARKET_SCENE_IMAGE, SCENE_VIEWS, STALL_CROPS, cropCoverStyle, cropStyle, laneCount, stallInfo,
@@ -72,6 +72,7 @@ export default function SellerView({ session, me, code, playerToken, error, onSe
   // sellerFirstCosts, so the fallback only matters defensively (e.g. before
   // the first successful poll response).
   const firstCosts = session.economics.sellerFirstCosts ?? DEFAULT_SELLER_FIRST_COSTS
+  const unitCostStep = session.economics.unitCostStep ?? UNIT_COST_STEP
 
   const marketSummary = lastRoundMarketPrices(session)
   const lastRoundNum = session.results.length > 0 ? session.results[session.results.length - 1].round : null
@@ -95,7 +96,7 @@ export default function SellerView({ session, me, code, playerToken, error, onSe
     if (prev !== null && myOffer.unitsSold > prev) {
       const gainedUnits = myOffer.unitsSold - prev
       const price0 = myOffer.price as number
-      const profitGained = liveSellerEarnings(firstCosts, myGrade, price0, myOffer.unitsSold) - liveSellerEarnings(firstCosts, myGrade, price0, prev)
+      const profitGained = liveSellerEarnings(firstCosts, myGrade, price0, myOffer.unitsSold, unitCostStep) - liveSellerEarnings(firstCosts, myGrade, price0, prev, unitCostStep)
       const revenueGained = price0 * gainedUnits
       const msg = `Ein Käufer hat deine Zitronen gekauft: +${revenueGained.toFixed(2)} € Einnahme, +${profitGained.toFixed(2)} € Gewinn`
       setToast(msg)
@@ -256,6 +257,7 @@ export default function SellerView({ session, me, code, playerToken, error, onSe
                 lastRound={lastRoundNum}
                 history={history}
                 firstCosts={firstCosts}
+                unitCostStep={unitCostStep}
                 frozen={false}
                 submitting={submitting}
                 onSubmit={handleSubmit}
@@ -279,6 +281,7 @@ export default function SellerView({ session, me, code, playerToken, error, onSe
                 lastRound={lastRoundNum}
                 history={history}
                 firstCosts={firstCosts}
+                unitCostStep={unitCostStep}
                 frozen
                 submitting={false}
                 onSubmit={() => {}}
@@ -286,7 +289,7 @@ export default function SellerView({ session, me, code, playerToken, error, onSe
                 onEditAgain={() => {
                   setGrade(myDecision.grade as Grade)
                   setUnits(myDecision.unitsOffered ?? session.maxSellerUnits)
-                  setPrice(myDecision.price ?? sellerCost(firstCosts, (myDecision.grade ?? 1) as Grade, 0))
+                  setPrice(myDecision.price ?? sellerCost(firstCosts, (myDecision.grade ?? 1) as Grade, 0, unitCostStep))
                   setForceEdit(true)
                 }}
               />
@@ -314,6 +317,7 @@ export default function SellerView({ session, me, code, playerToken, error, onSe
                     myGrade={myGrade}
                     infoMode={session.infoMode}
                     firstCosts={firstCosts}
+                    unitCostStep={unitCostStep}
                   />
                 ))}
               </div>
