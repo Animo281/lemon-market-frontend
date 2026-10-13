@@ -137,6 +137,29 @@ export default function JoinView() {
           </form>
         )}
 
+        {/* Already joined this code before (localStorage index survives a
+            closed tab/background-killed phone, unlike sessionStorage) — offer
+            to jump straight back in instead of only showing the join form or
+            a "Beitritt nicht mehr möglich" error once the game has started. */}
+        {code.length === 4 && sessionIndex.getAll()[code] && (() => {
+          const entry = sessionIndex.getAll()[code]
+          return (
+            <div className="panel p-5 flex items-center justify-between gap-3 animate-fade-in">
+              <span className="text-mkt-200 text-sm">
+                Du bist schon als <strong className="text-lemon-400">{entry.name}</strong>{' '}
+                ({entry.role === 'seller' ? 'Verkäufer' : 'Käufer'}) dabei.
+              </span>
+              <button
+                type="button"
+                className="btn-primary text-sm px-4 py-2 shrink-0"
+                onClick={() => { storage.restore(code); navigate(`/play/${code}`) }}
+              >
+                Weiterspielen →
+              </button>
+            </div>
+          )
+        })()}
+
         {/* Session join form */}
         {session ? (
           <form onSubmit={handleJoin} className="panel-warm p-6 space-y-5 animate-scale-in">

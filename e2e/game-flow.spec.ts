@@ -92,6 +92,33 @@ test('a 2-round game advances to round 2 instead of ending, and the info-mode to
   await closeSession(session)
 })
 
+test('a closed/reopened player tab auto-rejoins from the localStorage index', async ({ browser }) => {
+  const session = await setUpLobby(browser)
+  const { buyerCtx, code } = session
+
+  // sessionStorage is per-tab even within one BrowserContext — a fresh page
+  // in the same context has no player token, same as a reopened tab/closed-
+  // and-relaunched phone browser would, while the context's localStorage
+  // (the sessionIndex) still has it.
+  const reopened = await buyerCtx.newPage()
+  await reopened.goto(`/play/${code}`)
+  await expect(reopened).toHaveURL(`/play/${code}`) // not bounced to '/'
+  await expect(reopened.getByText('Warte auf Spielstart').first()).toBeVisible({ timeout: 10_000 })
+  await reopened.close()
+
+  // Same recovery via the join page's "Weiterspielen" banner, for the case
+  // where the player re-opens the QR/share link instead of the bare /play URL.
+  const viaJoin = await buyerCtx.newPage()
+  await viaJoin.goto(`/join/${code}`)
+  await expect(viaJoin.getByText('Test-Käufer', { exact: false })).toBeVisible()
+  await viaJoin.getByRole('button', { name: /Weiterspielen/ }).click()
+  await expect(viaJoin).toHaveURL(`/play/${code}`)
+  await expect(viaJoin.getByText('Warte auf Spielstart').first()).toBeVisible({ timeout: 10_000 })
+  await viaJoin.close()
+
+  await closeSession(session)
+})
+
 test('landing page rejects join with an unknown session code, fast (404 short-circuits retries)', async ({ page }) => {
   await page.goto('/join/ZZZZ')
   // The 404 fast-path (JoinView.tsx) skips the 3-retry/network-blip budget,

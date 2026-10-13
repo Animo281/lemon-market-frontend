@@ -272,8 +272,7 @@ export default function LandingView() {
                 <button
                   className="btn-secondary text-xs px-3 py-1.5 shrink-0"
                   onClick={() => {
-                    storage.setPlayerToken(code, entry.playerToken)
-                    storage.setPlayerId(code, entry.playerId)
+                    storage.restore(code)
                     navigate(`/play/${code}`)
                   }}
                 >
