@@ -46,7 +46,16 @@ export default function SellerStallSlot({ slot, seller, offer, isMine, myGrade, 
     ? offer.unitsSold === 0
       ? <span className="chip me abs" style={atStyle(slot.cx, CHIP_Y)}>Wartet auf Käufer<span className="dots" /></span>
       : (
-        <span className="chip me abs" style={atStyle(slot.cx, CHIP_Y)} title={`${offer.unitsSold} von ${offer.unitsOffered} verkauft`}>
+        // max-width/overflow on .chip can ellipsis this on narrow scenes
+        // (see index.css) — title only reveals the rest on hover, so this
+        // is also focusable: a tap gives it focus, and :focus removes the
+        // clipping (index.css `.chip:focus`) for touch users too.
+        <span
+          className="chip me abs"
+          style={atStyle(slot.cx, CHIP_Y)}
+          title={`${offer.unitsSold} von ${offer.unitsOffered} verkauft`}
+          tabIndex={0}
+        >
           {offer.unitsSold}/{offer.unitsOffered} verkauft · {signed(liveSellerEarnings(firstCosts, myGrade as Grade, price, offer.unitsSold, unitCostStep))}
         </span>
       )

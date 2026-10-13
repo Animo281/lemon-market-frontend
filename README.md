@@ -167,6 +167,24 @@ timer, a per-round stand choice, whole-euro prices — the handoffs' own "Offene
 sections and this file's "Known limitations" below record how the implementation
 actually resolved each one.
 
+## Supported devices & browsers
+
+There's no separate mobile app — one responsive web app for desktop, tablet and phone.
+
+- **Browsers:** Safari/iOS 16+, Chrome/Edge 105+, Firefox 110+ (`package.json`
+  `browserslist`, matched by `vite.config.ts` `build.target`). The buyer/seller game
+  scene uses CSS container queries (`cqw` units, `container-type: inline-size`), which
+  don't exist before those versions — on an older browser the scene shows a
+  "please update" message instead of a broken layout (`index.css`, `@supports not
+  (container-type: inline-size)`).
+- **Phones and iPad portrait:** the game scene is a single illustration that's either
+  shown in full (tablet/desktop width) or scrolls sideways with snap points on a phone
+  (`.scene-scroller`/`.scene-world`, `index.css`). Everything else (landing, admin,
+  tables) reflows to one column.
+- **Testing:** `playwright.config.ts` runs the e2e suite against Chromium, Firefox,
+  WebKit, an iPhone 14 and an iPad (portrait + landscape) emulation. `e2e/responsive.spec.ts`
+  checks all views for page-level horizontal overflow at phone/tablet/desktop widths.
+
 ## Known limitations
 
 - No reconnect UI beyond the "frühere Sessions" list on the landing page (backed by

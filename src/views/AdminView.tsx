@@ -285,7 +285,7 @@ export default function AdminView() {
                         {done && <CheckIcon size={10} className="ml-auto text-lime-500" />}
                         {!done && isCurrent && (
                           <button
-                            className="ml-auto text-[9px] px-1.5 py-0.5 rounded border border-copper-500/30 text-copper-400 hover:bg-copper-500/10 transition-colors font-mono disabled:opacity-50"
+                            className="tap-target-sm ml-auto text-[9px] px-1.5 py-0.5 rounded border border-copper-500/30 text-copper-400 hover:bg-copper-500/10 transition-colors font-mono disabled:opacity-50"
                             onClick={handleSkipBuyer}
                             disabled={busy}
                           >
@@ -294,7 +294,7 @@ export default function AdminView() {
                         )}
                         {!done && (
                           <button
-                            className="text-[9px] px-1.5 py-0.5 rounded border border-coral-500/30 text-coral-400 hover:bg-coral-500/10 transition-colors disabled:opacity-50"
+                            className="tap-target-sm text-[9px] px-1.5 py-0.5 rounded border border-coral-500/30 text-coral-400 hover:bg-coral-500/10 transition-colors disabled:opacity-50"
                             onClick={() => handleKick(b.id, b.name)}
                             disabled={busy}
                           >
