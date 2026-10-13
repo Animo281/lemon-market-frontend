@@ -17,6 +17,11 @@ export default function PlayerView() {
   const [kicked, setKicked] = useState(false)
   const hasLoadedOnce = useRef(false)
 
+  // A closed tab or a backgrounded phone can wipe sessionStorage — before
+  // giving up, try re-seeding it from the localStorage index (same data the
+  // landing page's "Frühere Sessions" card uses) so a reopened link/tab just
+  // works instead of stranding the player on the landing page.
+  if (code && !storage.getPlayerToken(code)) storage.restore(code)
   const playerToken = code ? storage.getPlayerToken(code) : null
   const playerId    = code ? storage.getPlayerId(code)    : null
 
@@ -48,12 +53,14 @@ export default function PlayerView() {
           // token today, so it can't be told apart from "you were never a
           // player here" — this check doesn't depend on that.)
           setKicked(true)
+          sessionIndex.remove(code)
         }
         hasLoadedOnce.current = true
       } catch (err: unknown) {
         if (cancelled) return
         if (err instanceof ApiError && err.status === 403) {
           setKicked(true)
+          sessionIndex.remove(code)
         } else if (!hasLoadedOnce.current) {
           setError(err instanceof ApiError ? err.message : 'Session nicht gefunden.')
         }

@@ -29,6 +29,19 @@ export const storage = {
     sessionStorage.removeItem(`${PREFIX}:player:${code}`)
     sessionStorage.removeItem(`${PREFIX}:pid:${code}`)
   },
+
+  // A closed tab or a phone that discarded it in the background wipes
+  // sessionStorage, but the localStorage index (sessionIndex, below)
+  // survives — this re-seeds sessionStorage from it so the player doesn't
+  // need to find the "Frühere Sessions" card on the landing page to get
+  // back in.
+  restore: (code: string): SessionIndexEntry | null => {
+    const entry = sessionIndex.getAll()[code]
+    if (!entry) return null
+    storage.setPlayerToken(code, entry.playerToken)
+    storage.setPlayerId(code, entry.playerId)
+    return entry
+  },
 }
 
 // localStorage-Index: überlebt Browser-Close für Reconnect.
