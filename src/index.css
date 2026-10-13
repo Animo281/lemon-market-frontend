@@ -155,6 +155,29 @@ html:not(.dark) {
       radial-gradient(circle at 25% 25%, rgba(240, 196, 25, 0.04) 0%, transparent 50%),
       radial-gradient(circle at 75% 75%, rgba(114, 200, 50, 0.03) 0%, transparent 50%);
   }
+
+  /* min-h-screen (100vh) on iOS Safari includes the address bar, so the
+     page can be taller than the visible viewport until it scrolls/hides.
+     100dvh tracks the actual visible area; @supports falls back to the
+     100vh Tailwind already generates for .min-h-screen when dvh isn't
+     recognized, so this never needs cascade-order luck between the two
+     classes. */
+  @supports (height: 100dvh) {
+    .min-h-screen { min-height: 100dvh; }
+  }
+
+  /* Expands a compact admin-list button's touch target toward the 44px
+     guideline via an invisible pseudo-element, without growing the button
+     itself or disturbing the tight row layout it sits in (PlayerList kick
+     button, AdminView skip/kick buttons). */
+  .tap-target-sm {
+    position: relative;
+  }
+  .tap-target-sm::before {
+    content: '';
+    position: absolute;
+    inset: -11px;
+  }
 }
 
 /* These were previously in @layer utilities, where Tailwind's cascade puts
@@ -292,12 +315,16 @@ html:not(.dark) {
 .stall-card {
   @apply panel transition-all duration-200;
 }
-.stall-card:hover {
-  border-color: rgba(240, 196, 25, 0.28);
-  box-shadow:
-    0 0 0 1px rgba(240, 196, 25, 0.06),
-    0 2px 6px rgb(var(--shadow-rgb) / calc(0.5 * var(--shadow-strength))),
-    0 8px 24px rgb(var(--shadow-rgb) / calc(0.4 * var(--shadow-strength)));
+/* (hover: hover) excludes touch screens — without it, a tap on iOS can
+   leave this "stuck" until the user taps elsewhere. */
+@media (hover: hover) {
+  .stall-card:hover {
+    border-color: rgba(240, 196, 25, 0.28);
+    box-shadow:
+      0 0 0 1px rgba(240, 196, 25, 0.06),
+      0 2px 6px rgb(var(--shadow-rgb) / calc(0.5 * var(--shadow-strength))),
+      0 8px 24px rgb(var(--shadow-rgb) / calc(0.4 * var(--shadow-strength)));
+  }
 }
 
 /* ── Heading tight tracking ───────────────────── */
@@ -323,9 +350,37 @@ h1, h2, h3 {
   container-type: inline-size;
   background: #27364C;
 }
+/* Tablets (iPad portrait and up, content width ~720–830px after page
+   padding) fit the scene without the phone's sideways scroll: the floor
+   drops to whatever width is available, so the scene shrinks to fit
+   instead of overflowing. Desktops are unaffected — at >=768px viewport
+   width their content is already wider than 880px, so min() still picks
+   the 880px floor and nothing changes. Below 768px (phones) the hard
+   880px floor stays, keeping the scroll-snap below. */
+@media (min-width: 768px) {
+  .scene-world { min-width: min(880px, 100%); }
+}
 @media (max-width: 879px) {
   .scene-scroller { scroll-snap-type: x mandatory; }
   .scene-world .scene-lane { scroll-snap-align: start; }
+}
+/* Fallback for browsers without container queries (pre Safari/iOS 16,
+   Chrome 105, Firefox 110 — see package.json browserslist): the cqw-sized
+   scene would render broken/unscaled, so hide it and say so instead of
+   shipping a garbled layout. Applies to every .scene-scroller instance in
+   BuyerView and SellerView without touching their JSX. */
+@supports not (container-type: inline-size) {
+  .scene-scroller { position: relative; min-height: 160px; }
+  .scene-scroller > * { visibility: hidden; }
+  .scene-scroller::before {
+    content: 'Dein Browser ist zu alt für diese Ansicht. Bitte aktualisiere auf Safari 16+, Chrome 105+ oder Firefox 110+.';
+    visibility: visible;
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    text-align: center; padding: 1.5rem;
+    background: #FBF3E1; color: #2B1B12;
+    font-size: .95rem; line-height: 1.4;
+  }
 }
 
 .scene-hud {
@@ -448,7 +503,7 @@ h1, h2, h3 {
   border-radius: .6cqw; padding: .2cqw 1.4cqw .3cqw; cursor: pointer; white-space: nowrap;
   box-shadow: 0 .35cqw 0 #2B1B12, 0 .9cqw 1.5cqw rgba(8, 12, 24, .42);
 }
-.stall-buy:hover { background: #FFD65C; }
+@media (hover: hover) { .stall-buy:hover { background: #FFD65C; } }
 .stall-buy:active {
   transform: translateX(-50%) translateY(.3cqw);
   box-shadow: 0 .05cqw 0 #2B1B12, 0 .3cqw .6cqw rgba(8, 12, 24, .3);
@@ -554,7 +609,7 @@ html.dark .eve-meta { color: #9FB0C4; }
   background: #F4C542; border: .25cqw solid #2B1B12; border-radius: .6cqw; padding: .3cqw 2.4cqw .45cqw;
   cursor: pointer; box-shadow: 0 .35cqw 0 #2B1B12; white-space: nowrap;
 }
-.cta:hover { background: #FFD65C; }
+@media (hover: hover) { .cta:hover { background: #FFD65C; } }
 .cta:active { transform: translateY(.3cqw); box-shadow: 0 .05cqw 0 #2B1B12; }
 .cta[aria-disabled="true"], .cta:disabled { background: #CFC4B2; color: #5A4A3C; box-shadow: none; cursor: default; }
 .cta:focus-visible {
@@ -590,7 +645,7 @@ html.dark .eve-meta { color: #9FB0C4; }
   background: none; border: 0; padding: 0; cursor: pointer; display: flex; flex-direction: column;
   align-items: center; gap: .8cqw; color: #2B1B12; transition: transform .2s ease; font-family: theme('fontFamily.hand');
 }
-.crateopt:hover { transform: translateY(-.5cqw); }
+@media (hover: hover) { .crateopt:hover { transform: translateY(-.5cqw); } }
 .crateopt[aria-pressed="true"] { transform: translateY(-1.4cqw); }
 .crateopt .label {
   background: var(--eve-paper); border: .22cqw solid #2B1B12; border-radius: .3cqw; box-shadow: var(--eve-lift);
@@ -634,7 +689,7 @@ html.dark .eve-meta { color: #9FB0C4; }
   background: #C98B4B; border: .22cqw solid #2B1B12; border-radius: .5cqw; padding: .1cqw .6cqw .2cqw;
   cursor: pointer; box-shadow: 0 .3cqw 0 #2B1B12;
 }
-.peg:hover { background: #D99B5B; }
+@media (hover: hover) { .peg:hover { background: #D99B5B; } }
 .peg:active { transform: translateY(.25cqw); box-shadow: 0 .05cqw 0 #2B1B12; }
 .peg[aria-pressed="true"] { background: #F4C542; }
 .peg:disabled { background: #CFC4B2; color: #5A4A3C; box-shadow: none; cursor: default; }
@@ -735,6 +790,9 @@ html.dark .eve-meta { color: #9FB0C4; }
   max-width: 19cqw; overflow: hidden; text-overflow: ellipsis;
 }
 .chip.me { background: #F4C542; }
+/* Lets a tap (not just a mouse hover on `title`) reveal text this chip's
+   max-width/ellipsis clipped — see SellerStallSlot.tsx. */
+.chip:focus { max-width: none; overflow: visible; z-index: 20; outline: .15cqw solid #2B1B12; outline-offset: .1cqw; }
 .chip.sold { background: #C9DFA2; color: #23460C; }
 .chip .dots::after { content: '…'; }
 @media (prefers-reduced-motion: no-preference) { .chip .dots { animation: chip-blink 1.4s steps(2) infinite; } }

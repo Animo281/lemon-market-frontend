@@ -365,7 +365,7 @@ export default function LandingView() {
                           <label className="flex flex-col gap-0.5">
                             <span className="label text-[9px]">Käuferwert</span>
                             <input
-                              type="number" min={0} step="0.10" value={modalEconomics.buyerValues[g]}
+                              type="number" inputMode="decimal" min={0} step="0.10" value={modalEconomics.buyerValues[g]}
                               onChange={e => setBuyerValue(g, e.target.value)}
                               aria-label={`Käuferwert ${GRADE_LABEL[g]}`}
                               className="bg-mkt-850 border border-mkt-800 rounded-lg px-2 py-1.5 font-mono text-mkt-100 text-sm text-center focus:outline-none focus:border-lemon-500/50 transition-colors"
@@ -374,7 +374,7 @@ export default function LandingView() {
                           <label className="flex flex-col gap-0.5">
                             <span className="label text-[9px]">Kosten 1. Einheit</span>
                             <input
-                              type="number" min={0} step="0.10" value={modalEconomics.sellerFirstCosts[g]}
+                              type="number" inputMode="decimal" min={0} step="0.10" value={modalEconomics.sellerFirstCosts[g]}
                               onChange={e => setSellerCost(g, e.target.value)}
                               aria-label={`Kosten 1. Einheit ${GRADE_LABEL[g]}`}
                               className="bg-mkt-850 border border-mkt-800 rounded-lg px-2 py-1.5 font-mono text-mkt-100 text-sm text-center focus:outline-none focus:border-lemon-500/50 transition-colors"
@@ -391,7 +391,7 @@ export default function LandingView() {
                     <div className="flex items-center gap-1.5">
                       <input
                         id="unitCostStep"
-                        type="number" min={0.01} step="0.10" value={modalEconomics.unitCostStep}
+                        type="number" inputMode="decimal" min={0.01} step="0.10" value={modalEconomics.unitCostStep}
                         onChange={e => setUnitCostStep(e.target.value)}
                         className="bg-mkt-850 border border-mkt-800 rounded-lg px-2 py-1 font-mono text-mkt-100 text-xs text-center w-20 focus:outline-none focus:border-lemon-500/50 transition-colors"
                       />

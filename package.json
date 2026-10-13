@@ -8,6 +8,14 @@
     "preview": "vite preview",
     "test:e2e": "playwright test"
   },
+  "browserslist": [
+    "Safari >= 16",
+    "iOS >= 16",
+    "Chrome >= 105",
+    "ChromeAndroid >= 105",
+    "Firefox >= 110",
+    "Edge >= 105"
+  ],
   "dependencies": {
     "@types/react-router-dom": "^5.3.3",
     "react": "^18.2.0",

@@ -70,6 +70,13 @@ wählen.
 **"Spiel starten"** ist erst klickbar, wenn mindestens 1 Verkäufer und 1 Käufer
 beigetreten sind.
 
+**Geräte & Browser:** funktioniert auf Laptop, Tablet (auch iPad, Quer- und
+Hochformat) und Smartphone im Browser — keine App-Installation nötig.
+Vorausgesetzt wird ein aktueller Browser (Safari/iOS ab Version 16, Chrome/Edge
+ab 105, Firefox ab 110); auf älteren Geräten zeigt die Marktansicht stattdessen
+einen Hinweis zum Aktualisieren. Auf dem Smartphone und im Hochformat auf
+kleineren Tablets lässt sich der Marktstand-Bereich seitlich wischen.
+
 ## 4. Ablauf während des Spiels
 
 Pro Runde durchläuft die Session automatisch mehrere Phasen — du musst nichts

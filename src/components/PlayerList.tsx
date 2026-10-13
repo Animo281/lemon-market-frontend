@@ -35,7 +35,7 @@ function RoleColumn({
               <span className="truncate font-sans">{p ? p.name : `Slot ${i + 1}`}</span>
               {p && onKick && (
                 <button
-                  className="ml-auto shrink-0 text-[9px] px-1.5 py-0.5 rounded border border-coral-500/30 text-coral-400 hover:bg-coral-500/10 transition-colors"
+                  className="tap-target-sm ml-auto shrink-0 text-[9px] px-1.5 py-0.5 rounded border border-coral-500/30 text-coral-400 hover:bg-coral-500/10 transition-colors"
                   onClick={() => onKick(p.id, p.name)}
                 >
                   ✕
