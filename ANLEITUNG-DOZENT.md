@@ -29,7 +29,7 @@ Eine Runde dauert typischerweise 1–3 Minuten; das ganze Experiment passt in ei
 
 1. Öffne die Startseite der App im Browser.
 2. Im Feld **"Als Dozent"**: Anzahl Verkäufer und Käufer eintragen (jeweils bis zu
-   10 bzw. 20 Personen — passend zur Kursgröße wählen).
+   12 bzw. 24 Personen — passend zur Kursgröße wählen).
 3. Auf **"Session erstellen"** klicken.
 4. Im folgenden Fenster kannst du **Max. Einheiten** (wie viele Lemonen ein
    Verkäufer maximal anbieten darf, 1–5), **Anzahl Runden** (1–20) und die

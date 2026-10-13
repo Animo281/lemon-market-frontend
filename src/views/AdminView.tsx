@@ -32,6 +32,9 @@ export default function AdminView() {
     if (!code) return
     if (!adminToken) { navigate('/'); return }
     const load = async () => {
+      // Skip polling while this tab is backgrounded — onVisibility below
+      // fires an immediate load() on return instead.
+      if (document.hidden) return
       try {
         const s = await api.getSession(code, adminToken)
         setSession(s)
@@ -47,9 +50,11 @@ export default function AdminView() {
         setError(err instanceof ApiError ? err.message : 'Verbindung verloren — versuche es weiter…')
       }
     }
+    const onVisibility = () => { if (!document.hidden) load() }
+    document.addEventListener('visibilitychange', onVisibility)
     load()
-    const iv = setInterval(load, 2000)
-    return () => clearInterval(iv)
+    const iv = setInterval(load, 3000)
+    return () => { clearInterval(iv); document.removeEventListener('visibilitychange', onVisibility) }
   }, [code, adminToken])
 
   if (!code || !adminToken) return null

@@ -27,7 +27,9 @@ export default function PlayerView() {
     // Buyer turn order is now enforced server-side (backend README, "Buyer
     // shopping order") — a buyer whose turn just started only finds out on
     // the next poll, so the open market gets a tighter cadence to keep that
-    // wait short. Every other phase keeps the normal 2s interval.
+    // wait short. Every other phase keeps the normal 3s interval. (Lowered
+    // from 1s/2s for the 30-player classroom run — at that headcount the
+    // old cadence risked the Cloudflare daily request cap.)
     let lastPhase: PublicSession['phase'] | undefined
     const load = async () => {
       try {
@@ -58,10 +60,20 @@ export default function PlayerView() {
         // else: transient poll failure after a successful load — keep
         // showing the last good state instead of blanking the screen.
       }
-      if (!cancelled) timer = setTimeout(load, lastPhase === 'market' ? 1000 : 2000)
+      // Don't poll while the tab is hidden (backgrounded/phone locked) —
+      // onVisibility below fires an immediate load() on return instead.
+      if (!cancelled && !document.hidden) timer = setTimeout(load, lastPhase === 'market' ? 1500 : 3000)
     }
+    const onVisibility = () => {
+      if (!document.hidden) { clearTimeout(timer); load() }
+    }
+    document.addEventListener('visibilitychange', onVisibility)
     load()
-    return () => { cancelled = true; clearTimeout(timer) }
+    return () => {
+      cancelled = true
+      clearTimeout(timer)
+      document.removeEventListener('visibilitychange', onVisibility)
+    }
   }, [code, playerToken, playerId])
 
   if (!code || !playerToken) return null

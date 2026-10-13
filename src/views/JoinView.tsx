@@ -26,6 +26,9 @@ export default function JoinView() {
     if (!code || code.length !== 4) return
     let iv: ReturnType<typeof setInterval>
     const load = async () => {
+      // Skip polling while this tab is backgrounded — onVisibility below
+      // fires an immediate load() on return instead.
+      if (document.hidden) return
       try {
         const s = await api.getSession(code)
         setSession(s)
@@ -54,9 +57,11 @@ export default function JoinView() {
         }
       }
     }
+    const onVisibility = () => { if (!document.hidden) load() }
+    document.addEventListener('visibilitychange', onVisibility)
     load()
-    iv = setInterval(load, 2000)
-    return () => clearInterval(iv)
+    iv = setInterval(load, 3000)
+    return () => { clearInterval(iv); document.removeEventListener('visibilitychange', onVisibility) }
   }, [code])
 
   const handleJoin = async (e: React.FormEvent) => {

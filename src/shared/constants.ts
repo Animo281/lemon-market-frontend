@@ -26,10 +26,10 @@ export const DEFAULT_MAX_SELLER_UNITS = 2
 
 // Mirrors backend/src/shared/constants.ts LIMITS — used as the LandingView
 // form's client-side clamp before a session (and its own session.limits)
-// exists yet. ANLEITUNG-DOZENT.md promises "bis zu 10 bzw. 20 Personen";
+// exists yet. ANLEITUNG-DOZENT.md promises "bis zu 12 bzw. 24 Personen";
 // these used to be hardcoded to 6/10 here, silently undercutting what the
 // backend and the instructor manual both actually allow.
-export const MAX_SELLERS_LIMIT = 10
-export const MAX_BUYERS_LIMIT = 20
+export const MAX_SELLERS_LIMIT = 12
+export const MAX_BUYERS_LIMIT = 24
 export const MAX_SELLER_UNITS_LIMIT = 5
 export const MAX_ROUNDS_LIMIT = 20
