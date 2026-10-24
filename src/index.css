@@ -360,6 +360,28 @@ h1, h2, h3 {
 @media (min-width: 768px) {
   .scene-world { min-width: min(880px, 100%); }
 }
+/* Buyer feedback: "möglichst kein Scrollen" — on desktop the scene used to
+   fill the full (now widened, see BuyerView.tsx) container width regardless
+   of viewport height, which could push the "Nicht kaufen" button below the
+   fold on shorter windows. Cap .scene-world's width (not just .scene-lane's)
+   to whatever still fits a budget of the viewport height — it's the
+   container-query basis every cqw-sized child (stall-name, offer card, …)
+   reads its own size from, so shrinking the lane alone without also
+   shrinking this would desync their sizing from the lane's actual width.
+   dvh, not vh, so mobile browser chrome doesn't throw the math off; height
+   derives from width via the scene's fixed 1024:572 aspect-ratio as always,
+   so nothing stretches. min() with 100% keeps the previous fill-the-
+   container behavior whenever that's the tighter constraint (short wide
+   windows, narrow containers) — overriding the min-width floor above,
+   which existed to keep the scene from shrinking too far on tablets, not
+   to fight this cap. */
+@media (min-width: 880px) {
+  .scene-world {
+    min-width: 0;
+    width: min(100%, calc(46dvh * 1024 / 572));
+    margin-inline: auto;
+  }
+}
 @media (max-width: 879px) {
   .scene-scroller { scroll-snap-type: x mandatory; }
   .scene-world .scene-lane { scroll-snap-align: start; }
@@ -531,10 +553,14 @@ h1, h2, h3 {
   max-width: 100%;
 }
 
+/* Buyer feedback: "Nicht kaufen" was easy to miss next to the stall buttons
+   — sized up substantially (was 1.05rem/.55rem 1.5rem) and made full-width
+   on narrow screens so it reads as the clear third choice, not an afterthought. */
 .scene-pass-btn {
-  font-family: theme('fontFamily.caps'); font-size: 1.05rem; color: #2B1B12; background: #F1E4CE;
-  border: 2px solid #2B1B12; border-radius: 10px; padding: .55rem 1.5rem; cursor: pointer;
-  box-shadow: 0 3px 0 #2B1B12; transition: transform .1s ease;
+  font-family: theme('fontFamily.caps'); font-size: 1.4rem; color: #2B1B12; background: #F1E4CE;
+  border: 2px solid #2B1B12; border-radius: 12px; padding: .85rem 2.5rem; cursor: pointer;
+  box-shadow: 0 4px 0 #2B1B12; transition: transform .1s ease;
+  width: 100%; max-width: 420px;
 }
 .scene-pass-btn:hover { background: #fff8ec; }
 .scene-pass-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #2B1B12; }

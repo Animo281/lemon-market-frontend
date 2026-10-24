@@ -13,16 +13,23 @@ interface Props {
 // the buyer-side counterpart to the seller's cost table (CrateChoiceScreen)
 // and the quality legend (SortingStation) — visible in every phase, unlike
 // the market board, which only shows once sellers have priced.
+// Buyer feedback: these numbers are what every buy decision hinges on, so
+// they were made prominent instead of a single small text line — three
+// equal tiles, each grade's value large and colored by its own quality.
 export default function ValueNote({ buyerValues }: Props) {
   return (
-    <div className="eve-note px-4 py-2.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm" role="note">
-      <span className="font-caps text-xs opacity-70 shrink-0">Dein Wert je Kiste</span>
-      {GRADES_BEST_FIRST.map(g => (
-        <span key={g} className="flex items-center gap-1.5 whitespace-nowrap">
-          <b style={{ color: QUALITY_LABEL[g].paper }}>{QUALITY_LABEL[g].label}</b>
-          <span className="font-mono">{buyerValues[g].toFixed(2)} €</span>
-        </span>
-      ))}
+    <div className="eve-note p-2" role="note">
+      <div className="font-caps text-xs opacity-70 px-2 pb-1">Dein Wert je Kiste</div>
+      <div className="grid grid-cols-3 gap-2">
+        {GRADES_BEST_FIRST.map(g => (
+          <div key={g} className="flex flex-col items-center gap-0.5 rounded-lg py-2" style={{ background: 'rgba(43,27,18,.06)' }}>
+            <b className="font-caps text-sm" style={{ color: QUALITY_LABEL[g].paper }}>{QUALITY_LABEL[g].label}</b>
+            <span className="font-mono font-bold" style={{ fontSize: 'clamp(1.25rem, 4vw, 1.7rem)' }}>
+              {buyerValues[g].toFixed(2)} €
+            </span>
+          </div>
+        ))}
+      </div>
     </div>
   )
 }

@@ -36,7 +36,9 @@ export interface RoundMetrics {
   efficiency: number
   equilibrium: { qty: number; price: number } | null
   supplyCurve: number[]
+  supplyCurveByGrade: Record<Grade, number[]>
   demandCurve: number[]
+  unitsSoldByGrade: Record<Grade, number>
 }
 
 export interface RoundResult {

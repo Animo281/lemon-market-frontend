@@ -19,10 +19,14 @@ export default function MarketHistory({ results, sellers }: Props) {
   if (results.length === 0) return null
   const sortedSellers = [...sellers].sort((a, b) => a.slotIndex - b.slotIndex)
 
+  // Buyer feedback: "Bildschirmfläche effektiver nutzen" — this table grows
+  // one row per round and was always open, pushing the stalls further down
+  // each round. <details> keeps it one tap away without permanently taking
+  // vertical space.
   return (
-    <div className="eve-note p-3 text-sm overflow-x-auto">
-      <div className="font-caps text-xs opacity-70 mb-2 px-1">Markttafel — bisherige Runden</div>
-      <table className="w-full border-collapse font-mono text-xs whitespace-nowrap">
+    <details className="eve-note p-3 text-sm overflow-x-auto">
+      <summary className="font-caps text-xs opacity-70 px-1 cursor-pointer select-none">Markttafel — bisherige Runden</summary>
+      <table className="w-full border-collapse font-mono text-xs whitespace-nowrap mt-2">
         <thead>
           <tr>
             <th className="text-left font-caps font-normal py-1 pr-3 opacity-70">Runde</th>
@@ -53,6 +57,6 @@ export default function MarketHistory({ results, sellers }: Props) {
           ))}
         </tbody>
       </table>
-    </div>
+    </details>
   )
 }

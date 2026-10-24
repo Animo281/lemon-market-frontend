@@ -3,7 +3,7 @@ import { Grade, GamePhase, Player, PublicSession } from '../shared/types'
 import { DEFAULT_SELLER_FIRST_COSTS, UNIT_COST_STEP, sellerCost } from '../shared/constants'
 import { api, ApiError } from '../api/client'
 import {
-  MARKET_SCENE_IMAGE, SCENE_VIEWS, STALL_CROPS, STALL_SLOTS, cropCoverStyle, cropStyle, laneCount, stallInfo,
+  MARKET_SCENE_IMAGE, SCENE_VIEWS, STALL_CROPS, STALL_SLOTS, cropStyle, laneCount, stallInfo,
 } from '../lib/marketScene'
 import { lastRoundMarketPrices, liveSellerEarnings, sellerBalance, sellerHistory } from '../lib/sellerStats'
 import SellerHud from '../components/seller/SellerHud'
@@ -13,7 +13,6 @@ import SellerLane from '../components/seller/SellerLane'
 import RoundReceipt from '../components/seller/RoundReceipt'
 import ProfitTable from '../components/ProfitTable'
 import { EyeIcon } from '../components/seller/icons'
-import { MiniLemonIcon } from '../components/buyer/icons'
 
 interface Props {
   session: PublicSession
@@ -73,6 +72,15 @@ export default function SellerView({ session, me, code, playerToken, error, onSe
   // the first successful poll response).
   const firstCosts = session.economics.sellerFirstCosts ?? DEFAULT_SELLER_FIRST_COSTS
   const unitCostStep = session.economics.unitCostStep ?? UNIT_COST_STEP
+
+  // Price must never start below the chosen grade's cost (no selling at a
+  // loss, enforced server-side too) — auto-adjust it to that floor whenever
+  // the grade changes, instead of leaving whatever the previous grade's
+  // price happened to be.
+  const handleSelectGrade = (g: Grade) => {
+    setGrade(g)
+    setPrice(sellerCost(firstCosts, g, 0, unitCostStep))
+  }
 
   const marketSummary = lastRoundMarketPrices(session)
   const lastRoundNum = session.results.length > 0 ? session.results[session.results.length - 1].round : null
@@ -212,11 +220,7 @@ export default function SellerView({ session, me, code, playerToken, error, onSe
                 </div>
                 <div className="abs" style={{ left: '50%', top: '48%', transform: 'translate(-50%, -50%)', width: '22%' }}>
                   <div className="stallcard" aria-pressed="true">
-                    <div className="crop" style={cropStyle(STALL_CROPS[myStall.cropIndex])}>
-                      {myStall.cropIndex === 2 && (
-                        <span style={cropCoverStyle(STALL_CROPS[2])}><MiniLemonIcon /></span>
-                      )}
-                    </div>
+                    <div className="crop" style={cropStyle(STALL_CROPS[myStall.cropIndex])} />
                     <b>{myStall.name}</b>
                     <span>
                       Dein Stand, {me.name}
@@ -239,7 +243,7 @@ export default function SellerView({ session, me, code, playerToken, error, onSe
                 maxUnits={session.maxSellerUnits}
                 firstCosts={firstCosts}
                 unitCostStep={unitCostStep}
-                onSelectGrade={setGrade}
+                onSelectGrade={handleSelectGrade}
                 onSelectUnits={setUnits}
                 onNext={() => setStep('counter')}
               />

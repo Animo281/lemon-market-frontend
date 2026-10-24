@@ -9,6 +9,7 @@ import SessionCodeDisplay from '../components/SessionCodeDisplay'
 import PlayerList from '../components/PlayerList'
 import PhaseIndicator from '../components/PhaseIndicator'
 import MarketBoard from '../components/MarketBoard'
+import GradeTally, { GradeTallyTable } from '../components/GradeTally'
 import SupplyDemandGraph from '../components/SupplyDemandGraph'
 import ProfitTable from '../components/ProfitTable'
 import GameEndStats from '../components/GameEndStats'
@@ -234,6 +235,7 @@ export default function AdminView() {
               <div className="label mb-4">Verkäufer-Entscheidungen</div>
               <div className="space-y-2">
                 {[...sellers].sort((a, b) => a.slotIndex - b.slotIndex).map(s => {
+                  const d = session.currentSellerDecisions[s.id]
                   const done = s.id in session.currentSellerDecisions
                   return (
                     <div key={s.id} className={`flex items-center gap-3 py-2.5 px-3 rounded-xl transition-colors ${
@@ -252,8 +254,13 @@ export default function AdminView() {
                       <span className={`font-mono text-sm ${done ? 'text-lime-300' : 'text-mkt-400'}`}>
                         {s.name}
                       </span>
-                      {done && (
-                        <span className="ml-auto text-xs font-mono text-lime-500">abgegeben</span>
+                      {done && d?.grade !== undefined && d?.price !== undefined && (
+                        <span className="ml-auto flex items-center gap-2 text-xs font-mono">
+                          <span className={
+                            d.grade === 1 ? 'text-coral-400' : d.grade === 2 ? 'text-lemon-400' : 'text-lime-400'
+                          }>Q{d.grade}</span>
+                          <span className="text-mkt-300">€{d.price.toFixed(2)}</span>
+                        </span>
                       )}
                     </div>
                   )
@@ -284,6 +291,7 @@ export default function AdminView() {
                 decisions={session.currentSellerDecisions}
                 infoMode={session.infoMode}
                 maxSellerUnits={session.maxSellerUnits}
+                revealGrades
               />
               {/* Buyer status grid — buyers act in small concurrent groups
                   now, so several rows can be "active" at once. */}
@@ -362,6 +370,8 @@ export default function AdminView() {
                   {lastResult.infoMode === 'full' ? 'Volle Info' : 'Asymm. Info'}
                 </span>
               </div>
+
+              <GradeTally sellerDecisions={lastResult.sellerDecisions} unitsSoldByGrade={lastResult.metrics.unitsSoldByGrade} />
 
               <div className="overflow-x-auto">
                 <table className="w-full text-xs font-mono">
@@ -523,6 +533,14 @@ export default function AdminView() {
                     <SupplyDemandGraph session={session} historyResult={r} />
                   </div>
                 ))}
+              </div>
+            </div>
+
+            {/* Quality tally across all rounds */}
+            <div>
+              <div className="label mb-3">Qualitäts-Auszählung je Runde</div>
+              <div className="panel p-6">
+                <GradeTallyTable results={session.results} />
               </div>
             </div>
 

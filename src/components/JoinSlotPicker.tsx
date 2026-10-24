@@ -1,6 +1,5 @@
 import { PublicSession, Role } from '../shared/types'
-import { cropCoverStyle, cropStyle, MARKET_SCENE_IMAGE, stallInfo, STALL_CROPS } from '../lib/marketScene'
-import { MiniLemonIcon } from './buyer/icons'
+import { cropStyle, MARKET_SCENE_IMAGE, stallInfo, STALL_CROPS } from '../lib/marketScene'
 
 interface Props {
   session: PublicSession
@@ -72,9 +71,7 @@ function SellerSlot({ index, numSellers, takenBy, selectedRole, selectedSlot, on
       <div
         className={`relative rounded-lg border border-mkt-800 overflow-hidden ${takenBy ? 'grayscale brightness-75' : ''}`}
         style={{ backgroundImage: `url(${MARKET_SCENE_IMAGE})`, aspectRatio: '206 / 250', ...cropStyle(STALL_CROPS[cropIndex]) }}
-      >
-        {cropIndex === 2 && <span style={cropCoverStyle(STALL_CROPS[2])}><MiniLemonIcon /></span>}
-      </div>
+      />
       <div className={`mt-1.5 text-xs font-semibold truncate ${isSelected ? 'text-lemon-400' : 'text-mkt-200'}`}>{stallName}</div>
       {laneLabel && <div className="text-[9px] text-mkt-500 truncate">{laneLabel}</div>}
       <div className="text-[10px] text-mkt-500 truncate">
