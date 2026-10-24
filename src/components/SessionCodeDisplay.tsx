@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { QRCodeSVG } from 'qrcode.react'
 import { CheckIcon } from './icons'
 
@@ -96,21 +97,22 @@ export default function SessionCodeDisplay({ code }: Props) {
         </p>
       )}
 
-      {qrOpen && (
+      {qrOpen && createPortal(
         <div
-          className="fixed inset-0 z-50 bg-black/90 flex flex-col items-center justify-center gap-8 cursor-pointer"
+          className="fixed inset-0 z-50 bg-black/90 flex flex-col items-center justify-center gap-6 p-4 overflow-auto cursor-pointer"
           onClick={() => setQrOpen(false)}
           role="button"
           aria-label="Schließen"
         >
-          <div className="bg-white p-6 rounded-3xl" style={{ width: 'min(80vh, 80vw)', height: 'min(80vh, 80vw)' }}>
+          <div className="bg-white p-4 rounded-3xl shrink-0" style={{ width: 'min(62vh, 85vw)', height: 'min(62vh, 85vw)' }}>
             <QRCodeSVG value={joinUrl} size={1} level="M" style={{ width: '100%', height: '100%' }} aria-label="QR-Code zum Beitreten" />
           </div>
-          <div className="font-mono font-bold text-white tracking-[0.22em]" style={{ fontSize: 'clamp(3rem, 10vw, 6rem)' }}>
+          <div className="font-mono font-bold text-white tracking-[0.22em] shrink-0" style={{ fontSize: 'clamp(2.5rem, 8vh, 5rem)' }}>
             {code}
           </div>
-          <p className="text-mkt-300 text-sm font-mono">Zum Schließen tippen oder Esc drücken</p>
-        </div>
+          <p className="text-mkt-300 text-sm font-mono shrink-0">Zum Schließen tippen oder Esc drücken</p>
+        </div>,
+        document.body
       )}
     </div>
   )
