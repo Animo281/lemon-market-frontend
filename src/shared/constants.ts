@@ -37,6 +37,11 @@ export const DEFAULT_MAX_SELLER_UNITS = 2
 export const MAX_SELLERS_LIMIT = 12
 export const MAX_BUYERS_LIMIT = 24
 
+// Mirrors backend/src/shared/constants.ts — a seller must never price below
+// their own grade's production cost (checked dynamically against minCost,
+// see PriceBoard.tsx) and never above this flat ceiling.
+export const MAX_SELLER_PRICE = 40
+
 // Mirrors backend/src/shared/constants.ts — buyers act in groups of
 // BUYER_GROUP_SIZE with a shared per-group turn timer instead of strictly
 // one at a time. Group size is fixed (not configurable); the timer duration

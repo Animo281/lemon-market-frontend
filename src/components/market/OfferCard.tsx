@@ -28,8 +28,13 @@ export default function OfferCard({ price, grade, chalk, ownHint, style, id }: P
     <div id={id} className={`stall-offer${chalk ? ' chalk' : ''}`} style={style}>
       {grade !== null ? (
         <>
+          {/* Same crate image for every grade — feedback from a live test run:
+              a different crate per quality was itself a visual "tell" before
+              anyone read the label. The only thing that should distinguish
+              stands is the explicit "Qualität N" text/colour below, which is
+              the actual revealed information, not a decorative hint. */}
           <div className="stall-crate">
-            <img src={CRATE_BY_GRADE[grade]} alt={`${QUALITY_LABEL[grade].label}: ${QUALITY_LABEL[grade].text}`} />
+            <img src={CRATE_BY_GRADE[2]} alt={`${QUALITY_LABEL[grade].label}: ${QUALITY_LABEL[grade].text}`} />
           </div>
           <div>
             <div className="price">{price.toFixed(2)} €</div>

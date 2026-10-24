@@ -69,12 +69,23 @@ export default function SupplyDemandGraph({ session, historyResult }: Props) {
     }
   }
   const sortedSupplyItems = [...supplyItems].sort((a, b) => a.price - b.price)
-  const supplyPrices = sortedSupplyItems.map(s => s.price)
 
   // --- Demand prices + equilibrium: already computed server-side, same formulas
   // (bestGradeWTP / calcAsymmetricWTP / findEquilibrium in the backend's gameAnalytics) ---
   const metrics = historyResult ? historyResult.metrics : session.currentRoundMetrics
   const demandPrices = metrics?.demandCurve ?? []
+
+  // --- Supply prices split per grade — the "3 Angebotskurven" the graph
+  // draws, one step-curve per quality instead of one combined curve. Prefer
+  // the server's own supplyCurveByGrade (gameAnalytics.ts) when present —
+  // same source of truth as the combined curve above — and fall back to
+  // deriving it from supplyItems for older results that predate the field.
+  const supplyPricesByGrade: Record<Grade, number[]> = metrics?.supplyCurveByGrade ?? {
+    1: sortedSupplyItems.filter(s => s.grade === 1).map(s => s.price),
+    2: sortedSupplyItems.filter(s => s.grade === 2).map(s => s.price),
+    3: sortedSupplyItems.filter(s => s.grade === 3).map(s => s.price),
+  }
+  const supplyPrices = ([1, 2, 3] as Grade[]).flatMap(g => supplyPricesByGrade[g])
 
   // --- Transactions ---
   const transactions: { qty: number; price: number; grade: Grade }[] = []
@@ -106,23 +117,40 @@ export default function SupplyDemandGraph({ session, historyResult }: Props) {
   const yTicks = Array.from({ length: 5 }, (_, i) => i * tickStep).filter(t => t <= MAX_P + tickStep)
   const xTicks = Array.from({ length: maxQty + 1 }, (_, i) => i)
 
-  const supplyPath = buildPath(supplyPrices, maxQty, MAX_P, true)
+  // One step-path per grade, each drawn in its own position along the
+  // x-axis (grade 1's units first, then grade 2's, then grade 3's) rather
+  // than all three sharing x=0..n — that would stack them on top of each
+  // other and produce three overlapping, unreadable curves.
+  const supplyPathsByGrade = ([1, 2, 3] as Grade[]).reduce((acc, g, idx) => {
+    const prevCount = ([1, 2, 3] as Grade[]).slice(0, idx).reduce((n, pg) => n + supplyPricesByGrade[pg].length, 0)
+    const prices = [...supplyPricesByGrade[g]].sort((a, b) => a - b)
+    let d = ''
+    let x = qX(prevCount, maxQty)
+    for (let i = 0; i < prices.length; i++) {
+      const y = pY(prices[i], MAX_P)
+      const nx = qX(prevCount + i + 1, maxQty)
+      d += i === 0 ? `M${x},${y}` : `L${x},${y}`
+      d += ` L${nx},${y}`
+      x = nx
+    }
+    acc[g] = d
+    return acc
+  }, {} as Record<Grade, string>)
   const demandPath = buildPath(demandPrices, maxQty, MAX_P, false)
   const eq = metrics?.equilibrium ?? null
 
   // Trigger animation on curve changes
-  const pathsKey = `${supplyPath}|${demandPath}`
+  const pathsKey = `${supplyPathsByGrade[1]}|${supplyPathsByGrade[2]}|${supplyPathsByGrade[3]}|${demandPath}`
   useEffect(() => {
-    if (pathsKey !== prevKey.current && (supplyPath || demandPath)) {
+    if (pathsKey !== prevKey.current && (supplyPrices.length || demandPath)) {
       prevKey.current = pathsKey
       setAnimKey(k => k + 1)
     }
-  }, [pathsKey, supplyPath, demandPath])
+  }, [pathsKey, supplyPrices.length, demandPath])
 
-  // Fill paths
-  const supplyFillPath = supplyPath
-    ? supplyPath + ` L${qX(supplyPrices.length, maxQty)},${H - M.bottom} L${M.left},${H - M.bottom} Z`
-    : ''
+  // Fill path (demand only — three overlapping supply fills would just
+  // muddy each other's color, so the supply side relies on its three
+  // distinct curve colors instead of an area fill)
   const demandFillPath = demandPath
     ? demandPath + ` L${qX(demandPrices.length, maxQty)},${M.top} L${M.left},${M.top} Z`
     : ''
@@ -155,10 +183,6 @@ export default function SupplyDemandGraph({ session, historyResult }: Props) {
         className="overflow-visible"
       >
         <defs>
-          <linearGradient id="sdg-supply" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#ffffff" stopOpacity="0.18" />
-            <stop offset="100%" stopColor="#ffffff" stopOpacity="0.02" />
-          </linearGradient>
           <linearGradient id="sdg-demand" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="#FFD700" stopOpacity="0.02" />
             <stop offset="100%" stopColor="#FFD700" stopOpacity="0.18" />
@@ -229,14 +253,6 @@ export default function SupplyDemandGraph({ session, historyResult }: Props) {
 
         {/* Clipped fills + curves */}
         <g clipPath="url(#sdg-clip)">
-          {supplyFillPath && (
-            <path
-              key={`sfill-${animKey}`}
-              d={supplyFillPath}
-              fill="url(#sdg-supply)"
-              style={{ animation: 'sdg-fade 0.6s ease forwards', opacity: 0 }}
-            />
-          )}
           {demandFillPath && (
             <path
               key={`dfill-${animKey}`}
@@ -246,21 +262,23 @@ export default function SupplyDemandGraph({ session, historyResult }: Props) {
             />
           )}
 
-          {/* Supply curve — colored per grade */}
-          {sortedSupplyItems.map((item, i) => {
-            const x1 = qX(i, maxQty)
-            const x2 = qX(i + 1, maxQty)
-            const y  = pY(item.price, MAX_P)
-            const nextY = sortedSupplyItems[i + 1] ? pY(sortedSupplyItems[i + 1].price, MAX_P) : undefined
-            return (
-              <g key={`supply-seg-${i}-${animKey}`} style={{ animation: `sdg-fade 0.4s ease ${0.05 * i}s both`, opacity: 0 }}>
-                <line x1={x1} x2={x2} y1={y} y2={y} stroke={GRADE_COLOR[item.grade]} strokeWidth={2.5} strokeLinecap="round" />
-                {nextY !== undefined && (
-                  <line x1={x2} x2={x2} y1={y} y2={nextY} stroke="#e8e8ff" strokeWidth={2} strokeOpacity={0.4} />
-                )}
-              </g>
+          {/* Supply — one step-curve per grade, each in its own color and
+              its own slice of the x-axis (no area fill: three overlapping
+              fills would just muddy each other's color). */}
+          {([1, 2, 3] as Grade[]).map(g => (
+            supplyPathsByGrade[g] && (
+              <path
+                key={`supply-${g}-${animKey}`}
+                d={supplyPathsByGrade[g]}
+                stroke={GRADE_COLOR[g]}
+                strokeWidth={2.5}
+                fill="none"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                style={{ animation: `sdg-fade 0.4s ease ${0.1 * g}s both`, opacity: 0 }}
+              />
             )
-          })}
+          ))}
 
           {/* Demand curve */}
           {demandPath && (
@@ -281,19 +299,25 @@ export default function SupplyDemandGraph({ session, historyResult }: Props) {
           )}
         </g>
 
-        {/* Curve labels */}
-        {supplyPath && supplyPrices.length > 0 && (
-          <text
-            key={`slbl-${animKey}`}
-            x={qX(supplyPrices.length, maxQty) - 4}
-            y={pY(supplyPrices[supplyPrices.length - 1], MAX_P) - 8}
-            fontSize={12} fill="#e8e8ff" fontWeight="700"
-            textAnchor="end"
-            style={{ animation: 'sdg-fade 0.4s ease 0.65s both', opacity: 0 }}
-          >
-            Angebot
-          </text>
-        )}
+        {/* Curve labels — one per grade, placed at each curve's own end */}
+        {([1, 2, 3] as Grade[]).map((g, idx) => {
+          const prices = supplyPricesByGrade[g]
+          if (!prices.length) return null
+          const prevCount = ([1, 2, 3] as Grade[]).slice(0, idx).reduce((n, pg) => n + supplyPricesByGrade[pg].length, 0)
+          const sorted = [...prices].sort((a, b) => a - b)
+          return (
+            <text
+              key={`slbl-${g}-${animKey}`}
+              x={qX(prevCount + prices.length, maxQty) - 4}
+              y={pY(sorted[sorted.length - 1], MAX_P) - 8}
+              fontSize={11} fill={GRADE_COLOR[g]} fontWeight="700"
+              textAnchor="end"
+              style={{ animation: `sdg-fade 0.4s ease ${0.55 + 0.05 * g}s both`, opacity: 0 }}
+            >
+              Q{g}
+            </text>
+          )
+        })}
         {demandPath && demandPrices.length > 0 && (
           <text
             key={`dlbl-${animKey}`}

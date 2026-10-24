@@ -5,6 +5,11 @@ interface Props {
   decisions: Record<string, Partial<SellerDecision>>
   infoMode: InfoMode
   maxSellerUnits: number
+  /** Admin feedback: the lecturer's own view must always show quality,
+   * even in an asymmetric-info round — only the buyers' market stays
+   * blind. The data is already unmasked for the admin viewer
+   * (mappers/toPublic.ts), this only controls whether the UI hides it. */
+  revealGrades?: boolean
 }
 
 const GRADE_STYLE: Record<number, { label: string; cls: string; dot: string }> = {
@@ -13,7 +18,7 @@ const GRADE_STYLE: Record<number, { label: string; cls: string; dot: string }> =
   3: { label: 'Q3', cls: 'text-lime-400  border-lime-500/35  bg-lime-500/10',  dot: 'bg-lime-400'  },
 }
 
-export default function MarketBoard({ sellers, decisions, infoMode, maxSellerUnits }: Props) {
+export default function MarketBoard({ sellers, decisions, infoMode, maxSellerUnits, revealGrades }: Props) {
   const sorted = [...sellers].sort((a, b) => a.slotIndex - b.slotIndex)
 
   const colCls =
@@ -82,14 +87,14 @@ export default function MarketBoard({ sellers, decisions, infoMode, maxSellerUni
                   {/* Grade + units */}
                   <div className="flex items-center justify-between">
                     <span className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-lg border ${
-                      infoMode === 'full' && gradeStyle
+                      (infoMode === 'full' || revealGrades) && gradeStyle
                         ? gradeStyle.cls
                         : 'text-mkt-500 border-mkt-800 bg-transparent'
                     }`}>
-                      {infoMode === 'full' && gradeStyle && (
+                      {(infoMode === 'full' || revealGrades) && gradeStyle && (
                         <span className={`w-1.5 h-1.5 rounded-full ${gradeStyle.dot}`} />
                       )}
-                      {infoMode === 'full' && gradeStyle ? gradeStyle.label : '?'}
+                      {(infoMode === 'full' || revealGrades) && gradeStyle ? gradeStyle.label : '?'}
                     </span>
 
                     <span className="font-mono text-sm">

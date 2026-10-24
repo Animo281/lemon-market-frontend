@@ -8,6 +8,7 @@ import MarketLane from '../components/buyer/MarketLane'
 import ProfitTable from '../components/ProfitTable'
 import ValueNote from '../components/buyer/ValueNote'
 import MarketHistory from '../components/buyer/MarketHistory'
+import MyPurchases from '../components/buyer/MyPurchases'
 import RoundEndCard from '../components/RoundEndCard'
 
 interface Props {
@@ -142,11 +143,13 @@ export default function BuyerView({ session, me, code, playerToken, error, onSes
   const showScene = session.phase === 'lobby' || session.phase === 'seller-input' || session.phase === 'market'
 
   return (
-    <div className="min-h-screen eve-page p-3 md:p-5">
-      {/* max-w-5xl (1024px), not the app's usual max-w-2xl/3xl: the scene
-          itself has min-width:880px (docs/lemon-market-ui/HANDOFF.md) and must fit uncropped
-          well before that breakpoint, or it'd scroll on ordinary desktops. */}
-      <div className="max-w-5xl mx-auto space-y-4">
+    <div className="min-h-screen eve-page p-2 md:p-3">
+      {/* Buyer feedback: "Bildschirmfläche effektiver nutzen" — widened from
+          max-w-5xl (1024px) so the scene and its tiles grow with the window
+          on desktop instead of sitting in a fixed-width column with empty
+          margins either side. Still well above the scene's 880px min-width
+          (docs/lemon-market-ui/HANDOFF.md). */}
+      <div className="max-w-[1600px] mx-auto space-y-2">
         {/* pr-12 reserves room for the fixed ThemeToggle (top-4 right-4, ~36px
             wide) so the session code doesn't run underneath it below ~1120px
             viewport width — see docs/lemon-market-ui overlap audit. */}
@@ -265,6 +268,7 @@ export default function BuyerView({ session, me, code, playerToken, error, onSes
           // .panel, not .eve-note — see the matching comment in SellerView.tsx.
           <div className="panel p-6">
             <h2 className="font-display text-3xl font-bold text-lemon-400 mb-4">Alle Ergebnisse</h2>
+            <MyPurchases results={session.results} sellers={sellers} buyerId={me.id} />
             <ProfitTable results={session.results} sellers={sellers} buyers={buyers} />
           </div>
         )}
