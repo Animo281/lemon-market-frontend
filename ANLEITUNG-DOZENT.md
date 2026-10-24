@@ -32,16 +32,19 @@ Eine Runde dauert typischerweise 1–3 Minuten; das ganze Experiment passt in ei
    12 bzw. 24 Personen — passend zur Kursgröße wählen).
 3. Auf **"Session erstellen"** klicken.
 4. Im folgenden Fenster kannst du **Max. Einheiten** (wie viele Lemonen ein
-   Verkäufer maximal anbieten darf, 1–5), **Anzahl Runden** (1–20) und die
-   **Preise je Qualität** einstellen (Käuferwert und Kosten der 1. Einheit,
-   je Qualitätsstufe Q1–Q3; jede weitere Einheit kostet den Verkäufer
-   automatisch +1,00 € mehr). Voreingestellt sind die Werte aus
+   Verkäufer maximal anbieten darf, 1–5), **Zeit pro Zug** (wie viele Sekunden
+   eine Käufer-Gruppe pro Zug hat, bevor automatisch übersprungen wird,
+   10–180s) und die **Preise je Qualität** einstellen (Käuferwert und Kosten
+   der 1. Einheit, je Qualitätsstufe Q1–Q3; jede weitere Einheit kostet den
+   Verkäufer automatisch +1,00 € mehr). Voreingestellt sind die Werte aus
    Holt & Sherman (1999) — Button **"Holt & Sherman Standardwerte"** setzt sie
    jederzeit zurück. Die Preise müssen mit der Qualität steigen (Q1 < Q2 < Q3
    für Käuferwert und für Kosten); sonst zeigt die App einen Fehler und
    **"Übernehmen →"** lässt sich nicht abschließen. Diese Einstellungen lassen
    sich **nach dem Start nicht mehr ändern** — im Zweifel lieber "Mit Defaults
-   starten" (2 Einheiten, 5 Runden, Holt & Sherman Preise) nutzen.
+   starten" (2 Einheiten, 30s/Zug, Holt & Sherman Preise) nutzen. Eine feste
+   Rundenzahl gibt es nicht mehr — du entscheidest nach jeder Runde, ob es
+   weitergeht (siehe Abschnitt 4).
 5. Du landest auf dem **Admin-Panel** — das ist dein Steuerpult für den Rest der
    Stunde. Lass dieses Fenster offen; am besten auf einem zweiten Bildschirm oder
    per Beamer projiziert.
@@ -86,12 +89,16 @@ manuell weiterschalten, außer am Rundenende:
    Auf deinem Panel siehst du, wer schon abgegeben hat.
 2. **Marktphase**: Sobald alle Verkäufer fertig sind, öffnet der Markt. Käufer
    sehen die Angebote (Qualität je nach Phase sichtbar oder verdeckt) und kaufen
-   nacheinander.
+   in Dreiergruppen gleichzeitig (nicht mehr strikt einer nach dem anderen) —
+   jede Gruppe hat ein gemeinsames Zeitlimit; läuft es ab, werden die noch
+   unentschiedenen Mitglieder automatisch übersprungen und die nächste Gruppe
+   ist dran. Die Zeit pro Zug legst du beim Erstellen der Session fest.
 3. **Rundenende**: Sobald alle Käufer entschieden haben (oder du sie überspringst,
    siehe unten), siehst du die Rundenergebnisse: wer was zu welchem Preis
    verkauft/gekauft hat, und den Gesamtüberschuss dieser Runde.
-4. Klicke **"Nächste Runde →"**, um weiterzumachen, oder **"Ergebnisse anzeigen
-   →"** in der letzten Runde.
+4. Klicke **"Nächste Runde →"**, um weiterzumachen, oder **"Spiel beenden"**,
+   wenn genug Runden gespielt wurden — es gibt keine feste Rundenzahl, du
+   entscheidest nach jeder Runde neu.
 
 **Der Wechsel von voller zu asymmetrischer Information ist ein bewusster
 Schritt von dir, keine Automatik.** Die Session startet mit voller Information

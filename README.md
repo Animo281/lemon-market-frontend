@@ -191,17 +191,21 @@ There's no separate mobile app — one responsive web app for desktop, tablet an
   `sessionIndex` in `localStorage`) — closing a tab loses the in-memory `session` state,
   the reconnect list is the only way back in.
 - Buyer turn order is now enforced server-side, not just displayed (backend README,
-  "Buyer shopping order") — `isMyTurn` in `BuyerView.tsx` reads `session.currentPlayerId`
-  directly rather than "have I already decided", and a buy attempt out of turn gets a
-  400 with a German error from `ErrorBanner`. Still 2s polling underneath (1s while
-  `phase === 'market'`, see `PlayerView.tsx`), not a push channel, so there's up to a
-  ~1s lag before "Du bist dran" appears.
+  "Buyer shopping order") — `isMyTurn` in `BuyerView.tsx` reads
+  `session.activeBuyerIds.includes(me.id)` (buyers act in small concurrent groups of
+  `BUYER_GROUP_SIZE`, not strictly one at a time), and a buy attempt out of turn gets a
+  400 with a German error from `ErrorBanner`. Still ~1.5s polling underneath during
+  `phase === 'market'` (see `PlayerView.tsx`), not a push channel, so there's up to that
+  much lag before "Du bist dran" appears or a group's auto-skip shows up.
 - `shared/types.ts` and `shared/constants.ts` are hand-mirrored from the backend, not
   imported — they can drift if the backend changes without a matching frontend update.
-- No round timer and no buyer/seller budget exist server-side at all (not "not shown" —
-  absent from the data model). The buyer's "Kontostand" and the seller's "Kasse" pills
-  are both client-side sums of `session.results[].*Decisions[].earnings`; the HUD status
-  pills are phase-derived labels, not a countdown. See `docs/lemon-market-ui/HANDOFF.md`
+- Each buyer group has a shared turn timer (`session.turnDeadline`/`turnDurationSeconds`,
+  admin-configurable at session creation). `BuyerHud` ticks a local countdown off the
+  deadline (resynced on poll) and flashes once when a buyer's `isMyTurn` flips to true
+  (`.animate-glow-pulse`/`.my-turn-ring` in `index.css`). No seller-side timer exists.
+  No buyer/seller budget exists server-side at all (not "not shown" — absent from the
+  data model). The buyer's "Kontostand" and the seller's "Kasse" pills are both
+  client-side sums of `session.results[].*Decisions[].earnings`. See `docs/lemon-market-ui/HANDOFF.md`
   and `HANDOFF-verkaeufer.md` for the full list of mockup-vs-backend gaps this closes.
   One mockup affordance was dropped rather than faked: the buyer scene has no "Budget zu
   knapp" (insufficient-funds) button state, since there's no buyer budget to check it

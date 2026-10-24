@@ -36,3 +36,12 @@ export const DEFAULT_MAX_SELLER_UNITS = 2
 // backend and the instructor manual both actually allow.
 export const MAX_SELLERS_LIMIT = 12
 export const MAX_BUYERS_LIMIT = 24
+
+// Mirrors backend/src/shared/constants.ts — buyers act in groups of
+// BUYER_GROUP_SIZE with a shared per-group turn timer instead of strictly
+// one at a time. Group size is fixed (not configurable); the timer duration
+// is, hence the min/max/default triplet matching the backend's.
+export const BUYER_GROUP_SIZE = 3
+export const DEFAULT_TURN_DURATION_SECONDS = 30
+export const MIN_TURN_DURATION_SECONDS = 10
+export const MAX_TURN_DURATION_SECONDS = 180

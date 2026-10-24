@@ -28,6 +28,19 @@ export default function AdminView() {
 
   const adminToken = code ? storage.getAdminToken(code) : null
 
+  // Group countdown shown in the buyer-status panel header — ticks locally,
+  // resynced on every poll via the turnDeadline dependency. Declared above
+  // the early returns below (Rules of Hooks: must run on every render).
+  const turnDeadline = session?.phase === 'market' ? session.turnDeadline : null
+  const [groupSecondsLeft, setGroupSecondsLeft] = useState<number | null>(null)
+  useEffect(() => {
+    if (turnDeadline == null) { setGroupSecondsLeft(null); return }
+    const tick = () => setGroupSecondsLeft(Math.max(0, Math.ceil((turnDeadline - Date.now()) / 1000)))
+    tick()
+    const iv = setInterval(tick, 1000)
+    return () => clearInterval(iv)
+  }, [turnDeadline])
+
   useEffect(() => {
     if (!code) return
     if (!adminToken) { navigate('/'); return }
@@ -123,12 +136,12 @@ export default function AdminView() {
     })
   }
 
-  const handleSkipBuyer = () => {
+  const handleSkipBuyer = (buyerId: string, buyerName: string) => {
     setConfirm({
       title: 'Käufer überspringen?',
-      body: 'Der aktuelle Käufer kauft in dieser Runde nichts mehr.',
+      body: `${buyerName} kauft in dieser Runde nichts mehr.`,
       confirmLabel: 'Überspringen',
-      action: () => runAction(() => api.skipBuyer(code, adminToken)),
+      action: () => runAction(() => api.skipBuyer(code, buyerId, adminToken)),
     })
   }
 
@@ -272,13 +285,19 @@ export default function AdminView() {
                 infoMode={session.infoMode}
                 maxSellerUnits={session.maxSellerUnits}
               />
-              {/* Buyer status grid */}
+              {/* Buyer status grid — buyers act in small concurrent groups
+                  now, so several rows can be "active" at once. */}
               <div className="panel p-5">
-                <div className="label mb-3">Käufer-Status</div>
+                <div className="flex items-center justify-between mb-3">
+                  <div className="label">Käufer-Status</div>
+                  {groupSecondsLeft != null && (
+                    <span className="font-mono text-xs text-lemon-400">Gruppe: noch {groupSecondsLeft}s</span>
+                  )}
+                </div>
                 <div className="grid grid-cols-2 gap-2">
                   {buyers.map(b => {
                     const done = b.id in session.currentBuyerDecisions
-                    const isCurrent = session.currentPlayerId === b.id
+                    const isCurrent = session.activeBuyerIds.includes(b.id)
                     return (
                       <div key={b.id} className={`flex items-center gap-2 px-3 py-2 rounded-xl border transition-colors ${
                         done ? 'bg-lime-500/8 border-lime-500/20' :
@@ -301,7 +320,7 @@ export default function AdminView() {
                         {!done && isCurrent && (
                           <button
                             className="tap-target-sm ml-auto text-[9px] px-1.5 py-0.5 rounded border border-copper-500/30 text-copper-400 hover:bg-copper-500/10 transition-colors font-mono disabled:opacity-50"
-                            onClick={handleSkipBuyer}
+                            onClick={() => handleSkipBuyer(b.id, b.name)}
                             disabled={busy}
                           >
                             überspr.
