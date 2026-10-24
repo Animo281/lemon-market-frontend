@@ -45,7 +45,7 @@ export const api = {
   createSession: (numSellers: number, numBuyers: number) =>
     post<CreateSessionResponse>('/session', { numSellers, numBuyers }),
 
-  updateSessionConfig: (code: string, adminToken: string, config: { maxSellerUnits?: number; totalRounds?: number; economics?: EconomicsConfig }) =>
+  updateSessionConfig: (code: string, adminToken: string, config: { maxSellerUnits?: number; totalRounds?: number; economics?: EconomicsConfig; turnDurationSeconds?: number }) =>
     request<PublicSession>(`/session/${code}/config`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json', 'x-token': adminToken },
@@ -86,8 +86,8 @@ export const api = {
       headers: { 'x-token': adminToken },
     }),
 
-  skipBuyer: (code: string, adminToken: string) =>
-    post<PublicSession>(`/session/${code}/skip-buyer`, undefined, adminToken),
+  skipBuyer: (code: string, buyerId: string, adminToken: string) =>
+    post<PublicSession>(`/session/${code}/skip-buyer`, { buyerId }, adminToken),
 
   forceAdvance: (code: string, adminToken: string) =>
     post<PublicSession>(`/session/${code}/force-advance`, undefined, adminToken),

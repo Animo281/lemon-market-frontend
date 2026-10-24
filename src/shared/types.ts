@@ -89,11 +89,15 @@ export interface PublicSession {
   infoMode: InfoMode
   players: Player[]
   buyerQueue: string[]
-  currentBuyerIndex: number
+  // epoch ms deadline for the current buyer group's turn; null outside market.
+  turnDeadline: number | null
+  turnDurationSeconds: number
   currentSellerDecisions: Record<string, Partial<SellerDecision>>
   currentBuyerDecisions: Record<string, BuyerDecision>
   results: RoundResult[]
-  currentPlayerId: string | null
+  // Buyer ids who may currently submit a decision — up to BUYER_GROUP_SIZE at
+  // once, market phase only. Replaces the old single currentPlayerId.
+  activeBuyerIds: string[]
   availableOffers: AvailableOffer[]
   economics: PublicEconomics
   limits: {
@@ -101,6 +105,8 @@ export interface PublicSession {
     maxRounds: number
     maxSellers: number
     maxBuyers: number
+    minTurnDurationSeconds: number
+    maxTurnDurationSeconds: number
   }
   currentRoundMetrics: RoundMetrics | null
 }

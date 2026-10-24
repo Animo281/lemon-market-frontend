@@ -71,10 +71,28 @@ export default function BuyerView({ session, me, code, playerToken, error, onSes
 
   const myDecision = session.phase === 'market' ? session.currentBuyerDecisions[me.id] : undefined
   // The backend enforces shopping order server-side (submitBuyerDecision
-  // rejects anyone but session.currentPlayerId) — reading the server's own
-  // turn pointer is what makes the buy button's enabled state actually
-  // match what a buy attempt will do.
-  const isMyTurn = session.phase === 'market' && session.currentPlayerId === me.id
+  // rejects anyone not in session.activeBuyerIds) — reading the server's own
+  // active group is what makes the buy button's enabled state actually
+  // match what a buy attempt will do. Buyers act in small concurrent groups
+  // now, not strictly one at a time, so this can be true for several
+  // buyers at once.
+  const isMyTurn = session.phase === 'market' && session.activeBuyerIds.includes(me.id)
+
+  // Announce + flash only on the false→true flip, not on every poll while
+  // already active — a screen reader shouldn't repeat "du bist dran" every
+  // ~1.5s, and the flash is meant to catch the eye once, not strobe.
+  const wasMyTurn = useRef(isMyTurn)
+  const [turnFlash, setTurnFlash] = useState(false)
+  useEffect(() => {
+    if (isMyTurn && !wasMyTurn.current) {
+      setLiveMsg('Du bist dran!')
+      setTurnFlash(true)
+      const t = setTimeout(() => setTurnFlash(false), 1200)
+      wasMyTurn.current = isMyTurn
+      return () => clearTimeout(t)
+    }
+    wasMyTurn.current = isMyTurn
+  }, [isMyTurn])
   const isLastRound = session.currentRound >= session.totalRounds
   const lastResult = session.results[session.results.length - 1]
   const myLastBuyerResult = lastResult?.buyerDecisions.find(b => b.playerId === me.id)
@@ -152,6 +170,8 @@ export default function BuyerView({ session, me, code, playerToken, error, onSes
               phase={session.phase}
               isMyTurn={isMyTurn}
               hasDecided={myDecision !== undefined}
+              turnDeadline={session.phase === 'market' ? session.turnDeadline : null}
+              turnFlash={turnFlash}
             />
             <ValueNote buyerValues={buyerValues} />
             <MarketHistory results={session.results} sellers={sellers} />

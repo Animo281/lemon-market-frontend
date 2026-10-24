@@ -401,6 +401,10 @@ h1, h2, h3 {
 .scene-pill .v { font-size: 2cqw; font-family: theme('fontFamily.caps'); }
 .scene-pill.phase-full { background: #D9E8B8; }
 .scene-pill.phase-asymm { background: #F6D98C; }
+/* "Du bist dran" status pill — same warm gold as .my-turn-ring, kept
+   distinct from phase-full/phase-asymm so it never reads as an info-mode
+   indicator. */
+.scene-pill.my-turn { background: #F0C419; font-weight: 700; }
 
 .scene-lane { position: relative; isolation: isolate; aspect-ratio: 1024 / 572; background-size: 100% 100%; }
 .scene-lane + .scene-lane { border-top: 3px solid #2B1B12; }

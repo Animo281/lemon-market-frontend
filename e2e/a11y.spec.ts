@@ -1,7 +1,7 @@
 import { test, expect, Page } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
 import type { Result } from 'axe-core'
-import { setUpLobby, startGame, submitSellerOffer, buyFirstStall, waitForSettled, closeSession } from './helpers'
+import { setUpLobby, startGame, submitSellerOffer, buyFirstStall, endGame, waitForSettled, closeSession } from './helpers'
 
 const THEMES = ['light', 'dark'] as const
 
@@ -92,14 +92,14 @@ for (const theme of THEMES) {
     )
 
     await buyFirstStall(buyerPage)
-    await expect(adminPage.getByRole('button', { name: /Ergebnisse anzeigen|Nächste Runde/ })).toBeEnabled({ timeout: 10_000 })
+    await expect(adminPage.getByRole('button', { name: 'Spiel beenden' })).toBeEnabled({ timeout: 10_000 })
     checkpoints.push(
       { label: 'admin-round-end', page: adminPage },
       { label: 'seller-round-end', page: sellerPage },
       { label: 'buyer-round-end', page: buyerPage },
     )
 
-    await adminPage.getByRole('button', { name: /Ergebnisse anzeigen|Nächste Runde/ }).click()
+    await endGame(adminPage)
     await expect(adminPage.getByRole('heading', { name: 'Alle Ergebnisse' })).toBeVisible({ timeout: 10_000 })
     await expect(buyerPage.getByText('Alle Ergebnisse')).toBeVisible({ timeout: 10_000 })
     await expect(sellerPage.getByText('Alle Ergebnisse')).toBeVisible({ timeout: 10_000 })

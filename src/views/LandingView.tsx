@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom'
 import { api } from '../api/client'
 import { storage, sessionIndex } from '../lib/storage'
 import {
-  DEFAULT_ECONOMICS, DEFAULT_MAX_SELLER_UNITS,
+  DEFAULT_ECONOMICS, DEFAULT_MAX_SELLER_UNITS, DEFAULT_TURN_DURATION_SECONDS,
   MAX_SELLERS_LIMIT, MAX_BUYERS_LIMIT, MAX_SELLER_UNITS_LIMIT,
+  MIN_TURN_DURATION_SECONDS, MAX_TURN_DURATION_SECONDS,
 } from '../shared/constants'
 import { EconomicsConfig, Grade } from '../shared/types'
 import ErrorBanner from '../components/ErrorBanner'
@@ -48,6 +49,7 @@ export default function LandingView() {
 
   const [pendingConfig, setPendingConfig] = useState<{ code: string; adminToken: string } | null>(null)
   const [modalMaxUnits, setModalMaxUnits] = useState(DEFAULT_MAX_SELLER_UNITS)
+  const [modalTurnSeconds, setModalTurnSeconds] = useState(DEFAULT_TURN_DURATION_SECONDS)
   const [modalEconomics, setModalEconomics] = useState<EconomicsConfig>(() => cloneEconomics(DEFAULT_ECONOMICS))
   // Collapsed by default: modalEconomics already carries the Holt & Sherman
   // defaults either way, so a lecturer who never opens this only ever
@@ -106,6 +108,7 @@ export default function LandingView() {
     try {
       await api.updateSessionConfig(pendingConfig.code, pendingConfig.adminToken, {
         maxSellerUnits: modalMaxUnits,
+        turnDurationSeconds: modalTurnSeconds,
         economics: modalEconomics,
       })
       navigate(`/admin/${pendingConfig.code}`)
@@ -303,17 +306,30 @@ export default function LandingView() {
             {/* Rounds are no longer chosen up front — the admin ends the
                 game after whichever round feels right, via a button on the
                 round-end screen instead of a count fixed here. */}
-            <label className="flex flex-col gap-1.5">
-              <span className="label">
-                <span className="inline-block w-1.5 h-1.5 rounded-full bg-copper-400 mr-1.5 align-middle -mt-0.5" />
-                Max. Einheiten
-              </span>
-              <input
-                type="number" min={1} max={MAX_SELLER_UNITS_LIMIT} value={modalMaxUnits}
-                onChange={e => setModalMaxUnits(Math.min(MAX_SELLER_UNITS_LIMIT, Math.max(1, Number(e.target.value))))}
-                className="bg-mkt-850 border border-mkt-800 rounded-xl px-3 py-3 font-mono text-copper-400 font-bold text-2xl text-center focus:outline-none focus:border-copper-400/50 transition-colors"
-              />
-            </label>
+            <div className="grid grid-cols-2 gap-3">
+              <label className="flex flex-col gap-1.5">
+                <span className="label">
+                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-copper-400 mr-1.5 align-middle -mt-0.5" />
+                  Max. Einheiten
+                </span>
+                <input
+                  type="number" min={1} max={MAX_SELLER_UNITS_LIMIT} value={modalMaxUnits}
+                  onChange={e => setModalMaxUnits(Math.min(MAX_SELLER_UNITS_LIMIT, Math.max(1, Number(e.target.value))))}
+                  className="bg-mkt-850 border border-mkt-800 rounded-xl px-3 py-3 font-mono text-copper-400 font-bold text-2xl text-center focus:outline-none focus:border-copper-400/50 transition-colors"
+                />
+              </label>
+              <label className="flex flex-col gap-1.5">
+                <span className="label">
+                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-copper-400 mr-1.5 align-middle -mt-0.5" />
+                  Zeit pro Zug (Sek.)
+                </span>
+                <input
+                  type="number" min={MIN_TURN_DURATION_SECONDS} max={MAX_TURN_DURATION_SECONDS} value={modalTurnSeconds}
+                  onChange={e => setModalTurnSeconds(Math.min(MAX_TURN_DURATION_SECONDS, Math.max(MIN_TURN_DURATION_SECONDS, Number(e.target.value))))}
+                  className="bg-mkt-850 border border-mkt-800 rounded-xl px-3 py-3 font-mono text-copper-400 font-bold text-2xl text-center focus:outline-none focus:border-copper-400/50 transition-colors"
+                />
+              </label>
+            </div>
 
             <div>
               <button
@@ -402,7 +418,7 @@ export default function LandingView() {
               onClick={handleConfigSkip}
               className="text-mkt-500 text-xs font-mono text-center hover:text-mkt-400 transition-colors"
             >
-              Mit Defaults starten (2 Einheiten · Holt &amp; Sherman Preise)
+              Mit Defaults starten (2 Einheiten · 30s/Zug · Holt &amp; Sherman Preise)
             </button>
           </div>
         </div>
