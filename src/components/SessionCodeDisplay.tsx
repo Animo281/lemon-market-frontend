@@ -1,4 +1,5 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
+import { QRCodeSVG } from 'qrcode.react'
 import { CheckIcon } from './icons'
 
 interface Props {
@@ -8,6 +9,7 @@ interface Props {
 export default function SessionCodeDisplay({ code }: Props) {
   const [copied, setCopied] = useState(false)
   const [copyFailed, setCopyFailed] = useState(false)
+  const [qrOpen, setQrOpen] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const joinUrl = `${window.location.origin}/join/${code}`
 
@@ -27,6 +29,16 @@ export default function SessionCodeDisplay({ code }: Props) {
     }
   }
 
+  // Esc closes the fullscreen QR overlay (shown on a beamer, no mouse at hand).
+  useEffect(() => {
+    if (!qrOpen) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setQrOpen(false)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [qrOpen])
+
   return (
     <div className="panel-warm p-6">
       <div className="label mb-3">Session-Code</div>
@@ -35,6 +47,25 @@ export default function SessionCodeDisplay({ code }: Props) {
       <div className="font-mono font-bold text-lemon-500 tracking-[0.22em] leading-none mb-5"
            style={{ fontSize: 'clamp(2.5rem, 8vw, 4rem)' }}>
         {code}
+      </div>
+
+      <div className="flex items-center gap-4 mb-5">
+        <button
+          onClick={() => setQrOpen(true)}
+          className="shrink-0 bg-white p-3 rounded-xl hover:ring-2 hover:ring-lemon-500/50 transition-all"
+          aria-label="QR-Code groß anzeigen"
+        >
+          <QRCodeSVG value={joinUrl} size={96} level="M" aria-label="QR-Code zum Beitreten" />
+        </button>
+        <div className="text-xs text-mkt-400 font-mono">
+          <p className="mb-1.5">Mit Handy scannen zum Beitreten</p>
+          <button
+            onClick={() => setQrOpen(true)}
+            className="text-lemon-500 hover:text-lemon-400 font-bold underline"
+          >
+            QR groß zeigen
+          </button>
+        </div>
       </div>
 
       <div className="flex items-center gap-2">
@@ -63,6 +94,23 @@ export default function SessionCodeDisplay({ code }: Props) {
         <p className="text-coral-400 text-xs font-mono mt-2">
           Kopieren nicht möglich — Link ist markiert, mit Strg+C manuell kopieren.
         </p>
+      )}
+
+      {qrOpen && (
+        <div
+          className="fixed inset-0 z-50 bg-black/90 flex flex-col items-center justify-center gap-8 cursor-pointer"
+          onClick={() => setQrOpen(false)}
+          role="button"
+          aria-label="Schließen"
+        >
+          <div className="bg-white p-6 rounded-3xl" style={{ width: 'min(80vh, 80vw)', height: 'min(80vh, 80vw)' }}>
+            <QRCodeSVG value={joinUrl} size={1} level="M" style={{ width: '100%', height: '100%' }} aria-label="QR-Code zum Beitreten" />
+          </div>
+          <div className="font-mono font-bold text-white tracking-[0.22em]" style={{ fontSize: 'clamp(3rem, 10vw, 6rem)' }}>
+            {code}
+          </div>
+          <p className="text-mkt-300 text-sm font-mono">Zum Schließen tippen oder Esc drücken</p>
+        </div>
       )}
     </div>
   )
