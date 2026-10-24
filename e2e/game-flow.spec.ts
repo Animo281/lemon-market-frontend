@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test'
-import { setUpLobby, startGame, submitSellerOffer, buyFirstStall, closeSession } from './helpers'
+import { setUpLobby, startGame, submitSellerOffer, buyFirstStall, endGame, closeSession } from './helpers'
 
 test('admin can cancel or confirm a kick via the ConfirmDialog (not window.confirm)', async ({ browser }) => {
   const session = await setUpLobby(browser)
@@ -51,9 +51,8 @@ test('admin creates a session, one seller and one buyer play a full round', asyn
   await buyFirstStall(buyerPage)
   await expect(buyerPage.getByText(/Gekauft/)).toBeVisible()
 
-  const nextRoundBtn = adminPage.getByRole('button', { name: /Ergebnisse anzeigen|Nächste Runde/ })
-  await expect(nextRoundBtn).toBeEnabled({ timeout: 10_000 })
-  await nextRoundBtn.click()
+  await expect(adminPage.getByRole('button', { name: 'Spiel beenden' })).toBeEnabled({ timeout: 10_000 })
+  await endGame(adminPage)
 
   await expect(adminPage.getByRole('heading', { name: 'Alle Ergebnisse' })).toBeVisible({ timeout: 10_000 })
   await expect(buyerPage.getByRole('heading', { name: 'Alle Ergebnisse' })).toBeVisible({ timeout: 10_000 })
@@ -64,8 +63,8 @@ test('admin creates a session, one seller and one buyer play a full round', asyn
   await closeSession(session)
 })
 
-test('a 2-round game advances to round 2 instead of ending, and the info-mode toggle uses the ConfirmDialog', async ({ browser }) => {
-  const session = await setUpLobby(browser, 'dark', 2)
+test('the admin can advance past round 1 instead of ending, and the info-mode toggle uses the ConfirmDialog', async ({ browser }) => {
+  const session = await setUpLobby(browser)
   const { adminPage, sellerPage, buyerPage } = session
 
   await startGame(session)
@@ -85,7 +84,7 @@ test('a 2-round game advances to round 2 instead of ending, and the info-mode to
   await expect(adminPage.getByText('Asymm. Info', { exact: true })).toBeVisible()
 
   await roundEndBtn.click()
-  await expect(adminPage.getByText('Runde 2/2')).toBeVisible({ timeout: 10_000 })
+  await expect(adminPage.getByText('Runde 2', { exact: true })).toBeVisible({ timeout: 10_000 })
   await expect(sellerPage.getByRole('button', { name: /Qualität 3/ })).toBeVisible({ timeout: 10_000 })
 
   expect(session.consoleErrors, session.consoleErrors.join('\n')).toEqual([])

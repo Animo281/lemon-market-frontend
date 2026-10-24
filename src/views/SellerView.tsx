@@ -193,7 +193,6 @@ export default function SellerView({ session, me, code, playerToken, error, onSe
             ref={moneyPillRef}
             sellerName={me.name}
             round={session.currentRound}
-            totalRounds={session.totalRounds}
             infoMode={infoModeForHud}
             balance={balance}
             statusLabel={STATUS_LABEL[session.phase]}

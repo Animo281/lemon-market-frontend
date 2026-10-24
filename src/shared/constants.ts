@@ -21,7 +21,12 @@ export function sellerCost(firstCosts: Record<Grade, number>, grade: Grade, unit
   return firstCosts[grade] + unitIndex * step
 }
 
-export const DEFAULT_TOTAL_ROUNDS = 5
+export const MAX_SELLER_UNITS_LIMIT = 5
+export const MAX_ROUNDS_LIMIT = 20
+// No fixed round count is chosen up front anymore — the admin ends the game
+// after whichever round they like (api.endGame). Kept only as the backend's
+// hard safety ceiling, so it defaults to the max rather than a curated number.
+export const DEFAULT_TOTAL_ROUNDS = MAX_ROUNDS_LIMIT
 export const DEFAULT_MAX_SELLER_UNITS = 2
 
 // Mirrors backend/src/shared/constants.ts LIMITS — used as the LandingView
@@ -31,5 +36,3 @@ export const DEFAULT_MAX_SELLER_UNITS = 2
 // backend and the instructor manual both actually allow.
 export const MAX_SELLERS_LIMIT = 12
 export const MAX_BUYERS_LIMIT = 24
-export const MAX_SELLER_UNITS_LIMIT = 5
-export const MAX_ROUNDS_LIMIT = 20

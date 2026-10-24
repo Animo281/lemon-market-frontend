@@ -74,6 +74,9 @@ export const api = {
   nextRound: (code: string, adminToken: string) =>
     post<PublicSession>(`/session/${code}/next-round`, undefined, adminToken),
 
+  endGame: (code: string, adminToken: string) =>
+    post<PublicSession>(`/session/${code}/end-game`, undefined, adminToken),
+
   toggleInfoMode: (code: string, adminToken: string) =>
     post<PublicSession>(`/session/${code}/toggle-info-mode`, undefined, adminToken),
 

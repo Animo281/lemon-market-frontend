@@ -4,7 +4,6 @@ import { LemonMark } from '../buyer/icons'
 interface Props {
   sellerName: string
   round: number
-  totalRounds: number
   /** null outside the market phase — mirrors BuyerHud, which only shows the
    * info-mode pill once the board is actually open. */
   infoMode: 'full' | 'asymmetric' | null
@@ -18,7 +17,7 @@ interface Props {
 // takes a ref so the market-round screen can fly coins into it and
 // bump-animate it on a sale.
 const SellerHud = forwardRef<HTMLSpanElement, Props>(function SellerHud(
-  { sellerName, round, totalRounds, infoMode, balance, statusLabel },
+  { sellerName, round, infoMode, balance, statusLabel },
   moneyRef,
 ) {
   return (
@@ -29,7 +28,9 @@ const SellerHud = forwardRef<HTMLSpanElement, Props>(function SellerHud(
       </div>
       <div className="scene-pills">
         <span className="scene-pill seller-pill-role">Verkäufer <span className="v">{sellerName}</span></span>
-        <span className="scene-pill">Runde <span className="v">{round}</span> von {totalRounds}</span>
+        {/* Rounds are no longer fixed up front — the admin ends the game
+            after whichever round, so there's no total to show here. */}
+        <span className="scene-pill">Runde <span className="v">{round}</span></span>
         {infoMode && (
           <span className={`scene-pill ${infoMode === 'full' ? 'phase-full' : 'phase-asymm'}`}>
             {infoMode === 'full' ? 'Phase: Qualität sichtbar' : 'Phase: Qualität verdeckt'}
