@@ -148,7 +148,6 @@ export default function BuyerView({ session, me, code, playerToken, error, onSes
           <>
             <BuyerHud
               round={session.currentRound}
-              totalRounds={session.totalRounds}
               infoMode={session.infoMode}
               phase={session.phase}
               isMyTurn={isMyTurn}

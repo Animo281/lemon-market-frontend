@@ -2,7 +2,7 @@ import { InfoMode } from '../shared/types'
 
 interface Props {
   round: number
-  total: number
+  total?: number
   infoMode: InfoMode
 }
 
@@ -25,7 +25,7 @@ export default function PhaseIndicator({ round, total, infoMode }: Props) {
 
       <span className="font-mono text-mkt-300">
         Runde <strong className="text-mkt-100">{round}</strong>
-        <span className="text-mkt-500">/{total}</span>
+        {total != null && <span className="text-mkt-500">/{total}</span>}
       </span>
 
       <span className={`text-[10px] font-semibold uppercase tracking-[0.1em] px-2 py-0.5 rounded-md border ${

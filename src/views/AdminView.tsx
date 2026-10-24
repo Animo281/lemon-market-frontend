@@ -94,6 +94,15 @@ export default function AdminView() {
   const handleStart = () => runAction(() => api.startGame(code, adminToken))
   const handleNextRound = () => runAction(() => api.nextRound(code, adminToken))
 
+  const handleEndGame = () => {
+    setConfirm({
+      title: 'Spiel jetzt beenden?',
+      body: 'Es werden keine weiteren Runden gespielt — die Ergebnisse werden direkt angezeigt.',
+      confirmLabel: 'Spiel beenden',
+      action: () => runAction(() => api.endGame(code, adminToken)),
+    })
+  }
+
   const handleToggleInfoMode = () => {
     const next = session.infoMode === 'full' ? 'asymmetrisch (Qualität ausblenden)' : 'volle Info (Qualität einblenden)'
     setConfirm({
@@ -144,14 +153,15 @@ export default function AdminView() {
         <div className="flex items-center justify-between pr-12">
           <h1 className="font-display text-3xl font-bold text-lemon-400">Admin-Panel</h1>
           {session.phase !== 'lobby' && session.phase !== 'game-end' && (
-            <PhaseIndicator round={session.currentRound} total={session.totalRounds} infoMode={session.infoMode} />
+            <PhaseIndicator round={session.currentRound} infoMode={session.infoMode} />
           )}
         </div>
 
-        {/* Round progress dots */}
+        {/* Round progress dots — rounds aren't fixed up front anymore, so this
+            only ever shows what's actually been played, not a fixed total. */}
         {session.phase !== 'lobby' && session.phase !== 'game-end' && (
           <div className="flex flex-wrap items-center gap-2">
-            {Array.from({ length: session.totalRounds }, (_, i) => {
+            {Array.from({ length: session.currentRound }, (_, i) => {
               const roundNum = i + 1
               const isDone   = roundNum < session.currentRound
               const isCurrent = roundNum === session.currentRound
@@ -169,7 +179,7 @@ export default function AdminView() {
                     }`} />
                     {roundNum}
                   </div>
-                  {i < session.totalRounds - 1 && (
+                  {i < session.currentRound - 1 && (
                     <div className={`w-4 h-px ${isDone ? 'bg-mkt-600' : 'bg-mkt-800'}`} />
                   )}
                 </div>
@@ -410,13 +420,32 @@ export default function AdminView() {
                     </span>
                   )}
               </button>
-              <button
-                onClick={handleNextRound}
-                disabled={busy}
-                className="btn-primary w-full mt-2"
-              >
-                {isLastRound ? 'Ergebnisse anzeigen →' : 'Nächste Runde →'}
-              </button>
+              {isLastRound ? (
+                <button
+                  onClick={handleNextRound}
+                  disabled={busy}
+                  className="btn-primary w-full mt-2"
+                >
+                  Ergebnisse anzeigen →
+                </button>
+              ) : (
+                <div className="flex gap-2 mt-2">
+                  <button
+                    onClick={handleNextRound}
+                    disabled={busy}
+                    className="btn-primary flex-1"
+                  >
+                    Nächste Runde →
+                  </button>
+                  <button
+                    onClick={handleEndGame}
+                    disabled={busy}
+                    className="btn-secondary shrink-0"
+                  >
+                    Spiel beenden
+                  </button>
+                </div>
+              )}
             </div>
 
             <div className="md:col-span-2">

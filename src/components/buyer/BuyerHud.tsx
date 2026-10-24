@@ -3,7 +3,6 @@ import { LemonMark } from './icons'
 
 interface Props {
   round: number
-  totalRounds: number
   infoMode: InfoMode
   phase: GamePhase
   /** Whether it's this buyer's turn to act during the market phase — only
@@ -22,7 +21,7 @@ const STATUS_LABEL: Record<GamePhase, string> = {
   'game-end': 'Spiel beendet',
 }
 
-export default function BuyerHud({ round, totalRounds, infoMode, phase, isMyTurn, hasDecided }: Props) {
+export default function BuyerHud({ round, infoMode, phase, isMyTurn, hasDecided }: Props) {
   const full = infoMode === 'full'
   // Only the market phase (and the reveal it implies) has a meaningful
   // info-mode to show — lobby/seller-input haven't opened the board yet.
@@ -42,7 +41,9 @@ export default function BuyerHud({ round, totalRounds, infoMode, phase, isMyTurn
         Lemon Market
       </div>
       <div className="scene-pills">
-        <span className="scene-pill">Runde <span className="v">{round}</span> von {totalRounds}</span>
+        {/* Rounds are no longer fixed up front — the admin ends the game
+            after whichever round, so there's no total to show here. */}
+        <span className="scene-pill">Runde <span className="v">{round}</span></span>
         <span className={`scene-pill ${showInfoMode ? (full ? 'phase-full' : 'phase-asymm') : ''}`}>
           {showInfoMode ? (full ? 'Phase: Qualität sichtbar' : 'Phase: Qualität verdeckt') : 'Vorbereitung'}
         </span>

@@ -45,11 +45,12 @@ export async function waitForSettled(page: Page) {
 }
 
 /**
- * Creates a session as admin (1 round, so the flow reaches game-end fast),
- * joins one seller and one buyer, and starts the game. Leaves all three
- * pages at the lobby, ready for the caller to drive further phases.
+ * Creates a session as admin, joins one seller and one buyer, and starts
+ * the game. Leaves all three pages at the lobby, ready for the caller to
+ * drive further phases. Rounds aren't fixed up front anymore — the caller
+ * ends the game explicitly via endGame() when it wants game-end.
  */
-export async function setUpLobby(browser: Browser, theme: 'light' | 'dark' = 'dark', rounds = 1): Promise<GameSession> {
+export async function setUpLobby(browser: Browser, theme: 'light' | 'dark' = 'dark'): Promise<GameSession> {
   const consoleErrors: string[] = []
 
   const adminCtx = await browser.newContext()
@@ -60,7 +61,6 @@ export async function setUpLobby(browser: Browser, theme: 'light' | 'dark' = 'da
   await adminPage.goto('/')
   await adminPage.getByRole('button', { name: /Session erstellen/ }).click()
 
-  await adminPage.getByLabel('Anzahl Runden').fill(String(rounds))
   await adminPage.getByRole('button', { name: /Übernehmen/ }).click()
   await adminPage.waitForURL(/\/admin\/[A-Z0-9]{4}/)
   const code = adminPage.url().split('/admin/')[1].slice(0, 4)
@@ -105,6 +105,15 @@ export async function submitSellerOffer(sellerPage: Page, priceEuro = '15') {
 /** Buys from the first (only) open stall as the buyer, once it's their turn. */
 export async function buyFirstStall(buyerPage: Page) {
   await buyerPage.getByRole('button', { name: /€ kaufen$/ }).first().click()
+}
+
+/** Admin ends the game from the round-end screen via the ConfirmDialog. */
+export async function endGame(adminPage: Page) {
+  await adminPage.getByRole('button', { name: 'Spiel beenden' }).click()
+  const dialog = adminPage.getByRole('alertdialog')
+  await expect(dialog.getByRole('heading', { name: 'Spiel jetzt beenden?' })).toBeVisible()
+  await dialog.getByRole('button', { name: 'Spiel beenden' }).click()
+  await expect(dialog).toBeHidden()
 }
 
 export async function closeSession(session: GameSession) {
