@@ -378,7 +378,12 @@ h1, h2, h3 {
 @media (min-width: 880px) {
   .scene-world {
     min-width: 0;
-    width: min(100%, calc(46dvh * 1024 / 572));
+    /* Raised from 46dvh: on wide-but-not-tall desktop windows the old budget
+       left most of the horizontal space unused (user feedback: "Bildschirm
+       wird nicht voll benutzt"). 60dvh still leaves room below the scene for
+       the pass button / wait notes at common desktop heights — verified in
+       the browser at 1920x1080 and 1536x864. */
+    width: min(100%, calc(60dvh * 1024 / 572));
     margin-inline: auto;
   }
 }

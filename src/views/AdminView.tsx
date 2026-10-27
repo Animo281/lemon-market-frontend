@@ -158,7 +158,11 @@ export default function AdminView() {
 
   return (
     <div className="min-h-screen market-bg p-3 md:p-6">
-      <div className="max-w-6xl mx-auto space-y-6">
+      {/* Widened from max-w-6xl (1152px) so the round-end grid (results
+          table + SupplyDemandGraph) has more room on wide screens instead of
+          squeezing the graph — see PlayerView.tsx's SellerView/BuyerView for
+          the matching fix. */}
+      <div className="max-w-[1600px] mx-auto space-y-6">
 
         {/* ── Header ────────────────────────────────── */}
         {/* pr-12 reserves room for the fixed ThemeToggle (top-4 right-4,
