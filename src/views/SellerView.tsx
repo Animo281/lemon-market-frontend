@@ -180,7 +180,11 @@ export default function SellerView({ session, me, code, playerToken, error, onSe
 
   return (
     <div className="min-h-screen eve-page p-3 md:p-5">
-      <div className="max-w-5xl mx-auto space-y-4">
+      {/* Buyer feedback: "Bildschirmfläche effektiver nutzen" — widened from
+          max-w-5xl (1024px) to match BuyerView.tsx, so the scene and its
+          tiles grow with the window on desktop instead of sitting in a
+          fixed-width column with empty margins either side. */}
+      <div className="max-w-[1600px] mx-auto space-y-4">
         {/* pr-12 reserves room for the fixed ThemeToggle (top-4 right-4, ~36px
             wide) so the session code doesn't run underneath it below ~1120px
             viewport width — see docs/lemon-market-ui overlap audit. */}

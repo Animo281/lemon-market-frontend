@@ -6,6 +6,9 @@ import { storage, sessionIndex } from '../lib/storage'
 import LoadingScreen from '../components/LoadingScreen'
 import BuyerView from './BuyerView'
 import SellerView from './SellerView'
+import HowToPlayModal from '../components/HowToPlayModal'
+
+const HOWTO_PREFIX = 'lemons:howto-seen:'
 
 export default function PlayerView() {
   const { code } = useParams<{ code: string }>()
@@ -15,6 +18,8 @@ export default function PlayerView() {
   const [me, setMe] = useState<Player | null>(null)
   const [error, setError] = useState('')
   const [kicked, setKicked] = useState(false)
+  const [showHowTo, setShowHowTo] = useState(false)
+  const hasShownHowTo = useRef(false)
   const hasLoadedOnce = useRef(false)
 
   // A closed tab or a backgrounded phone can wipe sessionStorage — before
@@ -83,6 +88,24 @@ export default function PlayerView() {
     }
   }, [code, playerToken, playerId])
 
+  // Show the role-specific "how to play" explainer once, the first time a
+  // player reaches the lobby — not on every reconnect/poll. Dismissal is
+  // remembered in localStorage (device-wide, not per session) so a returning
+  // player on the same device doesn't see it again; the "?" button below
+  // always lets them reopen it on demand.
+  useEffect(() => {
+    if (hasShownHowTo.current || !me || session?.phase !== 'lobby') return
+    if (!localStorage.getItem(HOWTO_PREFIX + me.role)) {
+      setShowHowTo(true)
+      hasShownHowTo.current = true
+    }
+  }, [me, session?.phase])
+
+  const closeHowTo = () => {
+    if (me) localStorage.setItem(HOWTO_PREFIX + me.role, '1')
+    setShowHowTo(false)
+  }
+
   if (!code || !playerToken) return null
 
   if (kicked) return (
@@ -118,14 +141,29 @@ export default function PlayerView() {
   // Admin and landing keep the existing Nacht-Markt design untouched.
   const RoleView = me.role === 'buyer' ? BuyerView : SellerView
   return (
-    <RoleView
-      session={session}
-      me={me}
-      code={code}
-      playerToken={playerToken}
-      error={error}
-      onSessionUpdate={setSession}
-      onError={setError}
-    />
+    <>
+      <RoleView
+        session={session}
+        me={me}
+        code={code}
+        playerToken={playerToken}
+        error={error}
+        onSessionUpdate={setSession}
+        onError={setError}
+      />
+      {/* Same fixed-corner pattern as ThemeToggle.tsx (top-4 right-4) —
+          mirrored to the left edge so the two never collide. Reopens the
+          mechanics explainer on demand; it already auto-opens once per
+          role/device on first lobby visit (see the effect above). */}
+      <button
+        onClick={() => setShowHowTo(true)}
+        className="fixed top-4 left-4 z-50 w-9 h-9 flex items-center justify-center rounded-xl bg-mkt-850 border border-mkt-800 text-mkt-400 hover:text-mkt-100 hover:border-mkt-600 transition-all font-bold"
+        aria-label="Wie funktioniert's?"
+        title="Wie funktioniert's?"
+      >
+        ?
+      </button>
+      {showHowTo && <HowToPlayModal role={me.role} onClose={closeHowTo} />}
+    </>
   )
 }
